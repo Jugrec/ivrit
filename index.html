@@ -1,0 +1,2464 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2B5C8A">
+<meta name="description" content="Систематический курс современного иврита: уроки, повторение, чтение, прописные буквы.">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Иврит шаг за шагом</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Rubik:wght@400;500;600&display=swap">
+<style>
+/* Layout: one calm column (max 560px), phone first; Hebrew set large in a book face, UI in Rubik. Accent is techelet blue. */
+:root {
+  --bg: #F3F5F7;
+  --surface: #FFFFFF;
+  --ink: #18202B;
+  --muted: #5A6577;
+  --line: #DCE1E8;
+  --accent: #2B5C8A;
+  --accent-soft: #E3ECF5;
+  --good: #2F7A4F;
+  --good-soft: #E2F1E7;
+  --bad: #B23A30;
+  --bad-soft: #F8E4E1;
+  --warn-soft: #FBF0DA;
+  --key: #E8ECF1;
+  --font-ui: "Rubik", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-he: "Frank Ruhl Libre", "David", "Times New Roman", serif;
+  --r: 12px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11151B; --surface: #1A2029; --ink: #E7EAEF; --muted: #9AA4B3; --line: #2B3340;
+  --accent: #82B2DE; --accent-soft: #1E2D3D; --good: #6BC08E; --good-soft: #17291F;
+  --bad: #EE8A80; --bad-soft: #351C1A; --warn-soft: #33291A; --key: #262E3A; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #11151B; --surface: #1A2029; --ink: #E7EAEF; --muted: #9AA4B3; --line: #2B3340;
+  --accent: #82B2DE; --accent-soft: #1E2D3D; --good: #6BC08E; --good-soft: #17291F;
+  --bad: #EE8A80; --bad-soft: #351C1A; --warn-soft: #33291A; --key: #262E3A; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px; }
+.view { display: flex; flex-direction: column; gap: 18px; }
+/* cursive Hebrew: Ktav Yad CLM by Maxim Iorsh, Culmus project, GNU GPL v2 */
+@font-face { font-family: "KtavYad"; src: url(data:font/ttf;base64,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cmlidXRlZCB1bmRlciB0aGUgdGVybXMgb2YgR05VIEdlbmVyYWwgUHVibGljIExpY2Vuc2UgdmVyc2lvbiAyKGh0dHA6Ly93d3cuZ251Lm9yZy9saWNlbnNlcy9ncGwuaHRtbCkuIApBbGwgcmlnaHRzIHJlc2VydmVkLgAASwB0AGEAdgAgAFkAYQBkACAAQwBMAE0AAEt0YXYgWWFkIENMTQAATQBlAGQAaQB1AG0ASQB0AGEAbABpAGMAAE1lZGl1bUl0YWxpYwAARgBvAG4AdABGAG8AcgBnAGUAIAAyAC4AMAAgADoAIABLAHQAYQB2ACAAWQBhAGQAIABDAEwATQAgAE0AZQBkAGkAdQBtACAASQB0AGEAbABpAGMAIAA6ACAAMQAyAC0AMQAwAC0AMgAwADEANwAARm9udEZvcmdlIDIuMCA6IEt0YXYgWWFkIENMTSBNZWRpdW0gSXRhbGljIDogMTItMTAtMjAxNwAASwB0AGEAdgAgAFkAYQBkACAAQwBMAE0AIABNAGUAZABpAHUAbQAgAEkAdABhAGwAaQBjAABLdGF2IFlhZCBDTE0gTWVkaXVtIEl0YWxpYwAAVgBlAHIAcwBpAG8AbgAgADAALgA5ADEAIAAAVmVyc2lvbiAwLjkxIAAASwB0AGEAdgBZAGEAZABDAEwATQAtAE0AZQBkAGkAdQBtAEkAdABhAGwAaQBjAABLdGF2WWFkQ0xNLU1lZGl1bUl0YWxpYwAAAAACAAD/6gAA/4MAMgAAAAAAAAAAAAAAAAAAAAAAAAAAADkAAAABAAIAAwAEAAUACgALAAwADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAiAQIBAwEEAQUBBgEHAQgBCQEKAQsBDAENAQ4BDwEQAREBEgETARQBFQEWARcBGAEZARoBGwEcAR0BHgEfASAJYWZpaTU3NjQ1CWFmaWk1NzY1OAlhZmlpNTc2NjQJYWZpaTU3NjY1CWFmaWk1NzY2NglhZmlpNTc2NjcJYWZpaTU3NjY4CWFmaWk1NzY2OQlhZmlpNTc2NzAJYWZpaTU3NjcxCWFmaWk1NzY3MglhZmlpNTc2NzMJYWZpaTU3Njc0CWFmaWk1NzY3NQlhZmlpNTc2NzYJYWZpaTU3Njc3CWFmaWk1NzY3OAlhZmlpNTc2NzkJYWZpaTU3NjgwCWFmaWk1NzY4MQlhZmlpNTc2ODIJYWZpaTU3NjgzCWFmaWk1NzY4NAlhZmlpNTc2ODUJYWZpaTU3Njg2CWFmaWk1NzY4NwlhZmlpNTc2ODgJYWZpaTU3Njg5CWFmaWk1NzY5MAd1bmkwNUYzB3VuaTA1RjQAAAAAAAH//wACAAEAAAAMAAAAFgAAAAIAAQADADgAAQAEAAAAAgAAAAAAAAABAAAAANU/B9oAAAAA1gXX3wAAAADWBdff) format("truetype"); font-display: swap; }
+.cursive { font-family: "KtavYad", var(--font-he) !important; font-style: normal; }
+.word.cursive { font-size: 3rem; }
+.cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; direction: rtl; }
+.cgrid > div { border: 1px solid var(--line); border-radius: 10px; padding: 6px 4px; text-align: center; display: flex; flex-direction: column; gap: 0; }
+.cgrid .c { font-family: "KtavYad", serif; font-size: 2.2rem; line-height: 1.25; }
+.cgrid .p { font-family: var(--font-he); font-size: 1.05rem; color: var(--muted); }
+.cgrid .n { font-size: 0.7rem; color: var(--muted); direction: ltr; }
+.pairs { display: flex; flex-direction: column; gap: 8px; }
+.pairs > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+.pairs .cc { font-family: "KtavYad", serif; font-size: 2rem; direction: rtl; letter-spacing: 0.4em; }
+.hwmodel { font-family: "KtavYad", serif; font-size: 3.2rem; text-align: center; direction: rtl; line-height: 1.3; }
+.hwprint { font-family: var(--font-he); font-size: 2rem; text-align: center; direction: rtl; }
+
+h1, h2, h3 { margin: 0; line-height: 1.25; text-wrap: balance; font-weight: 600; }
+h1 { font-size: 1.55rem; }
+h2 { font-size: 1.15rem; }
+h3 { font-size: 1rem; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: 0.875rem; }
+.eyebrow { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.he { font-family: var(--font-he); direction: rtl; unicode-bidi: isolate; font-size: 1.15em; }
+.plain { unicode-bidi: plaintext; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.btn { border: 0; border-radius: 10px; padding: 12px 18px; font-weight: 500; background: var(--accent); color: var(--surface); min-height: 48px; text-align: center; }
+.btn.secondary { background: var(--accent-soft); color: var(--accent); }
+.btn.ghost { background: transparent; color: var(--accent); padding: 8px 4px; min-height: 0; }
+.btn.small { min-height: 38px; padding: 8px 12px; font-size: 0.9rem; }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.grow { flex: 1 1 auto; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.banner { background: var(--accent-soft); border-radius: var(--r); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font-size: 0.925rem; }
+
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.iconbtn { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; width: 44px; height: 44px; display: grid; place-items: center; flex: none; }
+.iconbtn svg { width: 22px; height: 22px; stroke: var(--ink); }
+
+/* Today */
+.today { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.today > div { background: var(--bg); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; min-width: 0; }
+.today b { font-size: 1.35rem; font-variant-numeric: tabular-nums; font-weight: 600; }
+.today span { font-size: 0.78rem; color: var(--muted); }
+.actions { display: flex; flex-direction: column; gap: 10px; }
+.actions .btn { width: 100%; }
+.nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.nav .btn { width: 100%; }
+.nav.nav3 { grid-template-columns: repeat(3, 1fr); }
+.nav.nav3 .btn { padding-inline: 6px; }
+.wrtext { font-family: var(--font-he); direction: rtl; text-align: right; font-size: 1.35rem; line-height: 1.7; white-space: pre-wrap; }
+textarea.answer { min-height: 130px; resize: vertical; line-height: 1.6; }
+
+/* Lists */
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.li { display: grid; grid-template-columns: 2.6rem 1fr auto; gap: 10px; align-items: center; padding: 11px 0; border-top: 1px solid var(--line); width: 100%; background: none; border-left: 0; border-right: 0; border-bottom: 0; text-align: left; }
+.list > :first-child { border-top: 0; }
+.li > div { min-width: 0; }
+.li .num { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 500; font-size: 0.9rem; }
+.li .t { font-weight: 500; }
+.li .d { font-size: 0.85rem; color: var(--muted); }
+button.li:disabled { cursor: default; }
+button.li:disabled .t { color: var(--muted); }
+button.li:not(:disabled):hover .t { color: var(--accent); }
+.chip { font-size: 0.75rem; padding: 3px 9px; border-radius: 99px; background: var(--key); color: var(--muted); white-space: nowrap; }
+.chip.known, .chip.done { background: var(--good-soft); color: var(--good); }
+.chip.start, .chip.next { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+.chip.fail { background: var(--bad-soft); color: var(--bad); }
+
+/* Theory */
+.theory { display: flex; flex-direction: column; gap: 14px; font-size: 1rem; }
+.theory .rule { background: var(--accent-soft); border-radius: 10px; padding: 12px 14px; }
+.tscroll { overflow-x: auto; }
+.theory table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+.theory th, .theory td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+.theory th { font-weight: 500; color: var(--muted); font-size: 0.8rem; }
+
+/* Word card */
+.wcard { align-items: center; text-align: center; padding: 28px 18px; gap: 10px; }
+.wcard .w { font-family: var(--font-he); font-size: 3rem; line-height: 1.2; direction: rtl; }
+.wcard .tr { color: var(--muted); font-size: 1.05rem; }
+.wcard .ru { font-size: 1.2rem; font-weight: 500; }
+.wcard .forms { font-family: var(--font-he); direction: rtl; font-size: 1.15rem; color: var(--muted); }
+
+/* Run */
+.progress { height: 6px; background: var(--key); border-radius: 99px; overflow: hidden; }
+.progress > i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+.qhead { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.prompt { font-size: 1.15rem; font-weight: 500; unicode-bidi: plaintext; }
+.word { font-family: var(--font-he); direction: rtl; font-size: 2.4rem; text-align: center; padding: 6px 0 2px; line-height: 1.35; }
+.word.sent { font-size: 1.6rem; }
+.gapbox { display: inline-block; min-width: 3.5em; border-bottom: 2px solid var(--accent); }
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opt { background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px; padding: 12px 10px; min-height: 56px; text-align: center; font-size: 1.02rem; }
+.opt.he { font-size: 1.3rem; }
+.opt.sel { border-color: var(--accent); background: var(--accent-soft); }
+.opt.right { border-color: var(--good); background: var(--good-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.answer { width: 100%; font: inherit; font-family: var(--font-he); font-size: 1.55rem; direction: rtl; text-align: right; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); min-height: 58px; }
+.answer.right { border-color: var(--good); }
+.answer.wrong { border-color: var(--bad); }
+.tokens { display: flex; flex-wrap: wrap; gap: 8px; direction: rtl; justify-content: flex-start; }
+.tok { font-family: var(--font-he); font-size: 1.3rem; background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px; padding: 6px 12px; min-height: 46px; }
+.tok:disabled { opacity: 0.3; }
+.built { min-height: 62px; border: 1.5px dashed var(--line); border-radius: 10px; padding: 8px; }
+.built.right { border-style: solid; border-color: var(--good); }
+.built.wrong { border-style: solid; border-color: var(--bad); }
+.fb { border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.fb.right { background: var(--good-soft); }
+.fb.wrong { background: var(--bad-soft); }
+.fb .verdict { font-weight: 600; }
+.fb.right .verdict { color: var(--good); }
+.fb.wrong .verdict { color: var(--bad); }
+.fb .mine { font-family: var(--font-he); font-size: 1.35rem; direction: rtl; text-align: right; }
+.fb .mine .bad { background: var(--bad-soft); color: var(--bad); border-bottom: 2px solid var(--bad); border-radius: 3px; padding: 0 1px; }
+.fb .mine .miss { display: inline-block; min-width: 0.55em; border-bottom: 2px dashed var(--bad); }
+.fb .lbl { font-size: 0.8rem; color: var(--muted); }
+.kb button.hit { background: var(--accent); color: #fff; }
+.fb .corr { font-family: var(--font-he); font-size: 1.35rem; direction: rtl; text-align: right; display: flex; gap: 10px; align-items: center; justify-content: flex-start; }
+.fb .note { unicode-bidi: plaintext; }
+.ai { background: var(--surface); border-radius: 8px; padding: 10px 12px; font-size: 0.95rem; white-space: pre-wrap; unicode-bidi: plaintext; }
+.say { border: 0; background: var(--surface); border-radius: 8px; width: 38px; height: 38px; display: inline-grid; place-items: center; color: var(--accent); font-size: 0.95rem; flex: none; }
+
+/* Keyboard */
+.kb { display: flex; flex-direction: column; gap: 6px; user-select: none; -webkit-user-select: none; }
+.kb .krow { display: flex; gap: 5px; justify-content: center; }
+.kb button { flex: 1 1 0; min-width: 0; max-width: 46px; height: 46px; border: 0; border-radius: 8px; background: var(--key); font-family: var(--font-he); font-size: 1.3rem; padding: 0; }
+.kb button:active { background: var(--accent-soft); }
+.kb .wide { max-width: none; flex: 4 1 0; font-family: var(--font-ui); font-size: 0.9rem; }
+.kb .mid { max-width: none; flex: 1.5 1 0; font-family: var(--font-ui); font-size: 1rem; }
+
+/* Results / stats */
+.res { display: flex; flex-direction: column; gap: 8px; }
+.resrow { display: grid; grid-template-columns: 1fr 4.6rem; gap: 10px; align-items: center; font-size: 0.9rem; }
+.resrow > div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.resrow .bar { height: 8px; background: var(--key); border-radius: 99px; overflow: hidden; }
+.resrow .bar > i { display: block; height: 100%; background: var(--good); }
+.resrow.low .bar > i { background: var(--bad); }
+.resrow .sc { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.resrow .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mist { display: flex; flex-direction: column; gap: 14px; }
+.mist > div { border-top: 1px solid var(--line); padding-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+.mist > div:first-child { border-top: 0; padding-top: 0; }
+.mist .hw { font-family: var(--font-he); direction: rtl; text-align: right; font-size: 1.3rem; }
+.score { font-size: 2.4rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+
+/* Reading */
+.reading { display: flex; flex-direction: column; gap: 4px; }
+.sentence { text-align: right; border: 0; background: none; padding: 8px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.sentence .hs { font-family: var(--font-he); direction: rtl; font-size: 1.35rem; line-height: 1.6; }
+.sentence .rs { text-align: left; color: var(--muted); font-size: 0.92rem; }
+
+/* Forms */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 0.85rem; color: var(--muted); }
+.field input { font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); min-height: 48px; width: 100%; }
+.field input.heinput { font-family: var(--font-he); font-size: 1.4rem; direction: rtl; text-align: right; }
+
+/* Settings */
+.set { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.set:first-of-type { border-top: 0; }
+.set > div { min-width: 0; }
+.switch { position: relative; width: 50px; height: 30px; flex: none; border-radius: 99px; background: var(--key); border: 0; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: left .2s; }
+.switch[aria-checked="true"] { background: var(--accent); }
+.switch[aria-checked="true"]::after { left: 23px; }
+.seg { display: flex; background: var(--key); border-radius: 10px; padding: 3px; gap: 3px; flex: none; }
+.seg button { border: 0; background: transparent; border-radius: 8px; padding: 7px 10px; font-size: 0.85rem; }
+.seg button[aria-pressed="true"] { background: var(--surface); font-weight: 500; }
+.confirm { display: flex; flex-direction: column; gap: 10px; background: var(--bad-soft); border-radius: 10px; padding: 12px 14px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 0.9rem; z-index: 20; max-width: calc(100% - 32px); }
+
+/* Reader */
+.para { display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.para:last-child { border-bottom: 0; }
+.para .hs { font-family: var(--font-he); direction: rtl; font-size: 1.4rem; line-height: 1.75; text-align: right; }
+.para .rs { color: var(--muted); font-size: 0.92rem; }
+.para .tools { display: flex; gap: 8px; justify-content: flex-end; }
+.wtap { cursor: pointer; border-radius: 4px; padding: 0 1px; }
+.wtap:hover, .wtap.on { background: var(--accent-soft); }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -6px 20px rgba(0,0,0,.12); padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.sheet .in { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+.sheet .sw { font-family: var(--font-he); font-size: 2rem; direction: rtl; text-align: right; line-height: 1.3; }
+.sheet .parts { font-size: 0.9rem; color: var(--muted); }
+.sheet .sr { font-size: 1.1rem; font-weight: 500; }
+.tag { font-size: 0.72rem; padding: 2px 8px; border-radius: 99px; background: var(--warn-soft); color: var(--muted); align-self: flex-start; }
+.field textarea { font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); width: 100%; }
+
+/* Chat */
+.chat { display: flex; flex-direction: column; gap: 10px; }
+.msg { max-width: 88%; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.msg.ai { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); }
+.msg.me { align-self: flex-end; background: var(--accent-soft); }
+.msg .mh { font-family: var(--font-he); direction: rtl; text-align: right; font-size: 1.3rem; line-height: 1.55; unicode-bidi: plaintext; }
+.msg .mr { font-size: 0.88rem; color: var(--muted); }
+.msg .row { gap: 6px; }
+.fix { align-self: flex-end; max-width: 88%; background: var(--warn-soft); border-radius: 12px; padding: 8px 12px; font-size: 0.9rem; display: flex; flex-direction: column; gap: 4px; }
+.fix .fh { font-family: var(--font-he); direction: rtl; text-align: right; font-size: 1.2rem; }
+.composer { position: sticky; bottom: 0; background: var(--bg); padding-block: 10px calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); }
+.typing { color: var(--muted); font-size: 0.9rem; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (max-width: 380px) { .opts { grid-template-columns: 1fr; } .word { font-size: 2.1rem; } .today b { font-size: 1.15rem; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HOME -->
+  <section id="v-home" class="view">
+    <div class="top">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span class="eyebrow" id="lvlEyebrow">Уровень Алеф</span>
+        <h1>Иврит шаг за шагом</h1>
+      </div>
+      <button class="iconbtn" id="b-settings" aria-label="Настройки">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
+
+    <div id="storeNote" class="banner" hidden></div>
+
+    <div class="panel" id="todayPanel">
+      <div class="row" style="justify-content:space-between"><h2>Сегодня</h2><span class="small muted" id="todayDate"></span></div>
+      <div class="today">
+        <div><b id="tDue">0</b><span>к повторению</span></div>
+        <div><b id="tDone">0</b><span>ответов сегодня</span></div>
+        <div><b id="tStreak">0</b><span>дней подряд</span></div>
+      </div>
+      <div class="actions" id="todayActions"></div>
+    </div>
+
+    <div class="panel" id="placementCard" hidden>
+      <span class="eyebrow">Входной тест</span>
+      <h2>Определим, с какого модуля начать</h2>
+      <p class="muted">40 коротких заданий по темам всего уровня Алеф, около 15 минут. Если две темы подряд окажутся незнакомыми, тест закончится раньше.</p>
+      <div class="row"><button class="btn" id="b-test">Начать тест</button></div>
+    </div>
+
+    <div class="panel" id="practicePanel" hidden>
+      <h2>Живой язык</h2>
+      <div class="nav nav3">
+        <button class="btn secondary" id="b-texts">Чтение</button>
+        <button class="btn secondary" id="b-dialogs">Разговор</button>
+        <button class="btn secondary" id="b-writing">Письмо</button>
+      </div>
+      <button class="btn secondary" id="b-cursive">Прописные буквы</button>
+      <p class="small muted" id="practiceNote"></p>
+    </div>
+
+    <div id="unitPanels" class="view"></div>
+
+    <div class="nav nav3">
+      <button class="btn secondary" id="b-stats">Статистика</button>
+      <button class="btn secondary" id="b-errors">Ошибки</button>
+      <button class="btn secondary" id="b-mywords">Мои слова</button>
+    </div>
+
+    <div class="panel">
+      <div class="row" style="justify-content:space-between">
+        <h2>Модули курса</h2>
+        <button class="btn ghost small" id="b-results" hidden>Итоги теста</button>
+      </div>
+      <ol class="list" id="mods"></ol>
+      <p class="small muted">Модули добавляются по мере прохождения, начиная с вашего стартового.</p>
+    </div>
+  </section>
+
+  <!-- THEORY -->
+  <section id="v-lesson" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <div style="display:flex;flex-direction:column;gap:4px"><span class="eyebrow" id="lsEyebrow"></span><h1 id="lsTitle"></h1></div>
+    <div class="banner" id="lsMode" hidden></div>
+    <div class="panel theory" id="lsTheory"></div>
+    <button class="btn" id="lsNext"></button>
+    <button class="btn secondary" id="lsTestOut" hidden></button>
+    <p class="small muted" id="lsTestNote" hidden>Короткая проверка без теории и знакомства со словами. Если ответите верно хотя бы на 7 из 8 заданий, урок засчитается, а его слова сразу уйдут в повторение.</p>
+  </section>
+
+  <!-- WORDS INTRO -->
+  <section id="v-words" class="view" hidden>
+    <div class="qhead"><button class="btn ghost" data-home>← Прервать</button><span class="small muted" id="wdCount"></span></div>
+    <div class="progress"><i id="wdBar"></i></div>
+    <div class="panel wcard">
+      <span class="eyebrow" id="wdG"></span>
+      <div class="w" id="wdHe"></div>
+      <div class="tr" id="wdTr"></div>
+      <div class="ru" id="wdRu"></div>
+      <div class="forms" id="wdForms"></div>
+      <p class="small muted" id="wdNote"></p>
+      <button class="btn secondary small" id="wdSay" hidden>▶ Прослушать</button>
+    </div>
+    <div class="row"><button class="btn secondary" id="wdPrev">Назад</button><button class="btn grow" id="wdNext">Дальше</button></div>
+  </section>
+
+  <!-- RUN (exercises) -->
+  <section id="v-run" class="view" hidden>
+    <div class="qhead">
+      <button class="btn ghost" id="b-quit">← Прервать</button>
+      <span class="small muted" id="qcount"></span>
+    </div>
+    <div class="progress"><i id="qbar"></i></div>
+    <div class="eyebrow" id="qmod"></div>
+    <p class="prompt" id="qprompt"></p>
+    <div class="word" id="qword" hidden></div>
+    <div id="qlisten" hidden style="align-self:center"><button class="btn secondary" id="b-say">▶ Прослушать</button></div>
+    <div class="opts" id="qopts" hidden></div>
+    <div id="qorder" hidden style="display:flex;flex-direction:column;gap:12px">
+      <div class="built tokens" id="qbuilt"></div>
+      <div class="tokens" id="qpool"></div>
+    </div>
+    <div id="qtype" hidden style="display:flex;flex-direction:column;gap:12px">
+      <input id="answer" class="answer" type="text" dir="rtl" lang="he" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ответ на иврите" aria-label="Ваш ответ на иврите">
+      <div id="kbRun"></div>
+    </div>
+    <div id="qfb" hidden></div>
+    <div class="row">
+      <button class="btn grow" id="b-check">Проверить</button>
+      <button class="btn secondary" id="b-skip">Не знаю</button>
+    </div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section id="v-summary" class="view" hidden>
+    <div class="panel">
+      <span class="eyebrow" id="smEyebrow"></span>
+      <div class="row" style="align-items:baseline;gap:14px"><span class="score" id="smScore"></span><h2 id="smTitle" class="grow"></h2></div>
+      <p class="muted" id="smText"></p>
+      <div class="actions" id="smActions"></div>
+    </div>
+    <div class="panel" id="smMistWrap"><h2>Разбор ошибок</h2><div class="mist" id="smMist"></div></div>
+  </section>
+
+  <!-- READING -->
+  <section id="v-reading" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <div style="display:flex;flex-direction:column;gap:4px"><span class="eyebrow">Текст для чтения</span><h1 id="rdTitle"></h1></div>
+    <p class="small muted">Прочитайте текст. Нажмите на предложение, чтобы увидеть перевод.</p>
+    <div class="panel reading" id="rdText"></div>
+    <div class="panel" id="rdGlossWrap"><h3>Новые слова в тексте</h3><div id="rdGloss" class="small" style="display:flex;flex-direction:column;gap:6px"></div></div>
+    <button class="btn" id="rdGo">Ответить на вопросы</button>
+  </section>
+
+  <!-- PLACEMENT RESULTS -->
+  <section id="v-results" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <div class="panel">
+      <span class="eyebrow">Результат входного теста</span>
+      <h2 id="rTitle"></h2>
+      <p id="rText" class="muted"></p>
+    </div>
+    <div class="panel"><h2>По модулям</h2><div class="res" id="rMods"></div></div>
+    <div class="panel" id="rMistWrap"><h2>Разбор ошибок</h2><div class="mist" id="rMist"></div></div>
+  </section>
+
+  <!-- STATS -->
+  <section id="v-stats" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Статистика</h1>
+    <div class="panel">
+      <div class="today">
+        <div><b id="stStreak">0</b><span>дней подряд</span></div>
+        <div><b id="stWeek">0%</b><span>точность за 7 дней</span></div>
+        <div><b id="stTotal">0</b><span>ответов всего</span></div>
+      </div>
+      <div class="today">
+        <div><b id="stWords">0</b><span>слов в повторении</span></div>
+        <div><b id="stSkills">0</b><span>тем в повторении</span></div>
+        <div><b id="stTomorrow">0</b><span>повторить завтра</span></div>
+      </div>
+      <p class="small muted" id="stMastered"></p>
+    </div>
+    <div class="panel">
+      <h2>Слабые места</h2>
+      <p class="small muted" id="stWeakNote"></p>
+      <div class="res" id="stWeak"></div>
+      <button class="btn secondary" id="stWeakGo" hidden>Тренировать слабые места</button>
+    </div>
+    <div class="panel"><h2>По типам заданий</h2><div class="res" id="stTypes"></div></div>
+  </section>
+
+  <!-- ERRORS -->
+  <section id="v-errors" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Мои ошибки</h1>
+    <div class="panel">
+      <div class="today">
+        <div><b id="erActive">0</b><span>ждут разбора</span></div>
+        <div><b id="erFixed">0</b><span>исправлено</span></div>
+        <div><b id="erWeek">0</b><span>за 7 дней</span></div>
+      </div>
+      <p class="small muted">Ошибка уходит из списка после двух верных ответов подряд, где бы они ни были: в уроке, повторении или здесь.</p>
+      <button class="btn" id="erGo" hidden>Тренировать ошибки</button>
+    </div>
+    <div class="panel" id="erTopicsWrap" hidden><h2>Где ошибок больше всего</h2><div class="res" id="erTopics"></div></div>
+    <div class="panel"><h2>Последние ошибки</h2><div class="mist" id="erList"></div></div>
+  </section>
+
+  <!-- CURSIVE -->
+  <section id="v-cursive" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Прописные буквы</h1>
+    <div class="panel">
+      <p>В Израиле от руки пишут прописными буквами: записки, объявления, тетради, открытки. Печатные буквы от руки почти не пишут. Читать прописные нужно уметь обязательно, писать ими удобно и быстро.</p>
+      <div class="nav nav3">
+        <button class="btn" id="cuLetters">Буквы</button>
+        <button class="btn secondary" id="cuRead">Чтение</button>
+        <button class="btn secondary" id="cuWrite">Пропись</button>
+      </div>
+      <p class="small muted" id="cuNote"></p>
+    </div>
+    <div class="panel"><h2>Алфавит</h2><p class="small muted">Крупно прописная, под ней печатная буква и название.</p><div class="cgrid" id="cuGrid"></div></div>
+    <div class="panel"><h2>Похожие пары</h2><p class="small muted">В прописи эти буквы легко спутать. Сравните их внимательно.</p><div class="pairs" id="cuPairs"></div></div>
+    <p class="small muted">Шрифт Ktav Yad CLM: Максим Иорш, проект Culmus, лицензия GNU GPL.</p>
+  </section>
+
+  <!-- HANDWRITING SELF-CHECK -->
+  <section id="v-hw" class="view" hidden>
+    <button class="btn ghost" id="hwBack" style="align-self:flex-start">← Прописные буквы</button>
+    <span class="eyebrow" id="hwCount"></span>
+    <div class="panel">
+      <p class="muted">Напишите это слово прописными буквами на бумаге, затем сравните с образцом.</p>
+      <div class="hwprint" id="hwPrint"></div>
+      <p class="small muted" id="hwRu" style="text-align:center"></p>
+      <div class="hwmodel" id="hwModel" hidden></div>
+      <button class="btn" id="hwShow">Показать образец</button>
+      <div class="nav" id="hwRate" hidden>
+        <button class="btn secondary" id="hwNo">Не похоже</button>
+        <button class="btn" id="hwYes">Получилось</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MY WORDS -->
+  <section id="v-mywords" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Мои слова</h1>
+    <div class="panel">
+      <h2>Добавить слово или фразу</h2>
+      <div class="field"><label for="cwHe">На иврите</label><input id="cwHe" class="heinput" type="text" dir="rtl" lang="he" autocomplete="off" spellcheck="false"></div>
+      <div id="kbWords"></div>
+      <div class="field"><label for="cwRu">Перевод</label><input id="cwRu" type="text" autocomplete="off"></div>
+      <div class="field"><label for="cwTr">Произношение кириллицей (необязательно)</label><input id="cwTr" type="text" autocomplete="off"></div>
+      <button class="btn" id="cwAdd">Добавить в повторение</button>
+    </div>
+    <div class="panel"><div class="row" style="justify-content:space-between"><h2>Мой список</h2><span class="small muted" id="cwCount"></span></div><div class="list" id="cwList"></div></div>
+  </section>
+
+  <!-- TEXTS LIST -->
+  <section id="v-texts" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Чтение</h1>
+    <p class="muted small">Тексты из уже знакомых слов. Нажмите на любое слово, чтобы увидеть перевод и разбор по частям. Лучше читать понемногу каждый день.</p>
+    <div class="panel"><h2>Тексты курса</h2><div class="list" id="txList"></div></div>
+    <div class="panel" id="genPanel">
+      <h2>Новый текст от Claude</h2>
+      <p class="small muted" id="genNote">Claude напишет короткий рассказ только из слов, которые вы уже прошли. Можно указать тему.</p>
+      <div class="field"><label for="genTopic">Тема (необязательно)</label><input id="genTopic" type="text" autocomplete="off" placeholder="например: поход на рынок"></div>
+      <button class="btn secondary" id="genGo">Написать текст</button>
+      <p class="small muted" id="genStatus" hidden></p>
+      <div class="list" id="genList"></div>
+    </div>
+    <div class="panel">
+      <h2>Слушать и читать вне приложения</h2>
+      <p class="small muted">Проверенные бесплатные источники живого иврита. Открываются в новой вкладке.</p>
+      <div class="mist" id="lsnList"></div>
+    </div>
+  </section>
+
+  <!-- WRITING LIST -->
+  <section id="v-writing" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Письмо</h1>
+    <p class="muted small">Короткий текст на иврите на тему урока. Claude исправит ошибки, объяснит их и покажет, как написал бы носитель. Пишите сами, без переводчика: ошибки здесь полезны.</p>
+    <div class="panel"><div class="list" id="wrList"></div></div>
+  </section>
+
+  <!-- WRITING EDITOR -->
+  <section id="v-write" class="view" hidden>
+    <button class="btn ghost" id="wrBack" style="align-self:flex-start">← К заданиям</button>
+    <div style="display:flex;flex-direction:column;gap:6px"><span class="eyebrow">Письмо</span><h1 id="wrTitle"></h1></div>
+    <div class="panel">
+      <p id="wrTask"></p>
+      <p class="small muted" id="wrUse"></p>
+      <textarea id="wrIn" class="answer" dir="rtl" lang="he" spellcheck="false" aria-label="Ваш текст на иврите"></textarea>
+      <div id="kbWrite"></div>
+      <div class="row"><button class="btn grow" id="wrCheck">Проверить</button><button class="btn secondary" id="wrKb" aria-label="Клавиатура">⌨</button></div>
+    </div>
+    <div class="panel" id="wrResult" hidden></div>
+  </section>
+
+  <!-- TEXT READER -->
+  <section id="v-text" class="view" hidden>
+    <button class="btn ghost" id="txBack" style="align-self:flex-start">← К текстам</button>
+    <div style="display:flex;flex-direction:column;gap:6px"><span class="eyebrow">Чтение</span><h1 id="txTitle"></h1><span class="tag" id="txGen" hidden>Текст написал Claude</span><button class="btn ghost small" id="txNik" type="button" hidden style="align-self:flex-start"></button></div>
+    <div class="panel" id="txBody"></div>
+    <button class="btn" id="txQ">Вопросы к тексту</button>
+    <div style="height:150px" aria-hidden="true"></div>
+  </section>
+
+  <!-- DIALOG LIST -->
+  <section id="v-dialogs" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Разговор с Claude</h1>
+    <p class="muted small">Переписка на иврите в учебной ситуации. Claude отвечает короткими фразами на вашем уровне, исправляет ошибки по ходу, а в конце делает разбор. Можно писать и по-русски, если не знаете, как сказать: Claude подскажет.</p>
+    <div class="panel"><div class="list" id="dlList"></div></div>
+  </section>
+
+  <!-- CHAT -->
+  <section id="v-chat" class="view" hidden>
+    <div class="qhead"><button class="btn ghost" id="chBack">← Выйти</button><button class="btn ghost small" id="chEnd">Завершить и разобрать</button></div>
+    <div style="display:flex;flex-direction:column;gap:4px"><h1 id="chTitle"></h1><p class="small muted" id="chGoal"></p></div>
+    <div class="chat" id="chLog"></div>
+    <div class="panel" id="chSummary" hidden></div>
+    <div class="composer" id="chComposer">
+      <div class="row"><input id="chIn" class="answer grow" style="min-height:52px;font-size:1.35rem" type="text" dir="auto" autocomplete="off" spellcheck="false" placeholder="ваш ответ" aria-label="Ваша реплика"></div>
+      <div id="kbChat"></div>
+      <div class="row"><button class="btn grow" id="chSend">Отправить</button><button class="btn secondary" id="chHint">Подсказка</button><button class="btn secondary" id="chKb" aria-label="Клавиатура">⌨</button></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="v-settings" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Настройки</h1>
+    <div class="panel">
+      <div class="set"><div><div>Огласовки</div><div class="small muted">Показывать никуд в словах и заданиях</div></div><button class="switch" id="s-nikud" role="switch" aria-checked="true" aria-label="Огласовки"></button></div>
+      <div class="set"><div><div>Транслитерация</div><div class="small muted">Кириллицей у новых слов</div></div><button class="switch" id="s-translit" role="switch" aria-checked="true" aria-label="Транслитерация"></button></div>
+      <div class="set"><div><div>Клавиатура</div><div class="small muted">Встроенная или клавиатура телефона с ивритской раскладкой</div></div>
+        <div class="seg" id="s-kb"><button data-v="app" aria-pressed="true">Встроенная</button><button data-v="native" aria-pressed="false">Телефона</button></div></div>
+    </div>
+    <div class="panel">
+      <h2>Звук</h2>
+      <p class="small muted" id="voiceStatus">Проверяю голос иврита…</p>
+      <div class="row" id="voiceRow" hidden><button class="btn secondary" id="b-voice">▶ Проверить звук</button><span class="he" style="font-size:1.3rem">שָׁלוֹם, מָה שְׁלוֹמֵךְ?</span></div>
+    </div>
+    <div class="panel" id="aiPanel">
+      <h2>Объяснения от Claude</h2>
+      <p class="small muted" id="aiStatus"></p>
+    </div>
+    <div class="panel">
+      <h2>Прогресс</h2>
+      <p class="small muted" id="storeStatus"></p>
+      <div class="row"><button class="btn secondary" id="b-export">Сохранить копию в файл</button><button class="btn secondary" id="b-import">Загрузить копию</button></div>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+      <div class="confirm" id="importConfirm" hidden>
+        <span id="importText"></span>
+        <div class="row"><button class="btn" id="b-import-yes">Заменить прогресс</button><button class="btn secondary" id="b-import-no">Отмена</button></div>
+      </div>
+      <button class="btn ghost" id="b-reset" style="align-self:flex-start">Пройти входной тест заново</button>
+      <div class="confirm" id="resetConfirm" hidden>
+        <span>Результаты входного теста будут удалены. Уроки и повторение сохранятся. Продолжить?</span>
+        <div class="row"><button class="btn" id="b-reset-yes" style="background:var(--bad)">Удалить результаты теста</button><button class="btn secondary" id="b-reset-no">Отмена</button></div>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="sheet" id="sheet" hidden>
+  <div class="in">
+    <div class="row" style="justify-content:space-between;align-items:flex-start"><button class="btn ghost small" id="shClose">Закрыть</button><div class="sw" id="shWord"></div></div>
+    <div class="parts" id="shParts"></div>
+    <div class="sr" id="shRu"></div>
+    <div class="ai" id="shAi" hidden></div>
+    <div class="row"><button class="btn secondary small" id="shAdd">В повторение</button><button class="btn ghost small" id="shAsk">Спросить Claude</button><span id="shSay"></span></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const U = String.fromCharCode;
+  const NIKUD = new RegExp("[" + U(0x591) + "-" + U(0x5C7) + "]", "g");
+  const HEB = new RegExp("[" + U(0x5D0) + "-" + U(0x5EA) + "]");
+  const DAY = 86400000, MIN = 60000;
+
+  let C = null;                 // level file
+  const UNITS = [];             // loaded units in order
+  const IDX = { skills: {}, skillName: {}, skillUnit: {}, words: {}, lessons: {}, wordPool: {}, exById: {} };
+  let S = defaults();
+  let store = { mode: "none", save: async () => {} };
+  let sampleFn = null;
+  // Standalone mode: the same file opened outside Claude (own website / installed app)
+  const STANDALONE = !(window.claude && window.claude.use);
+
+  function defaults() {
+    return { v: 2, settings: { nikud: true, translit: true, kb: "app" },
+      placement: { status: "none", idx: 0, answers: {}, startedAt: null, finishedAt: null, result: null },
+      cards: {}, lessons: {}, units: {}, log: {}, skillStats: {}, typeStats: {}, altOk: {}, custom: [], recent: [], errors: {} };
+  }
+
+  /* ================= storage ================= */
+  async function initStore() {
+    if (STANDALONE) {
+      try { const raw = localStorage.getItem("ivrit-state"); if (raw) S = merge(defaults(), JSON.parse(raw)); } catch (e) { /* ignore */ }
+      useLocal("standalone");
+      try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (_) {}
+      return;
+    }
+    let db = null, uid = null, canWrite = null;
+    try {
+      if (window.claude && claude.use) {
+        const [d, u] = await Promise.all([claude.use("db"), claude.use("user")]);
+        db = d; uid = u ? await u.id() : null;
+        canWrite = u && u.can ? await u.can("data.write") : null;
+      }
+    } catch (e) { db = null; }
+    if (db && uid && canWrite !== false) {
+      const ref = db.doc("data/users/" + uid + "/state");
+      try {
+        const snap = await ref.get();
+        if (snap.exists) S = merge(defaults(), JSON.parse(JSON.stringify(snap.data())));
+        let busy = false, pending = false;
+        const write = () => ref.set(JSON.parse(JSON.stringify(S)));
+        const flush = async () => {
+          if (busy) { pending = true; return; }
+          busy = true;
+          try { await write(); }
+          catch (e) {
+            if (e && e.code === "unavailable") { await new Promise(r => setTimeout(r, 800 + Math.random() * 800)); try { await write(); } catch (_) { toast("Не удалось сохранить прогресс. Проверьте интернет."); } }
+            else if (e && e.code === "quota_exceeded") toast("Хранилище переполнено: сохраните копию в файл и напишите Claude.");
+            else if (e && e.code === "invalid_argument") { useLocal("noaccess"); busy = false; store.save(); toast("Прогресс будет сохраняться в этом браузере"); return; }
+            else toast("Не удалось сохранить прогресс.");
+          }
+          busy = false;
+          if (pending) { pending = false; flush(); }
+        };
+        store = { mode: "db", save: flush };
+        return;
+      } catch (e) { /* fall back */ }
+    }
+    try {
+      const raw = localStorage.getItem("ivrit-state");
+      if (raw) S = merge(defaults(), JSON.parse(raw));
+    } catch (e) { /* ignore */ }
+    useLocal(db && uid ? "noaccess" : "signedout");
+  }
+  function useLocal(reason) {
+    let ok = true;
+    try { localStorage.setItem("ivrit-probe", "1"); localStorage.removeItem("ivrit-probe"); } catch (e) { ok = false; }
+    store = ok ? { mode: "local", reason, save: async () => { try { localStorage.setItem("ivrit-state", JSON.stringify(S)); } catch (_) {} } } : { mode: "none", reason, save: async () => {} };
+  }
+  function merge(a, b) {
+    for (const k in b) {
+      if (b[k] && typeof b[k] === "object" && !Array.isArray(b[k]) && a[k] && typeof a[k] === "object" && !Array.isArray(a[k])) a[k] = merge(a[k], b[k]);
+      else a[k] = b[k];
+    }
+    return a;
+  }
+  const save = () => store.save();
+
+  /* ================= speech ================= */
+  let heVoice = null, voicesChecked = false;
+  function findVoice() {
+    if (!("speechSynthesis" in window)) return null;
+    const vs = speechSynthesis.getVoices() || [];
+    return vs.find(v => /^(he|iw)([-_]|$)/i.test(v.lang)) || null;
+  }
+  function checkVoices() { heVoice = findVoice(); voicesChecked = true; renderVoice(); }
+  function speak(text) {
+    if (!heVoice) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = heVoice.lang; u.voice = heVoice; u.rate = 0.85;
+      speechSynthesis.speak(u);
+    } catch (e) { toast("Не удалось воспроизвести звук"); }
+  }
+  function renderVoice() {
+    const ok = !!heVoice;
+    $("voiceRow").hidden = !ok;
+    $("voiceStatus").textContent = !voicesChecked ? "Проверяю голос иврита…" :
+      ok ? "Голос иврита найден: " + heVoice.name + ". Звук в упражнениях включён."
+         : "На этом устройстве нет голоса иврита, поэтому звук выключен, а задания на слух заменены заданиями на чтение. На компьютере звук обычно работает в браузере Edge.";
+  }
+  function sayBtn(text) {
+    if (!heVoice) return null;
+    const b = document.createElement("button"); b.className = "say"; b.type = "button"; b.textContent = "▶"; b.setAttribute("aria-label", "Прослушать");
+    b.onclick = (e) => { e.stopPropagation(); speak(text); };
+    return b;
+  }
+
+  /* ================= helpers ================= */
+  const shown = (t) => (t == null ? "" : S.settings.nikud ? String(t) : String(t).replace(NIKUD, ""));
+  function norm(s) { return (s || "").replace(NIKUD, "").replace(/[?!.,;:"'׳״\-־()«»]/g, " ").replace(/\s+/g, " ").trim(); }
+  // full (plene) spelling: holam and kubbutz are usually written with ו when nikud is dropped (בֹּקֶר → בוקר)
+  const HOLAM = U(0x5B9), KUB = U(0x5BB), VAV = U(0x5D5);
+  const isMark = (c) => c >= U(0x591) && c <= U(0x5C7);
+  function plene(s) {
+    if (!s || !(s.includes(HOLAM) || s.includes(KUB))) return null;
+    const ch = [...s]; let out = "", base = "";
+    for (let i = 0; i < ch.length; i++) {
+      const c = ch[i];
+      if ((c === HOLAM || c === KUB) && base !== VAV) {
+        let j = i + 1, marks = c;
+        while (j < ch.length && isMark(ch[j])) { marks += ch[j]; j++; }
+        out += marks + (ch[j] === VAV ? "" : VAV); i = j - 1; continue;
+      }
+      if (!isMark(c)) base = c;
+      out += c;
+    }
+    return out;
+  }
+  const FINAL = { "ך": "כ", "ם": "מ", "ן": "נ", "ף": "פ", "ץ": "צ" };
+  const unfinal = (s) => s.replace(/[ךםןףץ]/g, c => FINAL[c]);
+  const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  function dkey(t) { const d = new Date(t || Date.now()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  let toastT = null;
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3400); }
+  const VIEWS = ["home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write"];
+  function show(view) { for (const v of VIEWS) $("v-" + v).hidden = v !== view; if ($("sheet")) $("sheet").hidden = true; window.scrollTo(0, 0); }
+  function rich(el, text) {
+    // [[hebrew]] → styled span; everything else plain text
+    el.textContent = "";
+    String(text).split(/(\[\[[^\]]+\]\])/).forEach(part => {
+      const m = part.match(/^\[\[([^\]]+)\]\]$/);
+      if (m) { const s = document.createElement("span"); s.className = "he"; s.textContent = shown(m[1]); if (m[1].length <= 12) s.style.whiteSpace = "nowrap"; el.appendChild(s); }
+      else if (part) appendMixed(el, shown(part));
+    });
+    return el;
+  }
+  // wrap every Hebrew run inside mixed text so word order stays correct
+  const HR = "[" + U(0x590) + "-" + U(0x5FF) + "]";
+  const HEBRUN = new RegExp("(" + HR + "+(?:[ " + U(0x5BE) + "]" + HR + "+)*)");
+  function appendMixed(node, text) {
+    String(text).split(HEBRUN).forEach((seg, i) => {
+      if (!seg) return;
+      if (i % 2) { const s = document.createElement("span"); s.className = "he"; s.textContent = seg; node.appendChild(s); }
+      else node.appendChild(document.createTextNode(seg));
+    });
+    return node;
+  }
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  /* ================= FSRS-4.5 ================= */
+  const W = [0.4872, 1.4003, 3.7145, 13.8206, 5.1618, 1.2298, 0.8975, 0.031, 1.6474, 0.1367, 1.0461, 2.1072, 0.0793, 0.3246, 1.587, 0.2272, 2.8755];
+  const clampD = (d) => Math.min(10, Math.max(1, d));
+  const retr = (t, s) => Math.pow(1 + (19 / 81) * t / s, -0.5);
+  function schedule(c, G, now) {
+    c.last = now;
+    c.due = G === 1 ? now + 10 * MIN : now + Math.max(1, Math.round(c.s)) * DAY;
+  }
+  function initCard(id, G) {
+    const now = Date.now();
+    const c = { s: W[G - 1], d: clampD(W[4] - (G - 3) * W[5]), reps: 1, lapses: G === 1 ? 1 : 0, last: now, due: 0 };
+    c.due = G === 1 ? now + 10 * MIN : now + DAY;   // first review: next day
+    S.cards[id] = c;
+  }
+  function reviewCard(id, G) {
+    const c = S.cards[id]; if (!c) return initCard(id, G);
+    const now = Date.now();
+    const t = Math.max(0, (now - c.last) / DAY);
+    const R = retr(t, c.s);
+    if (G === 1) {
+      const sf = W[11] * Math.pow(c.d, -W[12]) * (Math.pow(c.s + 1, W[13]) - 1) * Math.exp(W[14] * (1 - R));
+      c.s = Math.max(0.1, Math.min(sf, c.s));
+      c.lapses = (c.lapses || 0) + 1;
+    } else {
+      const f = Math.exp(W[8]) * (11 - c.d) * Math.pow(c.s, -W[9]) * (Math.exp(W[10] * (1 - R)) - 1) * (G === 2 ? W[15] : 1) * (G === 4 ? W[16] : 1);
+      c.s = c.s * (f + 1);
+    }
+    const d0 = W[4];
+    c.d = clampD(W[7] * d0 + (1 - W[7]) * (c.d - W[6] * (G - 3)));
+    c.reps = (c.reps || 0) + 1;
+    schedule(c, G, now);
+  }
+  const dueCards = (until) => Object.keys(S.cards).filter(id => S.cards[id].due <= (until || Date.now()) && cardUsable(id));
+  function cardUsable(id) {
+    if (id.startsWith("k:")) return !!(IDX.skills[id.slice(2)] && IDX.skills[id.slice(2)].length);
+    if (id.startsWith("w:")) return !!getWord(id.slice(2));
+    return false;
+  }
+
+  /* ================= stats log ================= */
+  function logAnswer(ok, type, k) {
+    const d = dkey();
+    const L = S.log[d] || (S.log[d] = { n: 0, ok: 0 }); L.n++; if (ok) L.ok++;
+    const T = S.typeStats[type] || (S.typeStats[type] = [0, 0]); T[1]++; if (ok) T[0]++;
+    if (k) { const K = S.skillStats[k] || (S.skillStats[k] = [0, 0]); K[1]++; if (ok) K[0]++; }
+  }
+  function logFix(type, k) {
+    const L = S.log[dkey()]; if (L) L.ok++;
+    if (S.typeStats[type]) S.typeStats[type][0]++;
+    if (k && S.skillStats[k]) S.skillStats[k][0]++;
+  }
+  function streak() {
+    let n = 0; const now = new Date();
+    for (let i = 0; i < 400; i++) {
+      const d = dkey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i));
+      if (S.log[d] && (S.log[d].n > 0 || S.log[d].act > 0)) n++;
+      else if (i === 0) continue;   // today not yet: streak counts up to yesterday
+      else break;
+    }
+    return n;
+  }
+
+  /* ================= content index ================= */
+  function indexUnit(u) {
+    UNITS.push(u);
+    for (const [k, name] of Object.entries(u.skills || {})) { IDX.skillName[k] = name; IDX.skillUnit[k] = u.id; IDX.skills[k] = IDX.skills[k] || []; }
+    for (const w of u.words || []) { IDX.words[w.id] = w; (IDX.wordPool[u.id] = IDX.wordPool[u.id] || []).push(w); }
+    (u.lessons || []).forEach((l, i) => {
+      IDX.lessons[l.id] = { lesson: l, unit: u, i };
+      for (const ex of l.exercises.concat(l.hard || [])) { IDX.exById[ex.id] = ex; if (ex.k) IDX.skills[ex.k].push(ex); }
+    });
+    for (const ex of (u.test && u.test.items) || []) IDX.exById[ex.id] = ex;
+  }
+  function getWord(id) {
+    if (IDX.words[id]) return IDX.words[id];
+    const c = S.custom.find(x => x.id === id);
+    return c ? { id: c.id, he: c.he, tr: c.tr, ru: c.ru, custom: true } : null;
+  }
+
+  /* ================= exercise builders ================= */
+  function wordNote(w) { return w.he + (w.tr ? " (" + w.tr + ")" : "") + ": " + w.ru + (w.note ? ". " + w.note : ""); }
+  function wordRec(w) {
+    const pool = (w.custom ? S.custom.map(c => getWord(c.id)) : (IDX.wordPool[unitOfWord(w.id)] || [])).filter(x => x.id !== w.id && x.ru !== w.ru);
+    let others = shuffle(pool).slice(0, 3).map(x => x.ru);
+    if (others.length < 3) { const all = Object.values(IDX.words).filter(x => x.ru !== w.ru && !others.includes(x.ru)); others = others.concat(shuffle(all).slice(0, 3 - others.length).map(x => x.ru)); }
+    return { id: "wrec:" + w.id, type: "choice", prompt: "Что значит это слово?", he: w.he, say: w.he, options: [w.ru].concat(others), answer: 0, note: wordNote(w), word: w.id };
+  }
+  function wordProd(w) {
+    // any listed form counts (Russian «идёт» does not say whether it is הוֹלֵךְ or הוֹלֶכֶת)
+    const forms = (w.forms || "").split("·").map(x => x.trim()).filter(Boolean);
+    return { id: "wprod:" + w.id, type: "type", prompt: "Как сказать на иврите: «" + w.ru + "»?" + (forms.length ? " Подойдёт любая форма." : ""), accept: [w.he].concat(forms), note: wordNote(w), word: w.id, say: w.he };
+  }
+  function unitOfWord(id) { for (const u of UNITS) if ((u.words || []).some(w => w.id === id)) return u.id; return null; }
+  function skillEx(k, avoidId) {
+    const pool = IDX.skills[k] || [];
+    let cands = pool.filter(e => e.id !== avoidId && !S.recent.includes(e.id));
+    if (!cands.length) cands = pool.filter(e => e.id !== avoidId);
+    if (!cands.length) cands = pool;
+    return cands.length ? pick(cands) : null;
+  }
+  function exForCard(id) {
+    if (id.startsWith("w:")) {
+      const w = getWord(id.slice(2)); if (!w) return null;
+      const c = S.cards[id];
+      if (!c || c.reps < 2 || Math.random() < 0.2) return wordRec(w);
+      if (Math.random() < 0.5) { const cz = wordCloze(w); if (cz) return cz; }
+      return wordProd(w);
+    }
+    return skillEx(id.slice(2));
+  }
+  const cardOf = (ex) => ex.word ? "w:" + ex.word : ex.k ? "k:" + ex.k : null;
+  function remember(exId) { S.recent = [exId].concat(S.recent.filter(x => x !== exId)).slice(0, 40); }
+
+  /* ================= keyboard ================= */
+  function makeKb(getTarget) {
+    const kb = el("div", "kb");
+    const rows = [["ק","ר","א","ט","ו","ן","ם","פ"], ["ש","ד","ג","כ","ע","י","ח","ל","ך","ף"], ["ז","ס","ב","ה","נ","מ","צ","ת","ץ"]];
+    rows.forEach(r => { const d = el("div", "krow"); r.forEach(ch => d.appendChild(key(ch, ch))); kb.appendChild(d); });
+    const last = el("div", "krow");
+    last.appendChild(key("?", "?", "mid")); last.appendChild(key("пробел", " ", "wide")); last.appendChild(key("⌫", "BS", "mid"));
+    kb.appendChild(last);
+    function key(label, val, cls) {
+      const b = el("button", cls || "", label); b.type = "button";
+      b.setAttribute("aria-label", val === "BS" ? "Стереть" : val === " " ? "Пробел" : label);
+      b.addEventListener("pointerdown", e => e.preventDefault());
+      b.onclick = () => {
+        const a = getTarget(); if (!a || a.readOnly) return;
+        b.classList.add("hit"); setTimeout(() => b.classList.remove("hit"), 140);
+        try { if (navigator.vibrate) navigator.vibrate(8); } catch (_) {}
+        if (val === "BS") a.value = a.value.slice(0, -1); else a.value += val;
+        a.dispatchEvent(new Event("input"));
+      };
+      return b;
+    }
+    return kb;
+  }
+  function applyKbMode() {
+    const app = S.settings.kb === "app";
+    $("kbRun").hidden = !app; $("kbWords").hidden = !app;
+    for (const id of ["answer", "cwHe"]) $(id).setAttribute("inputmode", app ? "none" : "text");
+  }
+
+  /* ================= runner ================= */
+  let R = null, cur = null, picked = null, answered = false, built = [], lastResult = null;
+
+  function run(cfg) {
+    R = Object.assign({ requeue: true, grade: false }, cfg);
+    R.queue = cfg.items.filter(it => it && it.ex);
+    R.pos = 0; R.results = []; R.requeued = new Set();
+    if (!R.queue.length) { toast("Нет заданий"); return; }
+    show("run"); renderItem();
+  }
+  function renderItem() {
+    if (R.pos >= R.queue.length) return finishRun();
+    const item = R.queue[R.pos]; cur = item.ex; picked = null; answered = false; built = []; lastResult = null;
+    $("qcount").textContent = (R.pos + 1) + " / " + R.queue.length;
+    $("qbar").style.width = (R.pos / R.queue.length * 100) + "%";
+    rich($("qmod"), R.label ? R.label(item) : (cur.k ? IDX.skillName[cur.k] || "" : (cur.word ? "Слова" : "")));
+    const useAlt = cur.type === "listen" && !heVoice && cur.alt;
+    rich($("qprompt"), useAlt ? cur.alt.prompt : cur.prompt);
+    const qw = $("qword"); qw.hidden = !cur.he || cur.type === "listen"; qw.classList.toggle("sent", !!(cur.he && cur.he.length > 12));
+    qw.classList.toggle("cursive", cur.script === "cursive");
+    if (cur.he) {
+      qw.textContent = "";
+      if (cur.type === "gap") {
+        const [a, b] = shown(cur.he).split("___");
+        qw.appendChild(document.createTextNode(a)); qw.appendChild(el("span", "gapbox", " ")); qw.appendChild(document.createTextNode(b || ""));
+      } else qw.textContent = shown(cur.he);
+    }
+    $("qlisten").hidden = cur.type !== "listen" || !!useAlt;
+    $("qfb").hidden = true; $("qfb").textContent = "";
+    $("b-check").textContent = "Проверить"; $("b-check").disabled = true; $("b-skip").hidden = false;
+    const typed = ["type", "gap", "transform"].includes(cur.type);
+    $("qtype").hidden = !typed; $("qopts").hidden = !(cur.type === "choice" || cur.type === "listen"); $("qorder").hidden = cur.type !== "order";
+    if (typed) {
+      const a = $("answer"); a.value = ""; a.className = "answer"; a.readOnly = false;
+      if (S.settings.kb !== "app" || !matchMedia("(pointer: coarse)").matches) setTimeout(() => a.focus(), 50);
+    } else if (cur.type === "order") {
+      const order = shuffledTokens(cur.tokens);
+      const pool = $("qpool"); pool.textContent = ""; $("qbuilt").textContent = ""; $("qbuilt").className = "built tokens";
+      order.forEach((t, i) => {
+        const b = el("button", "tok", shown(t)); b.type = "button"; b.dataset.i = i; b.dataset.t = t;
+        b.onclick = () => { if (answered) return; b.disabled = true; built.push(b); renderBuilt(); };
+        pool.appendChild(b);
+      });
+    } else {
+      const box = $("qopts"); box.textContent = "";
+      const heOpts = cur.options.some(o => HEB.test(o));
+      const order = shuffle(cur.options.map((o, i) => i));
+      order.forEach(i => {
+        const o = cur.options[i];
+        const b = el("button", "opt" + (heOpts ? " he" : ""), heOpts ? shown(o) : o); b.type = "button"; b.dataset.i = i;
+        if (heOpts) b.dir = "rtl";
+        b.onclick = () => { if (answered) return; picked = i; [...box.children].forEach(x => x.classList.toggle("sel", +x.dataset.i === i)); $("b-check").disabled = false; };
+        box.appendChild(b);
+      });
+      if (cur.type === "listen" && !useAlt) setTimeout(() => speak(cur.say), 250);
+    }
+  }
+  function shuffledTokens(t) { if (t.length < 2) return t.slice(); let s; let n = 0; do { s = shuffle(t); n++; } while (s.join("|") === t.join("|") && n < 10); return s; }
+  function renderBuilt() {
+    const box = $("qbuilt"); box.textContent = "";
+    built.forEach((b, j) => {
+      const c = el("button", "tok", b.textContent); c.type = "button";
+      c.onclick = () => { if (answered) return; b.disabled = false; built.splice(j, 1); renderBuilt(); };
+      box.appendChild(c);
+    });
+    $("b-check").disabled = built.length !== cur.tokens.length;
+  }
+  function correctText(ex) {
+    if (ex.type === "order") return ex.tokens.join(" ");
+    if (ex.accept) return ex.accept[0];
+    return ex.options[ex.answer];
+  }
+  function check(skipped) {
+    if (!R) return;
+    if (answered) return next();
+    const item = R.queue[R.pos];
+    let ok = false, given = "", almost = false;
+    if (["type", "gap", "transform"].includes(cur.type)) {
+      given = $("answer").value;
+      const g = norm(given);
+      const acc = cur.accept.flatMap(a => { const p = plene(a); return p ? [norm(a), norm(p)] : [norm(a)]; }).concat(S.altOk[cur.id] || []);
+      ok = !skipped && !!g && acc.includes(g);
+      if (!ok && !skipped && g) { almost = acc.some(x => unfinal(x) === unfinal(g)); if (almost) ok = true; }
+      $("answer").classList.add(ok ? "right" : "wrong"); $("answer").readOnly = true;
+    } else if (cur.type === "order") {
+      const seq = built.map(b => b.dataset.t);
+      given = seq.join(" ");
+      const all = [cur.tokens].concat(cur.alt || []);
+      ok = !skipped && all.some(a => a.join("|") === seq.join("|"));
+      $("qbuilt").classList.add(ok ? "right" : "wrong");
+      [...$("qpool").children].forEach(b => b.disabled = true);
+    } else {
+      ok = !skipped && picked === cur.answer; given = picked === null ? "" : cur.options[picked];
+      [...$("qopts").children].forEach(x => { const i = +x.dataset.i; if (i === cur.answer) x.classList.add("right"); else if (i === picked) x.classList.add("wrong"); });
+    }
+    answered = true;
+    const res = { item, ex: cur, ok, given, skipped: !!skipped, almost };
+    lastResult = res;
+    if (item.first !== false) {
+      R.results.push(res);
+      if (R.mode !== "placement") logAnswer(ok, cur.type, cur.k);
+      const cid = cardOf(cur);
+      if (R.grade && cid) { item.prev = S.cards[cid] ? JSON.parse(JSON.stringify(S.cards[cid])) : null; reviewCard(cid, ok ? (almost ? 2 : 3) : 1); }
+      if (R.onAnswer) R.onAnswer(res);
+    }
+    if (R.mode !== "placement") remember(cur.id);
+    if (R.mode !== "placement" && R.mode !== "reading") errNote(cur, ok, given, skipped);
+    const depth = item.depth || 0;
+    if (!ok && R.requeue && depth < 2 && !R.requeued.has(cur.id)) {
+      R.requeued.add(cur.id);
+      const again = (cur.k && !cur.word) ? (skillEx(cur.k, cur.id) || cur) : cur;
+      R.queue.splice(Math.min(R.queue.length, R.pos + 4), 0, { ex: again, cardId: item.cardId, first: false, depth: depth + 1 });
+    }
+    save();
+    renderFeedback(res);
+    $("b-check").disabled = false; $("b-check").textContent = "Дальше"; $("b-skip").hidden = true;
+  }
+  function renderFeedback(res) {
+    const fb = $("qfb"); fb.hidden = false; fb.className = "fb " + (res.ok ? "right" : "wrong"); fb.textContent = "";
+    fb.appendChild(el("span", "verdict", res.override ? "Верно: Claude засчитал ваш вариант" : res.almost ? "Верно, но проверьте конечные буквы" : res.ok ? "Верно" : res.skipped ? "Правильный ответ" : "Неверно"));
+    const ct = correctText(res.ex);
+    if (HEB.test(ct) && (!res.ok || res.almost || res.ex.type !== "choice")) {
+      const c = el("div", "corr"); c.appendChild(el("span", "", shown(ct)));
+      const sb = sayBtn(ct); if (sb) c.appendChild(sb);
+      fb.appendChild(c);
+    } else if (!res.ok && res.ex.type === "choice") {
+      fb.appendChild(el("span", "", "Правильный ответ: " + ct));
+    }
+    if (!res.ok && !res.skipped && ["type", "gap", "transform"].includes(res.ex.type) && norm(res.given)) showDiff(fb, res);
+    if (res.ex.note) fb.appendChild(rich(el("span", "note small"), res.ex.note));
+    const ai = el("div", "ai"); ai.hidden = true; ai.id = "aiOut";
+    if (sampleFn && R.mode !== "placement") {
+      const row = el("div", "row");
+      const why = el("button", "btn secondary small", "Почему так?"); why.type = "button";
+      why.onclick = () => explain(res, ai, why);
+      row.appendChild(why);
+      const typed = ["type", "gap", "transform"].includes(res.ex.type);
+      if (!res.ok && typed && norm(res.given)) {
+        const mine = el("button", "btn ghost small", "Мой ответ тоже верный?"); mine.type = "button";
+        mine.onclick = () => judge(res, ai, mine);
+        row.appendChild(mine);
+      }
+      fb.appendChild(row);
+    }
+    fb.appendChild(ai);
+  }
+  /* ---- what exactly differs: your answer with the wrong letters marked ---- */
+  const CONFUSE = [["ו", "י"], ["ו", "ן"], ["י", "ן"], ["ה", "ח"], ["ה", "ת"], ["ח", "ת"], ["ב", "כ"], ["ד", "ר"], ["ס", "ם"], ["ט", "ת"], ["ק", "כ"], ["א", "ע"], ["ס", "ש"], ["ג", "נ"], ["ז", "ן"]];
+  function editOps(a, b) {   // Levenshtein with backtrace over characters: ops on a to get b
+    const n = a.length, m = b.length, d = [];
+    for (let i = 0; i <= n; i++) { d[i] = [i]; for (let j = 1; j <= m; j++) d[i][j] = i ? 0 : j; }
+    for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++)
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    const ops = []; let i = n, j = m;
+    while (i > 0 || j > 0) {
+      if (i > 0 && j > 0 && d[i][j] === d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)) { ops.unshift(a[i - 1] === b[j - 1] ? ["=", a[i - 1]] : ["~", a[i - 1], b[j - 1]]); i--; j--; }
+      else if (i > 0 && d[i][j] === d[i - 1][j] + 1) { ops.unshift(["-", a[i - 1]]); i--; }
+      else { ops.unshift(["+", b[j - 1]]); j--; }
+    }
+    return { dist: d[n][m], ops };
+  }
+  function showDiff(fb, res) {
+    const g = norm(res.given);
+    const cands = (res.ex.accept || []).flatMap(a => { const p = plene(a); return p ? [norm(a), norm(p)] : [norm(a)]; });
+    if (!cands.length) return;
+    let best = null;
+    for (const c of cands) { const r = editOps(g, c); if (!best || r.dist < best.r.dist) best = { c, r }; }
+    if (!best || best.r.dist === 0) return;
+    const tips = [];
+    // a word typed back to front
+    const gw = g.split(" "), cw = best.c.split(" ");
+    if (gw.length === cw.length) gw.forEach((w, i) => { if (w !== cw[i] && w.length > 1 && [...w].reverse().join("") === cw[i]) tips.push("Слово " + w + " набрано задом наперёд: нужно " + cw[i] + ". В иврите первая буква слова стоит справа."); });
+    const box = el("div", "mine");
+    for (const op of best.r.ops) {
+      if (op[0] === "=") box.appendChild(document.createTextNode(op[1]));
+      else if (op[0] === "~") { box.appendChild(el("span", "bad", op[1])); if (tips.length < 3 && !tips.some(t => t.includes("задом"))) tips.push("Вместо " + op[2] + " набрано " + op[1] + (CONFUSE.some(p => p.includes(op[1]) && p.includes(op[2])) ? ": эти буквы легко спутать." : ".")); }
+      else if (op[0] === "-") { box.appendChild(el("span", "bad", op[1] === " " ? "␣" : op[1])); if (tips.length < 3) tips.push(op[1] === " " ? "Лишний пробел." : "Лишняя буква " + op[1] + "."); }
+      else { box.appendChild(el("span", "miss", " ")); if (tips.length < 3) tips.push(op[1] === " " ? "Не хватает пробела между словами." : "Пропущена буква " + op[1] + "."); }
+    }
+    if (best.r.dist > Math.max(3, best.c.length / 2)) return;   // too different: a letter-by-letter view would only confuse
+    fb.appendChild(el("span", "lbl", "Ваш ответ, расхождения выделены:"));
+    fb.appendChild(box);
+    tips.slice(0, 3).forEach(t => fb.appendChild(rich(el("span", "small"), t)));
+  }
+  function exContext(ex) {
+    let s = "Задание: «" + ex.prompt + "».";
+    if (ex.he) s += " Текст задания на иврите: " + ex.he + ".";
+    if (ex.options) s += " Варианты: " + ex.options.join(" / ") + ".";
+    s += " Правильный ответ: " + correctText(ex) + ".";
+    if (ex.accept && ex.accept.length > 1) s += " Другие принятые варианты: " + ex.accept.slice(1).join(" / ") + ".";
+    return s;
+  }
+  const STYLE = " Пиши по-русски, коротко и конкретно. Ивритские слова пиши с огласовками. Не используй тире (—) и markdown; вместо тире ставь запятую или двоеточие.";
+  async function explain(res, out, btn) {
+    btn.disabled = true; out.hidden = false; out.textContent = "Думаю…";
+    const prompt = "Ты преподаватель современного иврита. Ученица говорит по-русски, уровень Алеф (начальный)." + " " + exContext(res.ex) +
+      " Ответ ученицы: " + (res.given ? "«" + res.given + "»" : "она не ответила") + "." +
+      " Объясни в 3-6 предложениях, почему правильный ответ именно такой, какое правило здесь работает" + (res.ok ? "" : " и в чём ошибка ученицы") + ". Дай ещё один короткий пример на это правило." + STYLE;
+    try { await sampleFn(prompt, { onText: ({ text }) => { out.textContent = text; } }); }
+    catch (e) { out.textContent = e && e.code === "rate_limited" ? "Слишком много запросов подряд. Попробуйте через минуту." : e && e.code === "not_granted" ? "Объяснения от Claude не разрешены для этой страницы." : "Не удалось получить объяснение."; btn.disabled = false; }
+  }
+  async function judge(res, out, btn) {
+    btn.disabled = true; out.hidden = false; out.textContent = "Проверяю ваш вариант…";
+    const prompt = "Ты строгий, но справедливый преподаватель современного иврита. " + exContext(res.ex) +
+      " Ученица написала: «" + res.given + "». Засчитать ли её ответ как правильное выполнение задания? Огласовки, знаки препинания и регистр не важны. Засчитывай нормативные и естественные разговорные варианты с тем же смыслом. Не засчитывай ошибки рода, числа, лица, времени, предлога, артикля, порядка слов, если они меняют смысл или неграмотны, а также опечатки, дающие другое или несуществующее слово." +
+      " Верни JSON: {\"correct\": true или false, \"explanation\": \"2-4 предложения\"}." + STYLE;
+    try {
+      const r = await sampleFn.json(prompt);
+      const okv = !!(r && r.correct === true);
+      out.textContent = (okv ? "Засчитано. " : "Не засчитано. ") + (r && r.explanation ? r.explanation : "");
+      if (okv) acceptOverride(res);
+    } catch (e) { out.textContent = e && e.code === "rate_limited" ? "Слишком много запросов подряд. Попробуйте через минуту." : "Не удалось проверить ответ."; btn.disabled = false; }
+  }
+  function acceptOverride(res) {
+    const g = norm(res.given);
+    S.altOk[res.ex.id] = (S.altOk[res.ex.id] || []).concat([g]).slice(-8);
+    if (S.errors && S.errors[errKey(res.ex)]) delete S.errors[errKey(res.ex)];
+    if (!res.ok && res.item.first !== false) {
+      res.ok = true; res.override = true;
+      logFix(res.ex.type, res.ex.k);
+      const cid = cardOf(res.ex);
+      if (R.grade && cid) { if (res.item.prev) S.cards[cid] = res.item.prev; else delete S.cards[cid]; reviewCard(cid, 3); }
+      if (R.onOverride) R.onOverride(res);
+    } else { res.ok = true; res.override = true; }
+    save();
+    const v = $("qfb").querySelector(".verdict"); if (v) v.textContent = "Верно: Claude засчитал ваш вариант";
+    $("qfb").className = "fb right";
+    $("answer").classList.remove("wrong"); $("answer").classList.add("right");
+  }
+  function next() {
+    if (!R) return;
+    if (R.shouldStop && R.shouldStop()) R.pos = R.queue.length; else R.pos++;
+    renderItem();
+  }
+  function finishRun() { const r = R; R = null; save(); r.onDone(r.results, r); }
+  function quitRun() {
+    try { window.speechSynthesis && speechSynthesis.cancel(); } catch (_) {}
+    const r = R; R = null; save();
+    if (r && r.onQuit) r.onQuit(r.results, r); else goHome();
+  }
+
+  /* ================= summary ================= */
+  function summary({ eyebrow, title, text, results, actions }) {
+    const firsts = results;
+    const ok = firsts.filter(r => r.ok).length;
+    $("smEyebrow").textContent = eyebrow || "";
+    $("smScore").textContent = firsts.length ? Math.round(ok / firsts.length * 100) + "%" : "";
+    rich($("smTitle"), title);
+    $("smText").textContent = text || (ok + " из " + firsts.length + " верно с первой попытки.");
+    const acts = $("smActions"); acts.textContent = "";
+    (actions || [{ label: "На главную", fn: goHome }]).forEach((a, i) => { const b = rich(el("button", "btn" + (i ? " secondary" : "")), a.label); b.onclick = a.fn; acts.appendChild(b); });
+    renderMistakes($("smMist"), firsts.filter(r => !r.ok));
+    $("smMistWrap").hidden = !firsts.some(r => !r.ok);
+    show("summary");
+  }
+  function renderMistakes(box, list) {
+    box.textContent = "";
+    for (const r of list) {
+      const d = el("div");
+      if (r.ex.k) d.appendChild(rich(el("span", "small muted"), IDX.skillName[r.ex.k] || ""));
+      d.appendChild(rich(el("span"), r.ex.prompt + (r.ex.he && r.ex.type !== "listen" ? ": " + r.ex.he : "")));
+      const ct = correctText(r.ex);
+      d.appendChild(el("span", HEB.test(ct) ? "hw" : "", HEB.test(ct) ? shown(ct) : "Правильно: " + ct));
+      d.appendChild(rich(el("span", "small"), r.given ? "Ваш ответ: " + r.given : r.skipped ? "Пропущено" : "Не было ответа"));
+      if (r.ex.note) d.appendChild(rich(el("span", "small muted"), r.ex.note));
+      box.appendChild(d);
+    }
+  }
+
+  /* ================= placement ================= */
+  function byModule() {
+    const out = {};
+    for (const m of C.modules) out[m.n] = [0, 0];
+    for (const it of C.placement) {
+      const a = S.placement.answers[it.id];
+      if (a) { out[it.m][1]++; if (a.ok) out[it.m][0]++; }
+      else if (S.placement.status === "done") out[it.m][1]++;
+    }
+    return out;
+  }
+  function computeStart(bm) { for (const m of C.modules) { const [c, t] = bm[m.n]; if (t === 0 || c / t < 0.8) return m.n; } return null; }
+  function stopEarly(mod) {
+    const bm = byModule(); const a = bm[mod], b = bm[mod - 1];
+    return mod >= 3 && a && b && a[1] > 0 && b[1] > 0 && a[0] === 0 && b[0] === 0;
+  }
+  function startPlacement() {
+    if (S.placement.status !== "in_progress") { S.placement = defaults().placement; S.placement.status = "in_progress"; S.placement.startedAt = new Date().toISOString(); save(); }
+    const items = C.placement.filter(it => !S.placement.answers[it.id]).map(ex => ({ ex }));
+    run({
+      mode: "placement", items, requeue: false,
+      label: (it) => { const m = C.modules.find(x => x.n === it.ex.m); return "Модуль " + m.n + " · " + m.title; },
+      onAnswer: (r) => { S.placement.answers[r.ex.id] = { ok: r.ok, given: r.given, skipped: r.skipped }; },
+      shouldStop: () => { const a = R.queue[R.pos], b = R.queue[R.pos + 1]; return !!(b && b.ex.m !== a.ex.m && stopEarly(a.ex.m)); },
+      onDone: () => { finishPlacement(); },
+      onQuit: () => goHome()
+    });
+  }
+  function finishPlacement() {
+    const p = S.placement; p.status = "done"; p.finishedAt = new Date().toISOString();
+    const bm = byModule(); p.result = { start: computeStart(bm), byModule: bm };
+    save(); renderResults(); show("results");
+  }
+  function renderResults() {
+    const r = S.placement.result; if (!r) return;
+    const sm = C.modules.find(m => m.n === r.start);
+    $("rTitle").textContent = r.start ? "Старт с модуля " + r.start + ": " + sm.title : "Все темы Алефа знакомы";
+    const known = r.start ? r.start - 1 : 14;
+    $("rText").textContent = r.start ? (known ? "Модули 1-" + known + " вы знаете. " : "") + "Начинаем с модуля " + r.start + "; темы, где были ошибки, вынесены в отдельную тренировку." : "Начнём с повторения слабых мест и перейдём к уровню Бет.";
+    const box = $("rMods"); box.textContent = "";
+    for (const m of C.modules) {
+      const [c, t] = r.byModule[m.n] || [0, 0]; const pct = t ? Math.round(c / t * 100) : 0;
+      box.appendChild(resRow(m.n + ". " + m.title, pct, c + " из " + t, pct < 80));
+    }
+    const wrong = C.placement.filter(it => S.placement.answers[it.id] && !S.placement.answers[it.id].ok).map(it => {
+      const a = S.placement.answers[it.id]; return { ex: it, ok: false, given: a.given, skipped: a.skipped };
+    });
+    renderMistakes($("rMist"), wrong);
+    $("rMistWrap").hidden = !wrong.length;
+  }
+  function resRow(name, pct, right, low) {
+    const row = el("div", "resrow" + (low ? " low" : ""));
+    const left = el("div"); left.appendChild(rich(el("span", "nm"), name));
+    const bar = el("div", "bar"); const i = el("i"); i.style.width = Math.max(0, Math.min(100, pct)) + "%"; bar.appendChild(i); left.appendChild(bar);
+    row.appendChild(left); row.appendChild(el("span", "sc", right));
+    return row;
+  }
+
+  /* ================= lessons ================= */
+  let LS = null;   // current lesson flow
+  function prevModule(u) {
+    if (u.kind !== "module") return null;
+    return UNITS.filter(x => x.kind === "module" && x.module < u.module).sort((a, b) => b.module - a.module)[0] || null;
+  }
+  function unitOpen(u) { const pm = prevModule(u); return !pm || lessonState(pm).allDone; }
+  function lessonState(u) {
+    const ls = u.lessons || [];
+    const doneN = ls.filter(l => S.lessons[l.id]).length;
+    const nextL = ls.find(l => !S.lessons[l.id]) || null;
+    return { ls, doneN, nextL, allDone: doneN === ls.length };
+  }
+  function openLesson(id) {
+    const { lesson, unit, i } = IDX.lessons[id];
+    LS = { lesson, unit, i, wi: 0 };
+    $("lsEyebrow").textContent = (unit.kind === "module" ? "Модуль " + unit.module + " · урок " + (i + 1) + " из " + unit.lessons.length : unit.title + " · " + (i + 1) + " из " + unit.lessons.length);
+    rich($("lsTitle"), lesson.title);
+    const box = $("lsTheory"); box.textContent = "";
+    if (i === 0 && unit.intro) box.appendChild(el("p", "muted", unit.intro));
+    for (const b of lesson.theory) {
+      if (b.t === "p") box.appendChild(rich(el("p"), b.text));
+      else if (b.t === "rule") box.appendChild(rich(el("div", "rule"), b.text));
+      else if (b.t === "table") {
+        const wrap = el("div", "tscroll"), tb = el("table");
+        if (b.head) { const tr = el("tr"); b.head.forEach(h => tr.appendChild(rich(el("th"), h))); const th = el("thead"); th.appendChild(tr); tb.appendChild(th); }
+        const body = el("tbody");
+        b.rows.forEach(r => { const tr = el("tr"); r.forEach(c => tr.appendChild(rich(el("td"), c))); body.appendChild(tr); });
+        tb.appendChild(body); wrap.appendChild(tb); box.appendChild(wrap);
+      }
+    }
+    const nw = lesson.words.length;
+    LS.hard = hardMode();
+    const nEx = lesson.exercises.length + (LS.hard ? (lesson.hard || []).length : Math.min(2, (lesson.hard || []).length));
+    $("lsNext").textContent = nw ? "Дальше: новые слова (" + nw + ")" : "Дальше: упражнения (" + nEx + ")";
+    const m = $("lsMode");
+    m.hidden = !LS.hard;
+    if (LS.hard) m.textContent = "Повышенная сложность: в прошлый раз точность была " + Math.round(lastAcc() * 100) + "%. Новые слова проверяются вводом на иврите, и добавлены фразы на перевод посложнее.";
+    const done = !!S.lessons[lesson.id];
+    $("lsTestOut").hidden = done; $("lsTestNote").hidden = done;
+    $("lsTestOut").textContent = "Сдать досрочно (8 заданий)";
+    show("lesson");
+  }
+  function lastAcc() {
+    if (typeof S.lastLessonAcc === "number") return S.lastLessonAcc;
+    let n = 0, ok = 0; for (const L of Object.values(S.log)) { n += L.n; ok += L.ok; }
+    return n >= 20 ? ok / n : 0;
+  }
+  const hardMode = () => lastAcc() >= 0.9;
+  function testOut() {
+    const { lesson, unit } = LS;
+    const pool = shuffle(lesson.exercises.filter(e => e.type !== "choice")).concat(shuffle(lesson.exercises.filter(e => e.type === "choice")));
+    const items = shuffle((lesson.hard || []).slice(0, 3)).concat(pool).slice(0, 8);
+    run({
+      mode: "test", items: shuffle(items).map(ex => ({ ex })), requeue: false,
+      label: () => "Досрочная сдача · " + lesson.title.replace(/\[\[|\]\]/g, ""),
+      onDone: (results) => {
+        const ok = results.filter(r => r.ok).length;
+        if (ok >= 7) completeLesson(lesson, unit, results, true);
+        else summary({ eyebrow: "Досрочная сдача", title: "Пока не засчитано", results,
+          text: ok + " из " + results.length + " верно, нужно хотя бы 7. Пройдите урок полностью: теория и упражнения закроют пробелы.",
+          actions: [{ label: "Пройти урок", fn: () => openLesson(lesson.id) }, { label: "На главную", fn: goHome }] });
+      },
+      onQuit: () => openLesson(lesson.id)
+    });
+  }
+  function lessonNext() { if (LS.lesson.words.length) { LS.wi = 0; renderWord(); show("words"); } else startLessonPractice(); }
+  function renderWord() {
+    const ids = LS.lesson.words, w = IDX.words[ids[LS.wi]];
+    $("wdCount").textContent = "Слово " + (LS.wi + 1) + " из " + ids.length;
+    $("wdBar").style.width = ((LS.wi + 1) / ids.length * 100) + "%";
+    $("wdG").textContent = w.g === "м" ? "мужской род" : w.g === "ж" ? "женский род" : "";
+    $("wdHe").textContent = shown(w.he);
+    $("wdTr").textContent = S.settings.translit ? (w.tr || "") : ""; $("wdTr").hidden = !S.settings.translit;
+    $("wdRu").textContent = w.ru;
+    $("wdForms").textContent = w.forms ? shown(w.forms) : w.pl ? "мн.ч. " + shown(w.pl) : "";
+    rich($("wdNote"), w.note || "");
+    $("wdSay").hidden = !heVoice;
+    $("wdPrev").disabled = LS.wi === 0;
+    $("wdNext").textContent = LS.wi === ids.length - 1 ? "К упражнениям" : "Дальше";
+  }
+  function startLessonPractice() {
+    const { lesson, unit } = LS;
+    const hard = LS.hard;
+    const wordItems = lesson.words.map(id => ({ ex: hard ? wordProd(IDX.words[id]) : wordRec(IDX.words[id]) }));
+    const extra = hard ? (lesson.hard || []) : shuffle(lesson.hard || []).slice(0, 2);
+    const exItems = lesson.exercises.concat(extra).map(ex => ({ ex }));
+    // words first in a light shuffle, then exercises interleaved with remaining words
+    const half = Math.ceil(wordItems.length / 2);
+    const items = shuffle(wordItems.slice(0, half)).concat(shuffle(exItems.concat(wordItems.slice(half))));
+    run({
+      mode: "lesson", items, requeue: true, grade: false,
+      onDone: (results) => completeLesson(lesson, unit, results),
+      onQuit: () => goHome()
+    });
+  }
+  function completeLesson(lesson, unit, results, testedOut) {
+    S.lessons[lesson.id] = Date.now();
+    if (results.length) S.lastLessonAcc = results.filter(r => r.ok).length / results.length;
+    for (const id of lesson.words) if (!results.some(r => r.ex.word === id)) { const cid = "w:" + id; if (!S.cards[cid]) initCard(cid, 2); }
+    const bySkill = {};
+    for (const r of results) {
+      if (r.ex.word) { const id = "w:" + r.ex.word; if (!S.cards[id]) initCard(id, r.ok ? 3 : 1); else reviewCard(id, r.ok ? 3 : 1); }
+      else if (r.ex.k) { (bySkill[r.ex.k] = bySkill[r.ex.k] || []).push(r.ok); }
+    }
+    for (const [k, arr] of Object.entries(bySkill)) {
+      const ratio = arr.filter(Boolean).length / arr.length;
+      const G = ratio === 1 ? 3 : ratio >= 0.5 ? 2 : 1;
+      const id = "k:" + k; if (!S.cards[id]) initCard(id, G); else reviewCard(id, G);
+    }
+    save();
+    const st = lessonState(unit);
+    const actions = [];
+    if (st.nextL) actions.push({ label: "Следующий урок: " + st.nextL.title, fn: () => openLesson(st.nextL.id) });
+    else if (unit.reading && !(S.units[unit.id] || {}).reading) actions.push({ label: "Текст для чтения: " + unit.reading.title, fn: () => openReading(unit) });
+    else if (unit.test) actions.push({ label: "Контрольный тест модуля", fn: () => startUnitTest(unit) });
+    actions.push({ label: "На главную", fn: goHome });
+    summary({ eyebrow: testedOut ? "Урок сдан досрочно" : "Урок пройден", title: lesson.title, results, actions,
+      text: undefined });
+    const t = $("smText"); t.textContent += " Слова и темы урока добавлены в повторение: первое повторение завтра.";
+  }
+
+  /* ================= reading ================= */
+  function openReading(unit) {
+    const rd = unit.reading;
+    $("rdTitle").textContent = rd.title;
+    const box = $("rdText"); box.textContent = "";
+    rd.he.forEach((s, i) => {
+      const b = el("button", "sentence"); b.type = "button";
+      const hs = el("span", "hs", shown(s)); b.appendChild(hs);
+      const rs = el("span", "rs", rd.ru[i] || ""); rs.hidden = true; b.appendChild(rs);
+      b.onclick = () => { rs.hidden = !rs.hidden; if (!rs.hidden) speak(s); };
+      box.appendChild(b);
+    });
+    const g = $("rdGloss"); g.textContent = "";
+    (rd.gloss || []).forEach(([he, ru]) => { const d = el("div"); d.appendChild(el("span", "he", shown(he))); d.appendChild(document.createTextNode("  " + ru)); g.appendChild(d); });
+    $("rdGlossWrap").hidden = !(rd.gloss || []).length;
+    $("rdGo").onclick = () => run({
+      mode: "reading", items: rd.questions.map(ex => ({ ex })), requeue: false,
+      label: () => "Вопросы к тексту",
+      onDone: (results) => {
+        S.units[unit.id] = Object.assign(S.units[unit.id] || {}, { reading: Date.now() }); save();
+        summary({ eyebrow: "Текст: " + rd.title, title: "Вопросы к тексту", results, actions: [
+          ...(unit.test ? [{ label: "Контрольный тест модуля", fn: () => startUnitTest(unit) }] : []), { label: "На главную", fn: goHome }] });
+      },
+      onQuit: () => openReading(unit)
+    });
+    show("reading");
+  }
+
+  /* ================= unit test ================= */
+  function startUnitTest(unit) {
+    run({
+      mode: "test", items: shuffle(unit.test.items).map(ex => ({ ex })), requeue: false,
+      label: () => "Контрольный тест · модуль " + unit.module,
+      onAnswer: (r) => { if (!r.ok && r.ex.k && S.cards["k:" + r.ex.k]) reviewCard("k:" + r.ex.k, 1); },
+      onDone: (results) => {
+        const pct = results.length ? results.filter(r => r.ok).length / results.length : 0;
+        const U = S.units[unit.id] = Object.assign(S.units[unit.id] || {}, {});
+        U.testLast = Math.round(pct * 100); U.testBest = Math.max(U.testBest || 0, U.testLast);
+        const passed = pct >= unit.test.pass; if (passed) U.passed = Date.now();
+        save();
+        const weak = {}; results.filter(r => !r.ok && r.ex.k).forEach(r => weak[r.ex.k] = (weak[r.ex.k] || 0) + 1);
+        const wl = Object.keys(weak).map(k => (IDX.skillName[k] || "").replace(/\[\[|\]\]/g, "")).join(", ");
+        summary({ eyebrow: "Контрольный тест · модуль " + unit.module, title: passed ? "Модуль пройден" : "Нужно ещё потренироваться",
+          text: passed ? "Порог " + Math.round(unit.test.pass * 100) + "% пройден. " + (UNITS.some(x => x.kind === "module" && x.module === unit.module + 1) ? "Модуль " + (unit.module + 1) + " открыт. " : "Следующий модуль появится в ближайшем обновлении приложения. ") + "Повторение продолжается каждый день." :
+            "Для перехода нужно " + Math.round(unit.test.pass * 100) + "%. Темы с ошибками (" + wl + ") уже поставлены в повторение на сегодня. Повторите их и пройдите тест снова.",
+          results, actions: passed ? [{ label: "На главную", fn: goHome }] : [{ label: "Повторить темы с ошибками", fn: startReview }, { label: "На главную", fn: goHome }] });
+      },
+      onQuit: () => goHome()
+    });
+  }
+
+  /* ================= review & practice ================= */
+  function interleave(items) {
+    // avoid the same skill twice in a row where possible
+    const out = []; let pool = shuffle(items);
+    while (pool.length) {
+      const last = out[out.length - 1];
+      let i = pool.findIndex(x => !last || (x.ex.k || x.ex.word) !== (last.ex.k || last.ex.word));
+      if (i < 0) i = 0;
+      out.push(pool.splice(i, 1)[0]);
+    }
+    return out;
+  }
+  function startReview() {
+    const ids = dueCards().sort((a, b) => S.cards[a].due - S.cards[b].due).slice(0, 60);
+    if (!ids.length) { toast("Сейчас нечего повторять"); goHome(); return; }
+    const items = ids.map(id => ({ ex: exForCard(id), cardId: id }));
+    run({ mode: "review", items: interleave(items), requeue: true, grade: true,
+      onDone: (results) => summary({ eyebrow: "Повторение", title: "Повторение на сегодня закончено", results,
+        actions: [{ label: "На главную", fn: goHome }, { label: "Ещё упражнения", fn: startExtra }] }),
+      onQuit: () => goHome() });
+  }
+  function startExtra() {
+    const ids = shuffle(Object.keys(S.cards).filter(cardUsable)).slice(0, 15);
+    if (!ids.length) { toast("Сначала пройдите урок"); return; }
+    run({ mode: "review", items: interleave(ids.map(id => ({ ex: exForCard(id), cardId: id }))), requeue: true, grade: true,
+      onDone: (results) => summary({ eyebrow: "Дополнительная практика", title: "Практика закончена", results, actions: [{ label: "На главную", fn: goHome }, { label: "Ещё", fn: startExtra }] }),
+      onQuit: () => goHome() });
+  }
+  function weakSkills() {
+    return Object.entries(S.skillStats).filter(([k, v]) => v[1] >= 2 && IDX.skills[k] && IDX.skills[k].length)
+      .map(([k, v]) => ({ k, acc: v[0] / v[1], n: v[1] })).sort((a, b) => a.acc - b.acc);
+  }
+  function startWeak() {
+    const ws = weakSkills().filter(w => w.acc < 0.9).slice(0, 3);
+    if (!ws.length) { toast("Слабых мест пока нет"); return; }
+    const items = [];
+    for (const w of ws) { const used = new Set(); for (let i = 0; i < 4; i++) { const ex = skillEx(w.k, null); if (ex && !used.has(ex.id)) { used.add(ex.id); items.push({ ex, cardId: "k:" + w.k }); remember(ex.id); } } }
+    run({ mode: "review", items: interleave(items), requeue: true, grade: true,
+      onDone: (results) => summary({ eyebrow: "Слабые места", title: "Тренировка закончена", results, actions: [{ label: "На главную", fn: goHome }, { label: "Статистика", fn: openStats }] }),
+      onQuit: () => goHome() });
+  }
+
+  /* ================= error journal ================= */
+  // every wrong answer is kept with its exercise; two right answers in a row mark it as fixed
+  function errNote(ex, ok, given, skipped) {
+    if (!ex || !ex.id) return;
+    const E = S.errors || (S.errors = {});
+    const id = errKey(ex), e = E[id];
+    if (ok) {
+      if (e && e.active) { e.streak = (e.streak || 0) + 1; if (e.streak >= 2) { e.active = false; e.fixedAt = Date.now(); } }
+      return;
+    }
+    const snap = { type: ex.type, prompt: ex.prompt, he: ex.he || "", correct: correctText(ex), note: ex.note || "" };
+    E[id] = { id, k: ex.k || null, word: ex.word || null, n: ((e && e.n) || 0) + 1, streak: 0, active: true,
+      first: (e && e.first) || Date.now(), last: Date.now(), given: skipped ? "" : String(given || "").slice(0, 120), snap };
+    const ids = Object.keys(E);
+    if (ids.length > 250) {   // keep the journal small: drop the oldest fixed, then the oldest
+      ids.sort((a, b) => (E[a].active - E[b].active) || (E[a].last - E[b].last)).slice(0, ids.length - 250).forEach(i => delete E[i]);
+    }
+  }
+  // word exercises are regenerated (a cloze may pick another sentence), so they are keyed by type + word
+  function errKey(ex) { return ex.word ? ex.id.split(":").slice(0, 2).join(":") : ex.id; }
+  const activeErrors = () => Object.values(S.errors || {}).filter(e => e.active);
+  function exForError(e) {
+    if (e.word) {
+      const w = getWord(e.word); if (!w) return null;
+      if (e.id.startsWith("wprod:")) return wordProd(w);
+      if (e.id.startsWith("wcl:")) return wordCloze(w) || wordProd(w);
+      return wordRec(w);
+    }
+    return IDX.exById[e.id] || null;
+  }
+  function errorItems(max) {
+    return activeErrors().sort((a, b) => (b.n - a.n) || (b.last - a.last))
+      .map(e => ({ ex: exForError(e), cardId: e.word ? "w:" + e.word : e.k ? "k:" + e.k : null })).filter(x => x.ex).slice(0, max);
+  }
+  function startErrors() {
+    const items = errorItems(12);
+    if (!items.length) { toast("Активных ошибок нет"); return; }
+    run({ mode: "errors", items: interleave(items), requeue: true, grade: true,
+      onDone: (results) => summary({ eyebrow: "Мои ошибки", title: "Разбор ошибок закончен",
+        text: "Ошибка считается исправленной после двух верных ответов подряд. Осталось: " + activeErrors().length + ".",
+        results, actions: [{ label: "На главную", fn: goHome }, { label: "Мои ошибки", fn: openErrors }] }),
+      onQuit: () => openErrors() });
+  }
+  function openErrors() {
+    const act = activeErrors(), all = Object.values(S.errors || {});
+    $("erActive").textContent = act.length;
+    $("erFixed").textContent = all.filter(e => !e.active).length;
+    const wk = Date.now() - 7 * DAY;
+    $("erWeek").textContent = all.filter(e => e.last >= wk).length;
+    const byK = {};
+    for (const e of act) { const key = e.k ? e.k : "__words"; byK[key] = (byK[key] || 0) + e.n; }
+    const tops = Object.entries(byK).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const tb = $("erTopics"); tb.textContent = "";
+    const maxN = tops.length ? tops[0][1] : 1;
+    tops.forEach(([k, n]) => tb.appendChild(resRow(k === "__words" ? "Слова" : (IDX.skillName[k] || k), n / maxN * 100, n + "", true)));
+    $("erTopicsWrap").hidden = !tops.length;
+    $("erGo").hidden = !act.length;
+    $("erGo").textContent = "Тренировать ошибки (" + Math.min(12, act.length) + ")";
+    const list = $("erList"); list.textContent = "";
+    if (!act.length) list.appendChild(el("p", "small muted", all.length ? "Все записанные ошибки исправлены. Новые появятся здесь сами." : "Здесь будут задания, в которых вы ошиблись: в уроках, повторении и тестах. Ошибка уходит из списка после двух верных ответов подряд."));
+    act.sort((a, b) => b.last - a.last).slice(0, 30).forEach(e => {
+      const d = el("div");
+      d.appendChild(rich(el("span", "small muted"), (e.k ? IDX.skillName[e.k] || "" : "Слова") + (e.n > 1 ? " · ошибок: " + e.n : "")));
+      d.appendChild(rich(el("span"), e.snap.prompt + (e.snap.he && e.snap.type !== "listen" ? ": " + e.snap.he : "")));
+      const ct = e.snap.correct || "";
+      d.appendChild(el("span", HEB.test(ct) ? "hw" : "", HEB.test(ct) ? shown(ct) : "Правильно: " + ct));
+      if (e.given) d.appendChild(rich(el("span", "small"), "Ваш ответ: " + e.given));
+      if (e.snap.note) d.appendChild(rich(el("span", "small muted"), e.snap.note));
+      list.appendChild(d);
+    });
+    show("errors");
+  }
+
+  /* ================= cursive script ================= */
+  const LETTERS = [["א","алеф"],["ב","бет"],["ג","гимель"],["ד","далет"],["ה","hэй"],["ו","вав"],["ז","заин"],["ח","хет"],["ט","тет"],["י","йуд"],["כ","каф"],["ך","каф софит"],["ל","ламед"],["מ","мем"],["ם","мем софит"],["נ","нун"],["ן","нун софит"],["ס","самех"],["ע","аин"],["פ","пэй"],["ף","пэй софит"],["צ","цади"],["ץ","цади софит"],["ק","куф"],["ר","рэйш"],["ש","шин"],["ת","тав"]];
+  const CPAIRS = [["ב","כ"],["ה","ח"],["ו","י"],["ו","ן"],["ס","ם"],["ג","ז"],["ז","צ"]];
+  const bare = (t) => String(t).replace(NIKUD, "");
+  const CURW = new RegExp("^[" + U(0x5D0) + "-" + U(0x5EA) + U(0x591) + "-" + U(0x5C7) + " ]+$");
+  function cursiveWords() {
+    const ids = new Set();
+    for (const [lid, L] of Object.entries(IDX.lessons)) if (S.lessons[lid] || (L.unit.id === "m4" && L.i < 2)) (L.lesson.words || []).forEach(w => ids.add(w));
+    return [...ids].map(id => IDX.words[id]).filter(w => w && CURW.test(w.he) && bare(w.he).replace(/ /g, "").length >= 2 && bare(w.he).length <= 12);
+  }
+  function buildCursive() {
+    IDX.skillName.cursive = "Прописные буквы";
+    const pool = [];
+    for (const [ch, name] of LETTERS) {
+      const others = shuffle(LETTERS.filter(l => l[0] !== ch)).slice(0, 2).map(l => l[0]);
+      const twin = CPAIRS.find(p => p.includes(ch)); const conf = twin ? twin.find(x => x !== ch) : null;
+      const opts = [ch].concat(conf ? [conf] : []).concat(others.filter(o => o !== conf)).slice(0, 4);
+      while (opts.length < 4) { const x = pick(LETTERS)[0]; if (!opts.includes(x)) opts.push(x); }
+      pool.push({ id: "cur:l:" + ch, k: "cursive", type: "choice", script: "cursive", prompt: "Какая это буква?", he: ch, options: opts, answer: 0, note: ch + ": " + name + "." });
+    }
+    const ws = cursiveWords();
+    for (const w of ws) {
+      const others = shuffle(ws.filter(x => x.ru !== w.ru)).slice(0, 3).map(x => x.ru);
+      if (others.length < 3) continue;
+      pool.push({ id: "cur:w:" + w.id, k: "cursive", type: "choice", script: "cursive", prompt: "Прочитайте прописью: что это за слово?", he: bare(w.he), options: [w.ru].concat(others), answer: 0, note: w.he + (w.tr ? " (" + w.tr + ")" : "") + ": " + w.ru });
+    }
+    IDX.skills.cursive = pool;
+    for (const ex of pool) IDX.exById[ex.id] = ex;
+    return pool;
+  }
+  function openCursive() {
+    const g = $("cuGrid"); g.textContent = "";
+    for (const [ch, name] of LETTERS) { const d = el("div"); d.appendChild(el("span", "c", ch)); d.appendChild(el("span", "p", ch)); d.appendChild(el("span", "n", name)); g.appendChild(d); }
+    const pp = $("cuPairs"); pp.textContent = "";
+    for (const [a, b] of CPAIRS) {
+      const d = el("div");
+      d.appendChild(el("span", "", LETTERS.find(l => l[0] === a)[1] + " и " + LETTERS.find(l => l[0] === b)[1]));
+      const c = el("span", "cc", a + " " + b); d.appendChild(c);
+      const p = el("span", "he", a + "  " + b); d.appendChild(p);
+      pp.appendChild(d);
+    }
+    const n = cursiveWords().length, c = S.cards["k:cursive"];
+    $("cuNote").textContent = "Слов для чтения прописью: " + n + " (из пройденных уроков, список растёт вместе с курсом). " +
+      (c ? "Прописные уже в вашем повторении: время от времени они будут попадаться среди заданий." : "После первой тренировки прописные попадут в повторение и будут периодически возвращаться.");
+    show("cursive");
+  }
+  function cursiveRun(kind) {
+    const pool = buildCursive();
+    let items = pool.filter(e => kind === "letters" ? e.id.startsWith("cur:l:") : e.id.startsWith("cur:w:"));
+    if (!items.length) { toast("Слова появятся после первых уроков"); return; }
+    items = shuffle(items).slice(0, kind === "letters" ? 14 : 12).map(ex => ({ ex, cardId: "k:cursive" }));
+    run({ mode: "lesson", items, requeue: true, grade: false,
+      onDone: (results) => { const acc = results.filter(r => r.ok).length / Math.max(1, results.length);
+        reviewCard("k:cursive", acc >= 0.85 ? 3 : acc >= 0.6 ? 2 : 1); save();
+        summary({ eyebrow: "Прописные буквы", title: kind === "letters" ? "Буквы пройдены" : "Чтение прописью закончено", results,
+        actions: [{ label: "Ещё раз", fn: () => cursiveRun(kind) }, { label: "Прописные буквы", fn: openCursive }] }); },
+      onQuit: () => openCursive() });
+  }
+  let HW = null;
+  function startHandwrite() {
+    const ws = shuffle(cursiveWords()).slice(0, 8);
+    if (!ws.length) { toast("Слова появятся после первых уроков"); return; }
+    HW = { ws, i: 0, ok: 0 }; renderHw(); show("hw");
+  }
+  function renderHw() {
+    const w = HW.ws[HW.i];
+    $("hwCount").textContent = "Пропись · " + (HW.i + 1) + " из " + HW.ws.length;
+    $("hwPrint").textContent = bare(w.he); $("hwRu").textContent = w.ru;
+    $("hwModel").textContent = bare(w.he); $("hwModel").hidden = true;
+    $("hwShow").hidden = false; $("hwRate").hidden = true;
+  }
+  function rateHw(ok) {
+    logAnswer(ok, "handwrite", null); if (ok) HW.ok++;
+    const L = S.log[dkey()]; if (L) L.act = (L.act || 0) + 1;
+    save();
+    if (++HW.i < HW.ws.length) renderHw();
+    else { toast("Готово: похоже " + HW.ok + " из " + HW.ws.length + ". Хорошо писать по 5-10 слов пару раз в неделю."); openCursive(); }
+  }
+
+  /* ================= 5-minute warm-up ================= */
+  function startWarmup() {
+    const used = new Set(), items = [];
+    const add = (it) => { if (it && it.ex && !used.has(it.ex.id) && items.length < 10) { used.add(it.ex.id); items.push(it); } };
+    dueCards().sort((a, b) => S.cards[a].due - S.cards[b].due).slice(0, 5).forEach(id => add({ ex: exForCard(id), cardId: id }));
+    errorItems(3).forEach(add);
+    shuffle(Object.keys(S.cards).filter(cardUsable)).slice(0, 20).forEach(id => add({ ex: exForCard(id), cardId: id }));
+    if (!items.length) { toast("Сначала пройдите урок"); return; }
+    run({ mode: "warmup", items: interleave(items), requeue: false, grade: true,
+      onDone: (results) => summary({ eyebrow: "Разминка", title: "Разминка закончена",
+        text: "Даже 5 минут в день сохраняют серию и не дают словам забыться.", results,
+        actions: [{ label: "На главную", fn: goHome }, { label: "Ещё 5 минут", fn: startWarmup }] }),
+      onQuit: () => goHome() });
+  }
+
+  /* ================= lexicon & tap-to-translate ================= */
+  const LEX = new Map();
+  let PRACTICE = { texts: [], dialogs: [], writing: [] };
+  const lexKey = (s) => norm(s).replace(/\s+/g, " ");
+  function lexAdd(he, ru, extra, prio) {
+    const k = lexKey(he); if (!k) return;
+    const old = LEX.get(k);
+    if (!old || (old.prio || 0) <= prio) LEX.set(k, Object.assign({ he, ru, prio }, extra || {}));
+  }
+  function buildLex(lexFile) {
+    for (const [he, ru, forms] of (lexFile && lexFile.words) || []) {
+      lexAdd(he, ru, { base: he }, 1);
+      if (forms) forms.split("·").map(s => s.trim()).filter(Boolean).forEach(f => lexAdd(f, ru, { base: he }, 1));
+    }
+    for (const w of Object.values(IDX.words)) {
+      lexAdd(w.he, w.ru, { base: w.he, wid: w.id }, 2);
+      if (w.pl) lexAdd(w.pl, w.ru + " (мн.ч.)", { base: w.he, wid: w.id }, 2);
+      if (w.forms) w.forms.split("·").map(s => s.trim()).filter(Boolean).forEach(f => lexAdd(f, w.ru, { base: w.he, wid: w.id }, 2));
+    }
+  }
+  const PREFIX_RU = { "ו": "и", "ה": "артикль", "ב": "в, на", "ל": "к, в, для", "מ": "из, от", "ש": "что, который", "כ": "как" };
+  function lookup(words, i, gloss) {
+    const local = new Map((gloss || []).map(([he, ru]) => [lexKey(he), { he, ru, base: he }]));
+    const get = (k) => local.get(k) || LEX.get(k);
+    const tries = [];
+    if (words[i + 1]) tries.push(words[i] + " " + words[i + 1]);
+    tries.push(words[i]);
+    for (const t of tries) {
+      const key = lexKey(t); if (!key) continue;
+      const hit = get(key); if (hit) return { hit, prefix: "", span: t === words[i] ? 1 : 2 };
+      for (let k = 1; k <= 3; k++) {
+        const p = key.slice(0, k), rest = key.slice(k);
+        if (rest.length < 2 || [...p].some(c => !PREFIX_RU[c])) break;
+        const h2 = get(rest); if (h2) return { hit: h2, prefix: p, span: t === words[i] ? 1 : 2 };
+      }
+    }
+    return null;
+  }
+  function textsForUnit() {
+    const out = [];
+    for (const u of UNITS) {
+      for (const t of PRACTICE.texts.filter(x => x.unit === u.id)) out.push(t);
+      if (u.reading) out.push(Object.assign({ id: u.id + "_reading", after: u.lessons[u.lessons.length - 1].id, questions: u.reading.questions }, u.reading));
+    }
+    return out;
+  }
+  const lessonLabel = (lid) => { const L = IDX.lessons[lid]; return L ? (L.unit.kind === "module" ? L.unit.module + "." + (L.i + 1) : String(L.i + 1)) : ""; };
+
+  function openTexts() {
+    const list = $("txList"); list.textContent = "";
+    for (const t of textsForUnit()) {
+      const open = !t.after || !!S.lessons[t.after];
+      const read = !!(S.read || {})[t.id];
+      const b = el("button", "li"); b.type = "button"; b.disabled = !open;
+      b.appendChild(el("span", "num", read ? "✓" : "•"));
+      const d = el("div"); d.appendChild(el("div", "t", t.title)); d.appendChild(el("div", "d", t.he.length + " предложений" + (open ? "" : ", откроется после урока " + lessonLabel(t.after)))); b.appendChild(d);
+      b.appendChild(el("span", "chip " + (read ? "done" : open ? "next" : ""), read ? "Прочитан" : open ? "Читать" : "Закрыт"));
+      b.onclick = () => openText(t, false);
+      list.appendChild(b);
+    }
+    const anyDone = Object.keys(S.lessons).length > 0;
+    $("genGo").disabled = !sampleFn || !anyDone;
+    $("genNote").textContent = !sampleFn ? "Недоступно в этом просмотре: откройте приложение в Claude, войдя в аккаунт." : !anyDone ? "Станет доступно после первого урока: Claude пишет только из слов, которые вы уже прошли." : "Claude напишет короткий рассказ только из слов, которые вы уже прошли. Можно указать тему.";
+    const ln = $("lsnList"); ln.textContent = "";
+    (C.listening || []).forEach(r => { const d = el("div"); const a = el("a", "he", r.title); a.href = r.url; a.target = "_blank"; a.rel = "noopener"; a.style.color = "var(--accent)"; d.appendChild(a); d.appendChild(el("span", "small muted", r.note)); ln.appendChild(d); });
+    const gl = $("genList"); gl.textContent = "";
+    (S.gen || []).forEach(t => {
+      const row = el("div", "li"); row.style.gridTemplateColumns = "1fr auto auto";
+      const d = el("div"); d.appendChild(el("div", "t", t.title)); d.appendChild(el("div", "d", t.he.length + " предложений" + ((S.read || {})[t.id] ? ", прочитан" : ""))); row.appendChild(d);
+      const o = el("button", "btn secondary small", "Читать"); o.type = "button"; o.onclick = () => openText(t, true); row.appendChild(o);
+      const x = el("button", "btn ghost small", "Удалить"); x.type = "button";
+      x.onclick = () => { if (x.dataset.armed) { S.gen = S.gen.filter(g => g.id !== t.id); save(); openTexts(); } else { x.dataset.armed = "1"; x.textContent = "Точно?"; } };
+      row.appendChild(x); gl.appendChild(row);
+    });
+    show("texts");
+  }
+
+  let TX = null;
+  function openText(t, generated, nk) {
+    // texts of level Bet are shown without nikud (in full spelling), with a toggle
+    const off = t.nikud === "off";
+    if (nk === undefined) nk = off ? false : S.settings.nikud;
+    TX = { t, generated, nk };
+    const disp = (x) => nk ? String(x) : bare(plene(x) || x);
+    $("txNik").hidden = !off;
+    $("txNik").textContent = nk ? "Скрыть огласовки" : "Показать огласовки";
+    $("txNik").onclick = () => openText(t, generated, !nk);
+    $("txTitle").textContent = t.title;
+    $("txGen").hidden = !generated;
+    const body = $("txBody"); body.textContent = "";
+    t.he.forEach((s, si) => {
+      const para = el("div", "para");
+      const hs = el("div", "hs");
+      const parts = s.split(/(\s+)/);
+      const words = parts.filter(p => p.trim());
+      let wi = 0;
+      parts.forEach(p => {
+        if (!p.trim()) { hs.appendChild(document.createTextNode(p)); return; }
+        const m = p.match(/^([^ְ-ת]*)(.*?)([^ְ-ת]*)$/u);
+        const lead = m ? m[1] : "", core = m ? m[2] : p, tail = m ? m[3] : "";
+        if (lead) hs.appendChild(document.createTextNode(lead));
+        if (core) {
+          const idx = wi; const sp = el("span", "wtap", disp(core));
+          sp.onclick = () => tapWord(sp, words.map(w => w.replace(/[^ְ-ת\s]/gu, "")), idx, s);
+          hs.appendChild(sp);
+        }
+        if (tail) hs.appendChild(document.createTextNode(tail));
+        wi++;
+      });
+      para.appendChild(hs);
+      const rs = el("div", "rs", (t.ru || [])[si] || ""); rs.hidden = true;
+      const tools = el("div", "tools");
+      const tb = el("button", "btn ghost small", "Перевод"); tb.type = "button"; tb.onclick = () => { rs.hidden = !rs.hidden; tb.textContent = rs.hidden ? "Перевод" : "Скрыть перевод"; };
+      tools.appendChild(tb);
+      const sb = sayBtn(s); if (sb) tools.appendChild(sb);
+      para.appendChild(tools); para.appendChild(rs);
+      body.appendChild(para);
+    });
+    if ((t.gloss || []).length) {
+      const g = el("div", "para");
+      g.appendChild(el("div", "small muted", "Новые слова в тексте"));
+      t.gloss.forEach(([he, ru]) => { const d = el("div", "small"); d.appendChild(el("span", "he", shown(he))); d.appendChild(document.createTextNode("  " + ru)); g.appendChild(d); });
+      body.appendChild(g);
+    }
+    $("txQ").hidden = !(t.questions || []).length;
+    show("text");
+  }
+  let SH = null;
+  function tapWord(span, words, i, sentence) {
+    document.querySelectorAll(".wtap.on").forEach(x => x.classList.remove("on"));
+    span.classList.add("on");
+    const r = lookup(words, i, TX && TX.t.gloss);
+    SH = { word: span.textContent, sentence, r };
+    $("shWord").textContent = span.textContent;
+    $("shAi").hidden = true; $("shAi").textContent = "";
+    if (r) {
+      const p = [...r.prefix].map(c => c + " (" + PREFIX_RU[c] + ")");
+      $("shParts").textContent = p.length ? "Состоит из: " + p.join(" + ") + " + " + shown(r.hit.base || r.hit.he) : (r.hit.base && lexKey(r.hit.base) !== lexKey(span.textContent) ? "Словарная форма: " + shown(r.hit.base) : "");
+      $("shRu").textContent = r.hit.ru;
+    } else {
+      $("shParts").textContent = "";
+      $("shRu").textContent = sampleFn ? "Этого слова нет в словаре приложения. Спросите Claude." : "Этого слова нет в словаре приложения.";
+    }
+    const wid = r && r.hit.wid;
+    const inReview = wid ? !!S.cards["w:" + wid] : !!(r && S.custom.some(c => lexKey(c.he) === lexKey(r.hit.base || r.hit.he)));
+    $("shAdd").hidden = !r; $("shAdd").disabled = inReview; $("shAdd").textContent = inReview ? "Уже в повторении" : "В повторение";
+    $("shAsk").hidden = !sampleFn;
+    const say = $("shSay"); say.textContent = ""; const sb = sayBtn(span.textContent); if (sb) say.appendChild(sb);
+    $("sheet").hidden = false;
+  }
+  function sheetAdd() {
+    if (!SH) return;
+    const r = SH.r, ai = SH.ai;
+    if (r && r.hit.wid) {
+      const id = "w:" + r.hit.wid;
+      if (!S.cards[id]) S.cards[id] = { s: W[0], d: clampD(W[4]), reps: 0, lapses: 0, last: Date.now(), due: Date.now() };
+    } else {
+      const he = ai ? ai.lemma : (r.hit.base || r.hit.he), ru = ai ? ai.ru : r.hit.ru;
+      if (!S.custom.some(c => lexKey(c.he) === lexKey(he))) {
+        const id = "c" + Date.now().toString(36);
+        S.custom.push({ id, he, ru, tr: "" });
+        S.cards["w:" + id] = { s: W[0], d: clampD(W[4]), reps: 0, lapses: 0, last: Date.now(), due: Date.now() };
+      }
+    }
+    save(); $("shAdd").disabled = true; $("shAdd").textContent = "Уже в повторении"; toast("Слово добавлено в повторение");
+  }
+  async function sheetAsk() {
+    if (!SH || !sampleFn) return;
+    const out = $("shAi"); out.hidden = false; out.textContent = "Спрашиваю…"; $("shAsk").disabled = true;
+    const prompt = "Ты преподаватель современного иврита для русскоязычной ученицы начального уровня. В предложении «" + SH.sentence + "» есть слово «" + SH.word + "». " +
+      "Разбери это слово: словарная форма с огласовками, перевод именно в этом предложении, из чего оно состоит (приставки, корень, биньян или шаблон, окончания)." +
+      " Верни JSON: {\"lemma\": \"словарная форма с огласовками\", \"ru\": \"перевод в этом контексте\", \"parts\": \"разбор по-русски в 1-3 предложениях\"}." + STYLE;
+    try {
+      const r = await sampleFn.json(prompt);
+      SH.ai = r;
+      out.textContent = (r.lemma ? shown(r.lemma) + ": " : "") + (r.ru || "") + (r.parts ? "\n" + r.parts : "");
+      if (!SH.r) { $("shRu").textContent = r.ru || ""; }
+      $("shAdd").hidden = false; $("shAdd").disabled = false; $("shAdd").textContent = "В повторение";
+    } catch (e) { out.textContent = e && e.code === "rate_limited" ? "Слишком много запросов подряд. Попробуйте через минуту." : "Не удалось получить разбор."; }
+    $("shAsk").disabled = false;
+  }
+  function textQuestions() {
+    const t = TX.t, gen = TX.generated;
+    run({ mode: "reading", items: t.questions.map(ex => ({ ex })), requeue: false, label: () => "Вопросы к тексту",
+      onDone: (results) => {
+        S.read = S.read || {}; S.read[t.id] = Date.now(); actLog(); save();
+        summary({ eyebrow: "Текст: " + t.title, title: "Вопросы к тексту", results, actions: [{ label: "К текстам", fn: openTexts }, { label: "На главную", fn: goHome }] });
+      },
+      onQuit: () => openText(t, gen) });
+  }
+  function actLog() { const d = dkey(); const L = S.log[d] || (S.log[d] = { n: 0, ok: 0 }); L.act = (L.act || 0) + 1; }
+
+  function learnedScope() {
+    const words = [], topics = [];
+    for (const [lid, ts] of Object.entries(S.lessons)) {
+      const L = IDX.lessons[lid]; if (!L) continue;
+      topics.push(L.lesson.title.replace(/\[\[|\]\]/g, ""));
+      L.lesson.words.forEach(id => { const w = IDX.words[id]; if (w) words.push(w.he.replace(NIKUD, "") + " (" + w.ru + ")"); });
+    }
+    return { words, topics };
+  }
+  async function generateText() {
+    if (!sampleFn) return;
+    const sc = learnedScope();
+    const topic = $("genTopic").value.trim();
+    $("genGo").disabled = true; $("genStatus").hidden = false; $("genStatus").textContent = "Claude пишет текст, это займёт до минуты…";
+    const prompt = "Напиши короткий связный текст на современном иврите для русскоязычной ученицы начального уровня (Алеф)." +
+      (topic ? " Тема: " + topic + "." : " Тема бытовая, из жизни в Израиле.") +
+      " Ограничения: 6-8 предложений, в каждом не больше 10 слов; используй только самые простые частотные слова, в первую очередь из этого списка уже изученных: " + sc.words.join(", ") + ". " +
+      "Грамматика: настоящее время, прошедшее время биньяна пааль, а также пройденные темы: " + sc.topics.join("; ") + ". Не больше трёх новых слов на весь текст, их вынеси в glossary." +
+      " Все слова на иврите пиши с полными огласовками (никуд). Иврит должен быть естественным и грамотным." +
+      " Добавь 3 вопроса на понимание по-русски с 4 вариантами ответа по-русски, первый вариант правильный." +
+      " Верни JSON: {\"title\": \"название по-русски\", \"sentences\": [{\"he\": \"...\", \"ru\": \"перевод\"}], \"glossary\": [{\"he\": \"...\", \"ru\": \"...\"}], \"questions\": [{\"prompt\": \"...\", \"options\": [\"...\", \"...\", \"...\", \"...\"], \"note\": \"короткое пояснение с цитатой из текста\"}]}." + STYLE;
+    try {
+      const r = await sampleFn.json(prompt, { modelTier: "default" });
+      if (!r || !Array.isArray(r.sentences) || !r.sentences.length) throw new Error("bad");
+      const id = "g" + Date.now().toString(36);
+      const t = { id, title: String(r.title || "Новый текст").slice(0, 80),
+        he: r.sentences.map(s => String(s.he || "")).filter(Boolean).slice(0, 12),
+        ru: r.sentences.map(s => String(s.ru || "")).slice(0, 12),
+        gloss: (r.glossary || []).slice(0, 8).map(g => [String(g.he || ""), String(g.ru || "")]),
+        questions: (r.questions || []).slice(0, 4).filter(q => Array.isArray(q.options) && q.options.length >= 2).map((q, i) => ({ id: id + "q" + i, type: "choice", prompt: String(q.prompt), options: q.options.map(String), answer: 0, note: String(q.note || "") })) };
+      S.gen = [t].concat(S.gen || []).slice(0, 6); save();
+      $("genStatus").hidden = true; $("genTopic").value = "";
+      openText(t, true);
+    } catch (e) {
+      $("genStatus").textContent = e && e.code === "rate_limited" ? "Слишком много запросов подряд. Попробуйте через минуту." : e && e.code === "not_granted" ? "Запросы к Claude не разрешены для этой страницы." : "Не получилось написать текст. Попробуйте ещё раз.";
+    }
+    $("genGo").disabled = false;
+  }
+
+  /* ================= dialogs with Claude ================= */
+  let CH = null;
+  function openDialogs() {
+    const list = $("dlList"); list.textContent = "";
+    if (!sampleFn) list.appendChild(el("p", "small muted", STANDALONE ? "Разговор с Claude доступен только в версии приложения внутри Claude." : "Разговор доступен, когда приложение открыто в Claude с входом в аккаунт."));
+    for (const d of PRACTICE.dialogs) {
+      const open = !d.after || !!S.lessons[d.after];
+      const n = (S.dlg || {})[d.id] || 0;
+      const b = el("button", "li"); b.type = "button"; b.disabled = !open || !sampleFn;
+      b.appendChild(el("span", "num", n ? "✓" : "•"));
+      const x = el("div"); x.appendChild(el("div", "t", d.title)); x.appendChild(el("div", "d", open ? d.goal : "Откроется после урока " + lessonLabel(d.after))); b.appendChild(x);
+      b.appendChild(el("span", "chip " + (open ? "next" : ""), open ? (n ? "Ещё раз" : "Начать") : "Закрыт"));
+      b.onclick = () => startChat(d);
+      list.appendChild(b);
+    }
+    show("dialogs");
+  }
+  function chatLevel() {
+    const sc = learnedScope();
+    return "Ученица говорит по-русски, уровень Алеф (начальный). Она уверенно знает настоящее время, прошедшее время биньяна пааль, местоимения, род и число. Пройденные темы: " + (sc.topics.join("; ") || "основы") + ".";
+  }
+  function transcript() { return CH.msgs.map(m => (m.who === "ai" ? "Собеседник: " : "Ученица: ") + m.he).join("\n"); }
+  async function chatTurn() {
+    const d = CH.d;
+    const prompt = "Ты собеседник в учебном диалоге на современном иврите. Твоя роль: " + d.role + " Цель ученицы: " + d.goal + " " + chatLevel() +
+      " Правила для твоих реплик: 1-2 коротких предложения, до 10 слов в каждом; простая частотная лексика; полные огласовки (никуд); естественный разговорный иврит Израиля; к ученице обращайся в женском роде; почти всегда заканчивай вопросом, чтобы разговор продолжался." +
+      " Если в последней реплике ученицы есть ошибка (грамматика, род, предлог, порядок слов, неверное слово), верни fix: {\"better\": \"исправленная фраза с огласовками\", \"why\": \"объяснение по-русски в 1-2 предложениях\"}. Если ошибок нет, fix: null. Если ученица написала по-русски, в fix.better дай, как сказать это на иврите." +
+      " suggest: пример простого возможного ответа ученицы на твою новую реплику, на иврите с огласовками." +
+      " Когда цель достигнута или после 8-10 обменов репликами, вежливо заверши разговор и поставь done: true." +
+      (CH.msgs.length ? "\nДиалог до сих пор:\n" + transcript() : "\nДиалог ещё не начат: начни его сам.") +
+      "\nВерни только JSON: {\"he\": \"твоя реплика\", \"ru\": \"её перевод\", \"fix\": null, \"suggest\": \"...\", \"done\": false}." + STYLE;
+    CH.busy = true; renderChat();
+    try {
+      const r = await sampleFn.json(prompt, { modelTier: "default" });
+      const lastMe = [...CH.msgs].reverse().find(m => m.who === "me");
+      if (lastMe && r.fix && r.fix.better) lastMe.fix = { better: String(r.fix.better), why: String(r.fix.why || "") };
+      CH.msgs.push({ who: "ai", he: String(r.he || "…"), ru: String(r.ru || ""), suggest: String(r.suggest || "") });
+      if (r.done) CH.done = true;
+    } catch (e) {
+      CH.err = e && e.code === "rate_limited" ? "Слишком много запросов подряд. Подождите минуту и отправьте снова." : e && e.code === "not_granted" ? "Запросы к Claude не разрешены для этой страницы." : "Claude не ответил. Отправьте реплику ещё раз.";
+    }
+    CH.busy = false; renderChat();
+  }
+  function startChat(d) {
+    CH = { d, msgs: [], busy: false, done: false, err: "" };
+    $("chTitle").textContent = d.title; $("chGoal").textContent = d.goal;
+    $("chSummary").hidden = true; $("chComposer").hidden = false; $("chIn").value = "";
+    $("kbChat").hidden = S.settings.kb !== "app"; $("chIn").setAttribute("inputmode", S.settings.kb === "app" ? "none" : "text");
+    show("chat");
+    chatTurn();
+  }
+  function renderChat() {
+    const log = $("chLog"); log.textContent = "";
+    for (const m of CH.msgs) {
+      const b = el("div", "msg " + m.who);
+      b.appendChild(el("div", "mh", shown(m.he)));
+      if (m.who === "ai") {
+        const rr = el("div", "mr", m.ru); rr.hidden = true;
+        const row = el("div", "row");
+        const tb = el("button", "btn ghost small", "Перевод"); tb.type = "button"; tb.onclick = () => { rr.hidden = !rr.hidden; };
+        row.appendChild(tb); const sb = sayBtn(m.he); if (sb) row.appendChild(sb);
+        b.appendChild(row); b.appendChild(rr);
+      }
+      log.appendChild(b);
+      if (m.fix) {
+        const f = el("div", "fix");
+        f.appendChild(el("span", "small muted", "Лучше сказать:"));
+        f.appendChild(el("span", "fh", shown(m.fix.better)));
+        if (m.fix.why) f.appendChild(rich(el("span"), m.fix.why));
+        log.appendChild(f);
+      }
+    }
+    if (CH.busy) log.appendChild(el("div", "typing", "Собеседник пишет…"));
+    if (CH.err) { log.appendChild(el("div", "typing", CH.err)); CH.err = ""; }
+    if (CH.done && !CH.busy) log.appendChild(el("div", "typing", "Разговор подошёл к концу. Нажмите «Завершить и разобрать», чтобы получить разбор."));
+    $("chSend").disabled = CH.busy; $("chHint").disabled = CH.busy || !lastAi();
+    setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 30);
+  }
+  const lastAi = () => [...CH.msgs].reverse().find(m => m.who === "ai");
+  function chatSend() {
+    const v = $("chIn").value.trim(); if (!v || CH.busy) return;
+    CH.msgs.push({ who: "me", he: v });
+    $("chIn").value = ""; actLog(); save();
+    chatTurn();
+  }
+  function chatHint() {
+    const a = lastAi(); if (!a || !a.suggest) { toast("Подсказки нет"); return; }
+    $("chIn").value = a.suggest.replace(NIKUD, "");
+    toast("Подсказка вставлена: поправьте её под себя");
+  }
+  async function chatEnd() {
+    if (!CH || CH.busy) return;
+    const mine = CH.msgs.filter(m => m.who === "me").length;
+    if (!mine) { goHome(); return; }
+    $("chComposer").hidden = true;
+    const box = $("chSummary"); box.hidden = false; box.textContent = ""; box.appendChild(el("p", "muted", "Claude готовит разбор…"));
+    setTimeout(() => box.scrollIntoView({ block: "start" }), 30);
+    const prompt = "Ты преподаватель современного иврита. Вот учебный диалог русскоязычной ученицы уровня Алеф с собеседником. Цель ученицы была: " + CH.d.goal + "\n" + transcript() +
+      "\nСделай разбор. Верни JSON: {\"summary\": \"2-3 предложения по-русски: что получилось хорошо и над чем работать\", \"mistakes\": [{\"you\": \"фраза ученицы\", \"better\": \"как правильно, с огласовками\", \"why\": \"коротко по-русски\"}], \"phrases\": [{\"he\": \"полезная фраза из этой ситуации с огласовками\", \"ru\": \"перевод\"}]}. В phrases дай 4-6 фраз." + STYLE;
+    try {
+      const r = await sampleFn.json(prompt, { modelTier: "default" });
+      S.dlg = S.dlg || {}; S.dlg[CH.d.id] = (S.dlg[CH.d.id] || 0) + 1; save();
+      box.textContent = "";
+      box.appendChild(el("h2", "", "Разбор разговора"));
+      if (r.summary) box.appendChild(rich(el("p"), r.summary));
+      const ms = (r.mistakes || []).filter(m => m && m.better);
+      if (ms.length) {
+        box.appendChild(el("h3", "", "Ошибки"));
+        const mist = el("div", "mist");
+        ms.forEach(m => { const d = el("div"); d.appendChild(rich(el("span", "small"), "Вы: " + (m.you || ""))); d.appendChild(el("span", "hw", shown(m.better))); if (m.why) d.appendChild(rich(el("span", "small muted"), m.why)); mist.appendChild(d); });
+        box.appendChild(mist);
+      }
+      const ph = (r.phrases || []).filter(p => p && p.he && p.ru);
+      if (ph.length) {
+        box.appendChild(el("h3", "", "Полезные фразы"));
+        const mist = el("div", "mist");
+        ph.forEach(p => { const d = el("div"); d.appendChild(el("span", "hw", shown(p.he))); d.appendChild(el("span", "small", p.ru)); mist.appendChild(d); });
+        box.appendChild(mist);
+        const add = el("button", "btn secondary", "Добавить фразы в повторение"); add.type = "button";
+        add.onclick = () => {
+          let n = 0;
+          ph.forEach(p => { if (!S.custom.some(c => lexKey(c.he) === lexKey(p.he))) { const id = "c" + Date.now().toString(36) + n; S.custom.push({ id, he: String(p.he), ru: String(p.ru), tr: "" }); S.cards["w:" + id] = { s: W[0], d: clampD(W[4]), reps: 0, lapses: 0, last: Date.now(), due: Date.now() }; n++; } });
+          save(); add.disabled = true; add.textContent = "Добавлено: " + n; toast("Фразы добавлены в повторение");
+        };
+        box.appendChild(add);
+      }
+      const row = el("div", "actions");
+      const again = el("button", "btn", "Ещё разговор"); again.onclick = openDialogs; row.appendChild(again);
+      const home = el("button", "btn secondary", "На главную"); home.onclick = goHome; row.appendChild(home);
+      box.appendChild(row);
+    } catch (e) {
+      box.textContent = ""; box.appendChild(el("p", "", "Не удалось получить разбор. Попробуйте ещё раз."));
+      const retry = el("button", "btn", "Повторить"); retry.onclick = chatEnd; box.appendChild(retry);
+      $("chComposer").hidden = false;
+    }
+  }
+
+  /* ================= writing ================= */
+  let WR = null;
+  function openWriting() {
+    const list = $("wrList"); list.textContent = "";
+    if (!sampleFn) list.appendChild(el("p", "small muted", STANDALONE ? "Здесь текст можно написать и сохранить. Автоматическая проверка есть только в версии внутри Claude: перечитайте текст по подсказкам или покажите его учителю." : "Проверка письма доступна, когда приложение открыто в Claude с входом в аккаунт."));
+    for (const w of PRACTICE.writing) {
+      const open = !w.after || !!S.lessons[w.after];
+      const n = (S.wr || {})[w.id] || 0;
+      const b = el("button", "li"); b.type = "button"; b.disabled = !open || (!sampleFn && !STANDALONE);
+      b.appendChild(el("span", "num", n ? "✓" : "•"));
+      const d = el("div"); d.appendChild(el("div", "t", w.title)); d.appendChild(el("div", "d", open ? w.task : "Откроется после урока " + lessonLabel(w.after))); b.appendChild(d);
+      b.appendChild(el("span", "chip " + (open ? "next" : ""), open ? (n ? "Ещё раз" : "Писать") : "Закрыт"));
+      b.onclick = () => openWrite(w);
+      list.appendChild(b);
+    }
+    show("writing");
+  }
+  function openWrite(w) {
+    WR = { w };
+    $("wrTitle").textContent = w.title; $("wrTask").textContent = w.task;
+    rich($("wrUse"), "Постарайтесь использовать: " + w.use + ".");
+    $("wrIn").value = (S.wrDraft || {})[w.id] || ""; $("wrResult").hidden = true; $("wrCheck").disabled = false;
+    $("wrCheck").textContent = sampleFn ? "Проверить" : "Сохранить";
+    const app = S.settings.kb === "app"; $("kbWrite").hidden = !app; $("wrIn").setAttribute("inputmode", app ? "none" : "text");
+    show("write");
+  }
+  // standalone: no AI check, keep the text and give a self-check list
+  function saveWritingOffline(text) {
+    S.wr = S.wr || {}; S.wr[WR.w.id] = (S.wr[WR.w.id] || 0) + 1;
+    S.wrDraft = S.wrDraft || {}; S.wrDraft[WR.w.id] = text;
+    actLog(); save();
+    const box = $("wrResult"); box.hidden = false; box.textContent = "";
+    box.appendChild(el("h2", "", "Текст сохранён"));
+    box.appendChild(el("p", "small muted", "Проверьте себя по списку:"));
+    ["Род и число: прилагательное и глагол согласованы с существительным?", "Артикль: у существительного и прилагательного вместе, в смихуте только у второго слова?", "Предлоги: לְ, בְּ, אֶת, עִם, עַל на своих местах?", "Время глагола: прошедшее, настоящее или будущее выбрано верно?", "Использованы слова из подсказки?", "Прочитайте текст вслух: звучит ли он естественно?"]
+      .forEach(t => box.appendChild(rich(el("p", "small"), "• " + t)));
+    const cp = el("button", "btn secondary small", "Скопировать текст"); cp.type = "button";
+    cp.onclick = async () => { try { await navigator.clipboard.writeText(text); toast("Текст скопирован"); } catch (_) { toast("Не удалось скопировать"); } };
+    box.appendChild(cp);
+  }
+  async function checkWriting() {
+    const text = $("wrIn").value.trim();
+    if (!HEB.test(text)) { toast("Напишите текст на иврите"); return; }
+    if (!sampleFn) { saveWritingOffline(text); return; }
+    $("wrCheck").disabled = true;
+    const box = $("wrResult"); box.hidden = false; box.textContent = ""; box.appendChild(el("p", "muted", "Claude проверяет текст…"));
+    const prompt = "Ты преподаватель современного иврита. " + chatLevel() + " Задание было: «" + WR.w.task + "» Ожидалось использовать: " + WR.w.use + "." +
+      " Текст ученицы:\n" + text +
+      "\nПроверь текст. Исправь все ошибки (грамматика, род, предлоги, артикль, порядок слов, неверные слова, орфография), но сохрани её мысль и простоту: не переписывай текст сложнее, чем нужно. Если фраза грамматически верна, но звучит не по-израильски, предложи естественный вариант." +
+      " Верни JSON: {\"corrected\": \"весь исправленный текст с полными огласовками\", \"mistakes\": [{\"you\": \"фрагмент ученицы\", \"better\": \"исправленный фрагмент с огласовками\", \"ru\": \"перевод исправленного фрагмента\", \"why\": \"объяснение по-русски в 1-2 предложениях\"}], \"praise\": \"1-2 предложения: что получилось хорошо\", \"tip\": \"один совет на следующий раз\"}." + STYLE;
+    try {
+      const r = await sampleFn.json(prompt, { modelTier: "default" });
+      S.wr = S.wr || {}; S.wr[WR.w.id] = (S.wr[WR.w.id] || 0) + 1;
+      if (S.wrDraft) delete S.wrDraft[WR.w.id];
+      actLog(); save();
+      box.textContent = "";
+      box.appendChild(el("h2", "", "Проверка"));
+      const ms = (r.mistakes || []).filter(m => m && m.better);
+      box.appendChild(el("p", "", ms.length ? "Ошибок и неточностей: " + ms.length + "." : "Ошибок не найдено."));
+      if (r.praise) box.appendChild(rich(el("p", "muted"), r.praise));
+      box.appendChild(el("h3", "", "Исправленный текст"));
+      const ct = el("div", "wrtext", shown(r.corrected || text)); box.appendChild(ct);
+      const sb = sayBtn(r.corrected || text); if (sb) box.appendChild(sb);
+      if (ms.length) {
+        box.appendChild(el("h3", "", "Разбор"));
+        const mist = el("div", "mist");
+        ms.forEach(m => { const d = el("div"); d.appendChild(rich(el("span", "small"), "Было: " + (m.you || ""))); d.appendChild(el("span", "hw", shown(m.better))); if (m.ru) d.appendChild(el("span", "small", m.ru)); if (m.why) d.appendChild(rich(el("span", "small muted"), m.why)); mist.appendChild(d); });
+        box.appendChild(mist);
+        const add = el("button", "btn secondary", "Добавить исправленные фразы в повторение"); add.type = "button";
+        add.onclick = () => {
+          let n = 0;
+          ms.filter(m => m.ru).forEach(m => { if (!S.custom.some(c => lexKey(c.he) === lexKey(m.better))) { const id = "c" + Date.now().toString(36) + n; S.custom.push({ id, he: String(m.better), ru: String(m.ru), tr: "" }); S.cards["w:" + id] = { s: W[0], d: clampD(W[4]), reps: 0, lapses: 0, last: Date.now(), due: Date.now() }; n++; } });
+          save(); add.disabled = true; add.textContent = "Добавлено: " + n; toast("Фразы добавлены в повторение");
+        };
+        box.appendChild(add);
+      }
+      if (r.tip) { box.appendChild(el("h3", "", "Совет")); box.appendChild(rich(el("p"), r.tip)); }
+      const row = el("div", "actions");
+      const again = el("button", "btn", "Другое задание"); again.onclick = openWriting; row.appendChild(again);
+      const home = el("button", "btn secondary", "На главную"); home.onclick = goHome; row.appendChild(home);
+      box.appendChild(row);
+      setTimeout(() => box.scrollIntoView({ block: "start" }), 30);
+    } catch (e) {
+      box.textContent = ""; box.appendChild(el("p", "", e && e.code === "rate_limited" ? "Слишком много запросов подряд. Попробуйте через минуту." : "Не удалось проверить текст. Попробуйте ещё раз."));
+    }
+    $("wrCheck").disabled = false;
+  }
+
+  /* ================= cloze cards from texts ================= */
+  const CLOZE = {};
+  function buildCloze() {
+    const texts = textsForUnit();
+    for (const t of texts) {
+      (t.he || []).forEach((s, si) => {
+        const ru = (t.ru || [])[si]; if (!ru) return;
+        const toks = s.split(/\s+/);
+        const clean = toks.map(x => x.replace(/[^ְ-ת]/gu, ""));
+        clean.forEach((c, j) => {
+          if (!c) return;
+          const r = lookup(clean, j, t.gloss);
+          if (!r || r.span !== 1 || !r.hit.wid) return;
+          const he = toks.map((x, k) => k === j ? x.replace(/[ְ-ת]+/u, "___") : x).join(" ");
+          (CLOZE[r.hit.wid] = CLOZE[r.hit.wid] || []).push({ s, he, token: c, ru, prefix: r.prefix });
+        });
+      });
+    }
+  }
+  function wordCloze(w) {
+    const list = CLOZE[w.id]; if (!list || !list.length) return null;
+    const c = pick(list);
+    const he = c.he;
+    if (!he.includes("___")) return null;
+    const parts = c.prefix ? [...c.prefix].map(p => p + " (" + PREFIX_RU[p] + ")").join(" + ") + " + " + w.he : "";
+    return { id: "wcl:" + w.id + ":" + lexKey(c.token), type: "gap", word: w.id, say: c.s,
+      prompt: "Вставьте слово «" + w.ru + "» в нужной форме" + (c.prefix ? ", вместе с приставками" : "") + ". Перевод: " + c.ru,
+      he, accept: [c.token], note: c.token + (parts ? " = " + parts : "") + ". " + wordNote(w) };
+  }
+
+  /* ================= home ================= */
+  function goHome() { renderHome(); show("home"); }
+  function renderHome() {
+    const p = S.placement;
+    const sn = $("storeNote");
+    if (store.mode === "local" && store.reason === "standalone") {
+      const old = !S.lastBackup || Date.now() - S.lastBackup > 7 * DAY;
+      sn.hidden = !(old && Object.keys(S.lessons).length);
+      sn.textContent = "Прогресс хранится на этом устройстве. Раз в неделю сохраняйте копию: Настройки → Прогресс → Сохранить копию в файл.";
+    }
+    else if (store.mode === "local" && store.reason === "noaccess") { sn.hidden = false; sn.textContent = "Ваш прогресс сохраняется в этом браузере на этом устройстве. Занимайтесь с одного устройства и время от времени сохраняйте копию в файл (Настройки → Прогресс)."; }
+    else if (store.mode === "local") { sn.hidden = false; sn.textContent = "Прогресс сохраняется только в этом браузере: войдите в Claude, чтобы он синхронизировался между телефоном и компьютером."; }
+    else if (store.mode === "none") { sn.hidden = false; sn.textContent = "Прогресс сейчас не сохраняется: откройте приложение по ссылке, войдя в Claude."; }
+    else sn.hidden = true;
+
+    $("placementCard").hidden = p.status === "done";
+    if (p.status === "in_progress") { $("b-test").textContent = "Продолжить тест (" + Object.keys(p.answers).length + " из " + C.placement.length + ")"; }
+    $("b-results").hidden = p.status !== "done";
+
+    // today
+    const due = dueCards().length;
+    const L = S.log[dkey()] || { n: 0 };
+    $("tDue").textContent = due; $("tDone").textContent = L.n; $("tStreak").textContent = streak();
+    $("todayDate").textContent = new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+    const acts = $("todayActions"); acts.textContent = "";
+    const addBtn = (label, fn, secondary) => { const b = rich(el("button", "btn" + (secondary ? " secondary" : "")), label); b.onclick = fn; acts.appendChild(b); return b; };
+    let primaryUsed = false;
+    if (due) { addBtn("Повторить (" + due + ")", startReview); primaryUsed = true; }
+    if (p.status === "done") {
+      for (const u of UNITS) {
+        if (!unitOpen(u)) continue;
+        const st = lessonState(u);
+        if (st.nextL) { addBtn((u.kind === "module" ? "Урок " + u.module + "." + (st.ls.indexOf(st.nextL) + 1) : (u.short || "Тренировка")) + ": " + st.nextL.title, () => openLesson(st.nextL.id), primaryUsed); primaryUsed = true; }
+        else if (u.reading && !(S.units[u.id] || {}).reading) { addBtn("Текст для чтения: " + u.reading.title, () => openReading(u), primaryUsed); primaryUsed = true; }
+        else if (u.test && !(S.units[u.id] || {}).passed) { addBtn("Контрольный тест модуля " + u.module, () => startUnitTest(u), primaryUsed); primaryUsed = true; }
+      }
+      const nErr = activeErrors().length;
+      if (nErr >= 3) addBtn("Разобрать ошибки (" + nErr + ")", startErrors, true);
+      if (Object.keys(S.cards).length) addBtn("Разминка на 5 минут", startWarmup, true);
+      if (!due && Object.keys(S.cards).length) addBtn("Дополнительная практика", startExtra, true);
+    }
+    $("todayPanel").hidden = p.status !== "done" && !due;
+    if (!acts.children.length) acts.appendChild(el("p", "small muted", "На сегодня всё сделано. Новые уроки появятся в следующем обновлении."));
+
+    // practice
+    $("practicePanel").hidden = p.status !== "done";
+    const txOpen = textsForUnit().filter(t => (!t.after || S.lessons[t.after]) && !(S.read || {})[t.id]).length;
+    const dlOpen = PRACTICE.dialogs.filter(d => !d.after || S.lessons[d.after]).length;
+    $("practiceNote").textContent = !Object.keys(S.lessons).length ? "Тексты и разговоры открываются по мере прохождения уроков, первые после урока 4.1."
+      : "Непрочитанных текстов: " + txOpen + ". Сценариев разговора: " + dlOpen + ". Заданий на письмо: " + PRACTICE.writing.filter(w => !w.after || S.lessons[w.after]).length + ". Хорошо добавлять к повторению 10-15 минут чтения, разговора или письма.";
+
+    // unit panels
+    const up = $("unitPanels"); up.textContent = "";
+    if (p.status === "done") for (const u of UNITS) up.appendChild(unitPanel(u));
+
+    // current level: the first open module that still has lessons to do
+    const curU = UNITS.find(u => u.kind === "module" && unitOpen(u) && !lessonState(u).allDone);
+    $("lvlEyebrow").textContent = "Уровень " + ((curU && curU.level) || "Алеф");
+    // module overview
+    const res = p.result, start = res ? res.start : null;
+    const ol = $("mods"); ol.textContent = "";
+    for (const m of C.modules) {
+      const li = el("li", "li");
+      const u = UNITS.find(x => x.kind === "module" && x.module === m.n);
+      let chip = ["Скоро", ""];
+      if (p.status === "done") {
+        if (u && (S.units[u.id] || {}).passed) chip = ["Пройден", "done"];
+        else if (u && unitOpen(u)) chip = ["Идёт", "next"];
+        else if (u) chip = ["Готов", ""];
+        else if (start === null || m.n < start) chip = ["Знаю", "known"];
+      }
+      li.appendChild(el("span", "num", m.n));
+      const d = el("div"); d.appendChild(el("div", "t", m.title)); d.appendChild(el("div", "d", shown(m.topics))); li.appendChild(d);
+      li.appendChild(el("span", "chip " + chip[1], chip[0]));
+      ol.appendChild(li);
+    }
+  }
+  function unitPanel(u) {
+    const pnl = el("div", "panel");
+    const head = el("div", "row"); head.style.justifyContent = "space-between";
+    head.appendChild(el("h2", "", u.kind === "module" ? "Модуль " + u.module + ": " + u.title : u.title));
+    const st = lessonState(u);
+    head.appendChild(el("span", "small muted", st.doneN + " из " + st.ls.length + " уроков"));
+    pnl.appendChild(head);
+    if (!unitOpen(u)) {
+      const pm = prevModule(u);
+      pnl.appendChild(el("p", "small muted", "Откроется после всех уроков модуля " + pm.module + ". " + u.intro));
+      return pnl;
+    }
+    if (u.kind === "drill") pnl.appendChild(el("p", "small muted", u.intro));
+    const list = el("div", "list");
+    st.ls.forEach((l, i) => {
+      const done = !!S.lessons[l.id], isNext = st.nextL && st.nextL.id === l.id;
+      const b = el("button", "li"); b.type = "button"; b.disabled = !done && !isNext;
+      b.appendChild(el("span", "num", u.kind === "module" ? u.module + "." + (i + 1) : String(i + 1)));
+      const d = el("div"); d.appendChild(rich(el("div", "t"), l.title)); d.appendChild(el("div", "d", done ? "Можно перечитать теорию и повторить" : isNext ? l.exercises.length + " упражнений" + (l.words.length ? ", " + l.words.length + " слов" : "") : "Откроется после предыдущего урока")); b.appendChild(d);
+      b.appendChild(el("span", "chip " + (done ? "done" : isNext ? "next" : ""), done ? "Пройден" : isNext ? "Открыть" : "Закрыт"));
+      b.onclick = () => openLesson(l.id);
+      list.appendChild(b);
+    });
+    if (u.reading) {
+      const U = S.units[u.id] || {};
+      const b = el("button", "li"); b.type = "button"; b.disabled = !st.allDone;
+      b.appendChild(el("span", "num", "Т"));
+      const d = el("div"); d.appendChild(el("div", "t", "Текст: " + u.reading.title)); d.appendChild(el("div", "d", "Чтение и вопросы")); b.appendChild(d);
+      b.appendChild(el("span", "chip " + (U.reading ? "done" : st.allDone ? "next" : ""), U.reading ? "Прочитан" : st.allDone ? "Открыть" : "После уроков"));
+      b.onclick = () => openReading(u); list.appendChild(b);
+    }
+    if (u.test) {
+      const U = S.units[u.id] || {};
+      const b = el("button", "li"); b.type = "button"; b.disabled = !st.allDone;
+      b.appendChild(el("span", "num", "✓"));
+      const d = el("div"); d.appendChild(el("div", "t", "Контрольный тест")); d.appendChild(el("div", "d", u.test.items.length + " заданий, порог " + Math.round(u.test.pass * 100) + "%" + (U.testBest != null ? ", лучший результат " + U.testBest + "%" : ""))); b.appendChild(d);
+      b.appendChild(el("span", "chip " + (U.passed ? "done" : U.testBest != null ? "fail" : st.allDone ? "next" : ""), U.passed ? "Сдан" : U.testBest != null ? "Не сдан" : st.allDone ? "Открыть" : "После уроков"));
+      b.onclick = () => startUnitTest(u); list.appendChild(b);
+    }
+    pnl.appendChild(list);
+    return pnl;
+  }
+
+  /* ================= stats ================= */
+  const TYPE_NAMES = { choice: "Выбор ответа", type: "Перевод на иврит", gap: "Пропуск в предложении", transform: "Трансформация", order: "Сборка фразы", listen: "На слух", handwrite: "Пропись от руки" };
+  function openStats() {
+    $("stStreak").textContent = streak();
+    let n7 = 0, ok7 = 0, tot = 0; const now = new Date();
+    for (let i = 0; i < 7; i++) { const L = S.log[dkey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i))]; if (L) { n7 += L.n; ok7 += L.ok; } }
+    for (const L of Object.values(S.log)) tot += L.n;
+    $("stWeek").textContent = n7 ? Math.round(ok7 / n7 * 100) + "%" : "–";
+    $("stTotal").textContent = tot;
+    const ids = Object.keys(S.cards).filter(cardUsable);
+    $("stWords").textContent = ids.filter(i => i.startsWith("w:")).length;
+    $("stSkills").textContent = ids.filter(i => i.startsWith("k:")).length;
+    const endTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2).getTime() - 1;
+    const startTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
+    $("stTomorrow").textContent = ids.filter(i => S.cards[i].due >= startTomorrow && S.cards[i].due <= endTomorrow).length;
+    const mastered = ids.filter(i => S.cards[i].s >= 21).length;
+    $("stMastered").textContent = "Надёжно усвоено (интервал повторения больше 3 недель): " + mastered + ".";
+    const ws = weakSkills();
+    const box = $("stWeak"); box.textContent = "";
+    ws.slice(0, 6).forEach(w => box.appendChild(resRow(IDX.skillName[w.k], Math.round(w.acc * 100), Math.round(w.acc * 100) + "% · " + w.n, w.acc < 0.8)));
+    $("stWeakNote").textContent = ws.length ? "Темы с самой низкой точностью ответов." : "Появятся после нескольких уроков.";
+    $("stWeakGo").hidden = !ws.some(w => w.acc < 0.9);
+    const tb = $("stTypes"); tb.textContent = "";
+    for (const [t, v] of Object.entries(S.typeStats)) tb.appendChild(resRow(TYPE_NAMES[t] || t, Math.round(v[0] / v[1] * 100), Math.round(v[0] / v[1] * 100) + "% · " + v[1], v[0] / v[1] < 0.8));
+    if (!tb.children.length) tb.appendChild(el("p", "small muted", "Пока нет ответов."));
+    show("stats");
+  }
+
+  /* ================= my words ================= */
+  function openMyWords() { renderMyWords(); show("mywords"); }
+  function renderMyWords() {
+    const list = $("cwList"); list.textContent = "";
+    $("cwCount").textContent = S.custom.length ? S.custom.length + "" : "";
+    if (!S.custom.length) list.appendChild(el("p", "small muted", "Здесь будут слова и фразы, которые вы добавите сами. Они попадают в то же повторение, что и слова курса."));
+    S.custom.slice().reverse().forEach(c => {
+      const row = el("div", "li"); row.style.gridTemplateColumns = "1fr auto";
+      const d = el("div"); d.appendChild(el("div", "t he", shown(c.he))); d.appendChild(el("div", "d", c.ru + (c.tr ? " · " + c.tr : ""))); row.appendChild(d);
+      const del = el("button", "btn ghost small", "Удалить"); del.type = "button";
+      del.onclick = () => {
+        if (del.dataset.armed) { S.custom = S.custom.filter(x => x.id !== c.id); delete S.cards["w:" + c.id]; save(); renderMyWords(); toast("Удалено"); }
+        else { del.dataset.armed = "1"; del.textContent = "Точно удалить?"; setTimeout(() => { if (del.isConnected) { delete del.dataset.armed; del.textContent = "Удалить"; } }, 3000); }
+      };
+      row.appendChild(del); list.appendChild(row);
+    });
+  }
+  function addCustom() {
+    const he = $("cwHe").value.trim(), ru = $("cwRu").value.trim(), tr = $("cwTr").value.trim();
+    if (!HEB.test(he)) { toast("Введите слово на иврите"); return; }
+    if (!ru) { toast("Введите перевод"); return; }
+    const id = "c" + Date.now().toString(36);
+    S.custom.push({ id, he, ru, tr });
+    S.cards["w:" + id] = { s: W[0], d: clampD(W[4]), reps: 0, lapses: 0, last: Date.now(), due: Date.now() };
+    save();
+    $("cwHe").value = ""; $("cwRu").value = ""; $("cwTr").value = "";
+    renderMyWords(); toast("Добавлено: слово уже в повторении");
+  }
+
+  /* ================= settings ================= */
+  function renderSettings() {
+    $("s-nikud").setAttribute("aria-checked", S.settings.nikud);
+    $("s-translit").setAttribute("aria-checked", S.settings.translit);
+    [...$("s-kb").children].forEach(b => b.setAttribute("aria-pressed", b.dataset.v === S.settings.kb));
+    $("importConfirm").hidden = true;
+    $("storeStatus").textContent = store.mode === "local" && store.reason === "standalone" ? "Прогресс хранится в этом браузере на этом устройстве." + (S.lastBackup ? " Последняя копия: " + new Date(S.lastBackup).toLocaleDateString("ru-RU") + "." : " Копий пока не было.") + " Чтобы перенести прогресс на другое устройство, сохраните копию и загрузите её там." : store.mode === "db" ? "Прогресс сохраняется в вашем аккаунте Claude и одинаков на телефоне и компьютере. Он виден только вам." : store.mode === "local" ? "Прогресс сохраняется только в этом браузере на этом устройстве." : "Прогресс сейчас не сохраняется.";
+    $("aiStatus").textContent = sampleFn ? "Кнопки «Почему так?» и «Мой ответ тоже верный?» появляются после ответа на задание. При первом нажатии Claude попросит разрешение." : "Объяснения от Claude недоступны в этом просмотре. Откройте приложение в Claude, войдя в свой аккаунт.";
+    $("resetConfirm").hidden = true;
+  }
+  async function exportProgress() {
+    S.lastBackup = Date.now(); save();
+    const data = JSON.stringify({ app: "ivrit", exportedAt: new Date().toISOString(), state: S }, null, 2);
+    const name = "ivrit-progress-" + dkey() + ".json";
+    if (STANDALONE) {
+      try {
+        const url = URL.createObjectURL(new Blob([data], { type: "application/json" }));
+        const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        toast("Копия сохранена в загрузки"); return;
+      } catch (_) { /* fall through to clipboard */ }
+    }
+    try {
+      const dl = window.claude && claude.use ? await claude.use("downloads") : null;
+      if (dl) { await dl.save({ filename: name, data }); toast("Копия сохранена"); return; }
+    } catch (e) { if (e && e.code === "declined") { toast("Сохранение отменено"); return; } }
+    try { await navigator.clipboard.writeText(data); toast("Скачивание недоступно: копия скопирована в буфер обмена"); }
+    catch (e) { toast("Не удалось сохранить копию"); }
+  }
+
+  let IMP = null;
+  function importPick() { $("importFile").value = ""; $("importFile").click(); }
+  function importRead() {
+    const f = $("importFile").files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        const d = JSON.parse(rd.result);
+        if (!d || d.app !== "ivrit" || !d.state || typeof d.state !== "object") throw new Error("bad");
+        IMP = d.state;
+        const n = Object.keys(IMP.lessons || {}).length;
+        $("importText").textContent = "Копия от " + (d.exportedAt ? new Date(d.exportedAt).toLocaleDateString("ru-RU") : "неизвестной даты") + ": пройдено уроков " + n + ". Текущий прогресс на этом устройстве будет заменён.";
+        $("importConfirm").hidden = false;
+      } catch (_) { toast("Это не файл прогресса приложения"); }
+    };
+    rd.readAsText(f);
+  }
+  function importApply() {
+    if (!IMP) return;
+    S = merge(defaults(), JSON.parse(JSON.stringify(IMP))); IMP = null;
+    $("importConfirm").hidden = true; save(); buildCursive(); renderSettings(); toast("Прогресс загружен");
+  }
+  function setupStandalone() {
+    if (!STANDALONE) return;
+    $("genPanel").hidden = true; $("aiPanel").hidden = true;
+    $("b-dialogs").hidden = true; $("b-dialogs").parentElement.className = "nav";
+    try {
+      const m = document.createElement("link"); m.rel = "manifest"; m.href = "manifest.json"; document.head.appendChild(m);
+      if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) navigator.serviceWorker.register("sw.js").catch(() => {});
+    } catch (_) {}
+  }
+
+  /* ================= wiring ================= */
+  function wire() {
+    $("kbRun").appendChild(makeKb(() => $("answer")));
+    $("kbWords").appendChild(makeKb(() => $("cwHe")));
+    document.querySelectorAll("[data-home]").forEach(b => b.onclick = goHome);
+    $("b-test").onclick = startPlacement;
+    $("b-results").onclick = () => { renderResults(); show("results"); };
+    $("b-settings").onclick = () => { renderSettings(); show("settings"); };
+    $("b-stats").onclick = openStats;
+    $("b-mywords").onclick = openMyWords;
+    $("b-errors").onclick = openErrors;
+    $("b-cursive").onclick = openCursive;
+    $("cuLetters").onclick = () => cursiveRun("letters");
+    $("cuRead").onclick = () => cursiveRun("words");
+    $("cuWrite").onclick = startHandwrite;
+    $("hwBack").onclick = openCursive;
+    $("hwShow").onclick = () => { $("hwModel").hidden = false; $("hwShow").hidden = true; $("hwRate").hidden = false; };
+    $("hwYes").onclick = () => rateHw(true);
+    $("hwNo").onclick = () => rateHw(false);
+    $("erGo").onclick = startErrors;
+    $("stWeakGo").onclick = startWeak;
+    $("cwAdd").onclick = addCustom;
+    $("lsNext").onclick = lessonNext;
+    $("lsTestOut").onclick = testOut;
+    $("wdPrev").onclick = () => { if (LS.wi > 0) { LS.wi--; renderWord(); } };
+    $("wdNext").onclick = () => { if (LS.wi < LS.lesson.words.length - 1) { LS.wi++; renderWord(); } else startLessonPractice(); };
+    $("wdSay").onclick = () => speak(IDX.words[LS.lesson.words[LS.wi]].he);
+    $("b-quit").onclick = quitRun;
+    $("b-say").onclick = () => cur && speak(cur.say);
+    $("b-check").onclick = () => check(false);
+    $("b-skip").onclick = () => check(true);
+    $("answer").addEventListener("input", () => { if (!answered) $("b-check").disabled = !norm($("answer").value); });
+    $("answer").addEventListener("keydown", e => { if (e.key === "Enter" && !$("b-check").disabled) { e.preventDefault(); check(false); } });
+    $("s-nikud").onclick = () => { S.settings.nikud = !S.settings.nikud; save(); renderSettings(); };
+    $("s-translit").onclick = () => { S.settings.translit = !S.settings.translit; save(); renderSettings(); };
+    [...$("s-kb").children].forEach(b => b.onclick = () => { S.settings.kb = b.dataset.v; save(); applyKbMode(); renderSettings(); });
+    $("b-voice").onclick = () => speak("שָׁלוֹם, מָה שְׁלוֹמֵךְ?");
+    $("b-export").onclick = exportProgress;
+    $("b-import").onclick = importPick;
+    $("importFile").onchange = importRead;
+    $("b-import-yes").onclick = importApply;
+    $("b-import-no").onclick = () => { IMP = null; $("importConfirm").hidden = true; };
+    $("b-reset").onclick = () => { $("resetConfirm").hidden = false; };
+    $("b-reset-no").onclick = () => { $("resetConfirm").hidden = true; };
+    $("b-texts").onclick = openTexts;
+    $("b-dialogs").onclick = openDialogs;
+    $("b-writing").onclick = openWriting;
+    $("wrBack").onclick = openWriting;
+    $("wrCheck").onclick = checkWriting;
+    $("kbWrite").appendChild(makeKb(() => $("wrIn")));
+    $("wrKb").onclick = () => { const on = $("kbWrite").hidden; $("kbWrite").hidden = !on; $("wrIn").setAttribute("inputmode", on ? "none" : "text"); };
+    let draftT = null;
+    $("wrIn").addEventListener("input", () => { clearTimeout(draftT); draftT = setTimeout(() => { if (!WR) return; S.wrDraft = S.wrDraft || {}; S.wrDraft[WR.w.id] = $("wrIn").value; save(); }, 1500); });
+    $("txBack").onclick = openTexts;
+    $("txQ").onclick = textQuestions;
+    $("genGo").onclick = generateText;
+    $("shClose").onclick = () => { $("sheet").hidden = true; document.querySelectorAll(".wtap.on").forEach(x => x.classList.remove("on")); };
+    $("shAdd").onclick = sheetAdd;
+    $("shAsk").onclick = sheetAsk;
+    $("kbChat").appendChild(makeKb(() => $("chIn")));
+    const setChatKb = (on) => { $("kbChat").hidden = !on; $("chIn").setAttribute("inputmode", on ? "none" : "text"); };
+    $("chKb").onclick = () => setChatKb($("kbChat").hidden);
+    $("chBack").onclick = () => { if (CH && CH.msgs.some(m => m.who === "me") && !$("chBack").dataset.armed) { $("chBack").dataset.armed = "1"; $("chBack").textContent = "Выйти без разбора?"; setTimeout(() => { delete $("chBack").dataset.armed; $("chBack").textContent = "← Выйти"; }, 3000); return; } openDialogs(); };
+    $("chEnd").onclick = chatEnd;
+    $("chSend").onclick = chatSend;
+    $("chHint").onclick = chatHint;
+    $("chIn").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); chatSend(); } });
+    $("b-reset-yes").onclick = () => { S.placement = defaults().placement; save(); goHome(); toast("Результаты теста удалены"); };
+  }
+
+  async function boot() {
+    wire(); setupStandalone();
+    try {
+      C = await (await fetch("content/aleph.json")).json();
+      const units = await Promise.all((C.units || []).map(f => fetch("content/" + f).then(r => r.json())));
+      units.forEach(indexUnit);
+      const [lexFile, ...prs] = await Promise.all([C.lexicon ? fetch("content/" + C.lexicon).then(r => r.json()) : null].concat((C.practice || []).map(f => fetch("content/" + f).then(r => r.json()))));
+      for (const pf of prs) {
+        (pf.texts || []).forEach(t => { t.unit = pf.unit; PRACTICE.texts.push(t); });
+        (pf.dialogs || []).forEach(d => PRACTICE.dialogs.push(d));
+        (pf.writing || []).forEach(w => PRACTICE.writing.push(w));
+      }
+      buildLex(lexFile);
+      buildCloze();
+    } catch (e) { document.querySelector(".wrap").textContent = "Не удалось загрузить материалы курса. Обновите страницу."; return; }
+    renderHome(); show("home");
+    await initStore();
+    buildCursive();
+    applyKbMode(); renderHome();
+    try { if (window.claude && claude.use) sampleFn = await claude.use("sample"); } catch (_) { sampleFn = null; }
+    if ("speechSynthesis" in window) {
+      if (findVoice()) checkVoices(); else { speechSynthesis.onvoiceschanged = checkVoices; setTimeout(checkVoices, 2000); }
+    } else { voicesChecked = true; renderVoice(); }
+  }
+  boot();
+})();
+</script>
+
+</body>
+</html>
