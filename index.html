@@ -1108,6 +1108,15 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       else if (op[0] === "-") { box.appendChild(el("span", "bad", op[1] === " " ? "␣" : op[1])); if (tips.length < 3) tips.push(op[1] === " " ? "Лишний пробел." : "Лишняя буква " + op[1] + "."); }
       else { box.appendChild(el("span", "miss", " ")); if (tips.length < 3) tips.push(op[1] === " " ? "Не хватает пробела между словами." : "Пропущена буква " + op[1] + "."); }
     }
+    // vowel letters: without nikud the sounds «и», «о», «у» are shown by י and ו (full spelling, ktiv male)
+    const vl = best.r.ops.find(op => (op[0] === "+" || op[0] === "-") && (op[1] === "י" || op[1] === "ו"));
+    if (vl) {
+      const miss = vl[0] === "+";
+      const word = cw.find(w => !gw.includes(w)) || best.c;
+      tips.unshift(miss
+        ? "Без огласовок звук «и» обычно пишется буквой [[י]], а «о» и «у» буквой [[ו]] (полное написание). Эти буквы есть в слове и в огласованном виде, их нужно набирать: [[" + word + "]]."
+        : "Здесь лишняя гласная буква [[" + vl[1] + "]]: в этом слове правильно [[" + word + "]].");
+    }
     if (best.r.dist > Math.max(3, best.c.length / 2)) return;   // too different: a letter-by-letter view would only confuse
     fb.appendChild(el("span", "lbl", "Ваш ответ, расхождения выделены:"));
     fb.appendChild(box);
