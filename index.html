@@ -251,6 +251,21 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
 .composer { position: sticky; bottom: 0; background: var(--bg); padding-block: 10px calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); }
 .typing { color: var(--muted); font-size: 0.9rem; }
 
+/* Session time */
+.tline { display: flex; flex-direction: column; gap: 6px; }
+.tline .progress i { background: var(--good); }
+/* Pairs game */
+.ghead { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.gtime { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 1.1rem; }
+.gtime.low { color: var(--bad); }
+.gboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.gcol { display: flex; flex-direction: column; gap: 10px; }
+.gcard { background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 8px; min-height: 56px; font-size: 1rem; transition: opacity .25s, transform .15s; }
+.gcard.he { font-family: var(--font-he); font-size: 1.4rem; direction: rtl; }
+.gcard.sel { border-color: var(--accent); background: var(--accent-soft); }
+.gcard.ok { border-color: var(--good); background: var(--good-soft); opacity: 0; pointer-events: none; }
+.gcard.no { border-color: var(--bad); background: var(--bad-soft); transform: translateX(3px); }
+.gscore { font-size: 2.4rem; font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media (max-width: 380px) { .opts { grid-template-columns: 1fr; } .word { font-size: 2.1rem; } .today b { font-size: 1.15rem; } }
 </style>
@@ -280,6 +295,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         <div><b id="tDone">0</b><span>ответов сегодня</span></div>
         <div><b id="tStreak">0</b><span>дней подряд</span></div>
       </div>
+      <div class="tline" id="tTimeWrap" hidden><span class="small muted" id="tTime"></span><div class="progress"><i id="tTimeBar"></i></div></div>
       <div class="actions" id="todayActions"></div>
     </div>
 
@@ -382,6 +398,37 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <div class="actions" id="smActions"></div>
     </div>
     <div class="panel" id="smMistWrap"><h2>Разбор ошибок</h2><div class="mist" id="smMist"></div></div>
+  </section>
+
+  <!-- PAUSE (session time is up) -->
+  <section id="v-pause" class="view" hidden>
+    <div class="panel">
+      <span class="eyebrow">Перерыв</span>
+      <h2 id="pzTitle"></h2>
+      <p class="muted" id="pzText"></p>
+      <div class="actions">
+        <button class="btn" id="pzStop">Закончить на сегодня</button>
+        <button class="btn secondary" id="pzGame">Мини-игра «Пары»</button>
+        <button class="btn secondary" id="pzWarm">Разминка на 5 минут</button>
+        <button class="btn secondary" id="pzGo">Продолжить</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAIRS GAME -->
+  <section id="v-game" class="view" hidden>
+    <div class="ghead"><button class="btn ghost" id="gmQuit">← Выйти</button><span class="small muted" id="gmScore"></span><span class="gtime" id="gmTime"></span></div>
+    <div id="gmPlay" class="view">
+      <p class="small muted">Найдите пары: слово на иврите и перевод. За минуту как можно больше. Ошибка отнимает 3 секунды.</p>
+      <div class="gboard"><div class="gcol" id="gmHe"></div><div class="gcol" id="gmRu"></div></div>
+    </div>
+    <div class="panel" id="gmEnd" hidden>
+      <span class="eyebrow">Мини-игра «Пары»</span>
+      <div class="row" style="align-items:baseline;gap:14px"><span class="gscore" id="gmFinal"></span><h2 class="grow" id="gmEndTitle"></h2></div>
+      <p class="muted" id="gmEndText"></p>
+      <div class="mist" id="gmMiss"></div>
+      <div class="actions" id="gmActions"></div>
+    </div>
   </section>
 
   <!-- READING -->
@@ -581,6 +628,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <div class="set"><div><div>Транслитерация</div><div class="small muted">Кириллицей у новых слов</div></div><button class="switch" id="s-translit" role="switch" aria-checked="true" aria-label="Транслитерация"></button></div>
       <div class="set"><div><div>Клавиатура</div><div class="small muted">Встроенная или клавиатура телефона с ивритской раскладкой</div></div>
         <div class="seg" id="s-kb"><button data-v="app" aria-pressed="true">Встроенная</button><button data-v="native" aria-pressed="false">Телефона</button></div></div>
+      <div class="set"><div><div>Длина занятия</div><div class="small muted">Потом приложение предложит закончить или сыграть. Повторение карточек не больше 10 минут.</div></div>
+        <div class="seg" id="s-sess"><button data-v="20">20</button><button data-v="25" aria-pressed="true">25</button><button data-v="30">30</button></div></div>
     </div>
     <div class="panel">
       <h2>Звук</h2>
@@ -638,7 +687,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   const STANDALONE = !(window.claude && window.claude.use);
 
   function defaults() {
-    return { v: 2, settings: { nikud: true, translit: true, kb: "app" },
+    return { v: 2, settings: { nikud: true, translit: true, kb: "app", session: 25 },
       placement: { status: "none", idx: 0, answers: {}, startedAt: null, finishedAt: null, result: null },
       cards: {}, lessons: {}, units: {}, log: {}, skillStats: {}, typeStats: {}, altOk: {}, custom: [], recent: [], errors: {} };
   }
@@ -762,7 +811,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function dkey(t) { const d = new Date(t || Date.now()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   let toastT = null;
   function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3400); }
-  const VIEWS = ["home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write"];
+  const VIEWS = ["home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game"];
   function show(view) { for (const v of VIEWS) $("v-" + v).hidden = v !== view; if ($("sheet")) $("sheet").hidden = true; window.scrollTo(0, 0); }
   function rich(el, text) {
     // [[hebrew]] → styled span; everything else plain text
@@ -935,8 +984,9 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function run(cfg) {
     R = Object.assign({ requeue: true, grade: false }, cfg);
     R.queue = cfg.items.filter(it => it && it.ex);
-    R.pos = 0; R.results = []; R.requeued = new Set();
+    R.pos = cfg.pos || 0; R.results = cfg.results || []; R.requeued = new Set(cfg.requeued || []);
     if (!R.queue.length) { toast("Нет заданий"); return; }
+    lastAct = Date.now();
     show("run"); renderItem();
   }
   function renderItem() {
@@ -1042,6 +1092,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       const again = (cur.k && !cur.word) ? (skillEx(cur.k, cur.id) || cur) : cur;
       R.queue.splice(Math.min(R.queue.length, R.pos + 4), 0, { ex: again, cardId: item.cardId, first: false, depth: depth + 1 });
     }
+    tick(R.mode);
+    if (R.mode === "lesson") saveResume();
     save();
     renderFeedback(res);
     $("b-check").disabled = false; $("b-check").textContent = "Дальше"; $("b-skip").hidden = true;
@@ -1170,7 +1222,58 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function next() {
     if (!R) return;
     if (R.shouldStop && R.shouldStop()) R.pos = R.queue.length; else R.pos++;
+    if (R.pos < R.queue.length && (R.mode === "lesson" || R.mode === "review") && timeUp()) return showPause();
     renderItem();
+  }
+
+  /* ================= session time ================= */
+  // Active time is counted between answers (gaps over 3 minutes count as 3), only while the app is visible.
+  const REVIEW_CAP = 10 * MIN;
+  let lastAct = 0;
+  function today() { const d = dkey(); if (!S.day || S.day.d !== d) S.day = { d, ms: 0, rev: 0, asked: false }; return S.day; }
+  function tick(kind) {
+    const now = Date.now(), t = today();
+    if (lastAct) { const dt = Math.min(now - lastAct, 3 * MIN); t.ms += dt; if (kind === "review") t.rev += dt; }
+    lastAct = now;
+  }
+  const sessMin = () => S.settings.session || 25;
+  const timeUp = () => { const t = today(); return !t.asked && t.ms >= sessMin() * MIN; };
+  const reviewCapped = () => today().rev >= REVIEW_CAP;
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && lastAct) lastAct = Date.now(); });
+  function showPause() {
+    const t = today(); t.asked = true; save();
+    const lesson = R.mode === "lesson";
+    $("pzTitle").textContent = "Вы занимаетесь уже " + nmin(Math.floor(t.ms / MIN));
+    $("pzText").textContent = lesson
+      ? "На сегодня хватит, если хочется отдохнуть: урок сохранён, завтра он продолжится с этого места (осталось заданий: " + (R.queue.length - R.pos) + "). Если есть желание, можно продолжить урок или переключиться на лёгкую игру."
+      : "Хорошее занятие. Можно закончить на сегодня, продолжить или переключиться на лёгкую игру.";
+    $("pzGo").textContent = lesson ? "Продолжить урок" : "Продолжить повторение";
+    $("pzGame").hidden = gameWords().length < 5;
+    $("pzWarm").hidden = lesson ? !Object.keys(S.cards).length : true;
+    show("pause");
+  }
+  function nmin(n) { const a = n % 10, b = n % 100; return n + (a === 1 && b !== 11 ? " минуту" : a >= 2 && a <= 4 && (b < 12 || b > 14) ? " минуты" : " минут"); }
+  function leaveRun() { const r = R; R = null; save(); return r; }
+
+  /* ================= lesson resume ================= */
+  function saveResume() {
+    S.resume = { id: R.lessonId, hard: R.hard, pos: R.pos + 1, at: Date.now(),
+      queue: R.queue.map(it => ({ ex: it.ex, cardId: it.cardId, first: it.first, depth: it.depth })),
+      results: R.results.map(r => ({ ex: r.ex, ok: r.ok, given: r.given, skipped: r.skipped, almost: r.almost })),
+      requeued: [...R.requeued] };
+  }
+  const resumeFor = (id) => S.resume && S.resume.id === id && S.resume.pos < S.resume.queue.length ? S.resume : null;
+  const resumeLeft = (z) => z.queue.length - z.pos;
+  function lessonRunCfg(lesson, unit, hard) {
+    return { mode: "lesson", requeue: true, grade: false, lessonId: lesson.id, hard,
+      onDone: (results) => completeLesson(lesson, unit, results),
+      onQuit: () => { goHome(); toast("Урок сохранён: продолжите с того же места"); } };
+  }
+  function resumeLesson(id) {
+    const z = resumeFor(id), info = IDX.lessons[id];
+    if (!z || !info) { S.resume = null; return openLesson(id); }
+    LS = { lesson: info.lesson, unit: info.unit, i: info.i, wi: 0, hard: z.hard };
+    run(Object.assign(lessonRunCfg(info.lesson, info.unit, z.hard), { items: z.queue, pos: z.pos, results: z.results, requeued: z.requeued }));
   }
   function finishRun() { const r = R; R = null; save(); r.onDone(r.results, r); }
   function quitRun() {
@@ -1299,7 +1402,9 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const nw = lesson.words.length;
     LS.hard = hardMode();
     const nEx = lesson.exercises.length + (LS.hard ? (lesson.hard || []).length : Math.min(2, (lesson.hard || []).length));
-    $("lsNext").textContent = nw ? "Дальше: новые слова (" + nw + ")" : "Дальше: упражнения (" + nEx + ")";
+    const z = resumeFor(lesson.id);
+    $("lsNext").textContent = z ? "Продолжить упражнения (осталось " + resumeLeft(z) + ")" : nw ? "Дальше: новые слова (" + nw + ")" : "Дальше: упражнения (" + nEx + ")";
+    lastAct = Date.now();
     const m = $("lsMode");
     m.hidden = !LS.hard;
     if (LS.hard) m.textContent = "Повышенная сложность: в прошлый раз точность была " + Math.round(lastAcc() * 100) + "%. Новые слова проверяются вводом на иврите, и добавлены фразы на перевод посложнее.";
@@ -1331,7 +1436,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       onQuit: () => openLesson(lesson.id)
     });
   }
-  function lessonNext() { if (LS.lesson.words.length) { LS.wi = 0; renderWord(); show("words"); } else startLessonPractice(); }
+  function lessonNext() { tick("lesson"); if (resumeFor(LS.lesson.id)) return resumeLesson(LS.lesson.id); if (LS.lesson.words.length) { LS.wi = 0; renderWord(); show("words"); } else startLessonPractice(); }
   function renderWord() {
     const ids = LS.lesson.words, w = IDX.words[ids[LS.wi]];
     $("wdCount").textContent = "Слово " + (LS.wi + 1) + " из " + ids.length;
@@ -1355,14 +1460,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     // words first in a light shuffle, then exercises interleaved with remaining words
     const half = Math.ceil(wordItems.length / 2);
     const items = shuffle(wordItems.slice(0, half)).concat(shuffle(exItems.concat(wordItems.slice(half))));
-    run({
-      mode: "lesson", items, requeue: true, grade: false,
-      onDone: (results) => completeLesson(lesson, unit, results),
-      onQuit: () => goHome()
-    });
+    if (S.resume && S.resume.id === lesson.id) S.resume = null;
+    run(Object.assign(lessonRunCfg(lesson, unit, hard), { items }));
   }
   function completeLesson(lesson, unit, results, testedOut) {
     S.lessons[lesson.id] = Date.now();
+    if (S.resume && S.resume.id === lesson.id) S.resume = null;
     if (results.length) S.lastLessonAcc = results.filter(r => r.ok).length / results.length;
     for (const id of lesson.words) if (!results.some(r => r.ex.word === id)) { const cid = "w:" + id; if (!S.cards[cid]) initCard(cid, 2); }
     const bySkill = {};
@@ -1454,10 +1557,28 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const ids = dueCards().sort((a, b) => S.cards[a].due - S.cards[b].due).slice(0, 60);
     if (!ids.length) { toast("Сейчас нечего повторять"); goHome(); return; }
     const items = ids.map(id => ({ ex: exForCard(id), cardId: id }));
+    const capped = reviewCapped();   // started again after the 10 minutes: no limit this time
     run({ mode: "review", items: interleave(items), requeue: true, grade: true,
-      onDone: (results) => summary({ eyebrow: "Повторение", title: "Повторение на сегодня закончено", results,
-        actions: [{ label: "На главную", fn: goHome }, { label: "Ещё упражнения", fn: startExtra }] }),
+      shouldStop: () => !capped && reviewCapped(),
+      onDone: (results) => {
+        const left = dueCards().length, nl = nextLessonAction();
+        summary({ eyebrow: "Повторение", title: left ? "10 минут повторения позади" : "Повторение на сегодня закончено", results,
+          text: (results.filter(r => r.ok).length + " из " + results.length + " верно с первой попытки.") + (left ? " Остальные карточки (" + left + ") подождут: теперь время для нового материала." : ""),
+          actions: (nl ? [nl] : []).concat(left ? [{ label: "Повторить ещё (" + left + ")", fn: startReview }] : [{ label: "Ещё упражнения", fn: startExtra }], [{ label: "На главную", fn: goHome }]) });
+      },
       onQuit: () => goHome() });
+  }
+  function nextLessonAction() {
+    if (S.placement.status !== "done") return null;
+    for (const u of UNITS) {
+      if (!unitOpen(u)) continue;
+      const st = lessonState(u);
+      if (st.nextL) {
+        const z = resumeFor(st.nextL.id), name = (u.kind === "module" ? "Урок " + u.module + "." + (st.ls.indexOf(st.nextL) + 1) : (u.short || "Тренировка")) + ": " + st.nextL.title;
+        return z ? { label: "Продолжить " + name + " (осталось " + resumeLeft(z) + ")", fn: () => resumeLesson(st.nextL.id) } : { label: name, fn: () => openLesson(st.nextL.id) };
+      }
+    }
+    return null;
   }
   function startExtra() {
     const ids = shuffle(Object.keys(S.cards).filter(cardUsable)).slice(0, 15);
@@ -1645,6 +1766,75 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         text: "Даже 5 минут в день сохраняют серию и не дают словам забыться.", results,
         actions: [{ label: "На главную", fn: goHome }, { label: "Ещё 5 минут", fn: startWarmup }] }),
       onQuit: () => goHome() });
+  }
+
+  /* ================= pairs game ================= */
+  // Learned words only; the game does not change the review schedule.
+  let GM = null;
+  function gameWords() {
+    const seen = new Set(), out = [];
+    for (const id of Object.keys(S.cards)) {
+      if (!id.startsWith("w:")) continue;
+      const w = getWord(id.slice(2)); if (!w || !w.ru) continue;
+      const key = norm(w.he); if (seen.has(key)) continue; seen.add(key); out.push(w);
+    }
+    return out;
+  }
+  function startGame() {
+    const words = gameWords();
+    if (words.length < 5) { toast("Для игры нужно хотя бы 5 выученных слов"); return; }
+    gameStop();
+    GM = { pool: shuffle(words), used: 0, score: 0, left: 60, sel: null, miss: new Map(), t: null };
+    $("gmPlay").hidden = false; $("gmEnd").hidden = true; $("gmTime").hidden = false;
+    show("game"); gameDeal(); gameTime();
+    GM.t = setInterval(() => { if (document.hidden) return; GM.left--; gameTime(); if (GM.left <= 0) gameEnd(); }, 1000);
+  }
+  function gameStop() { if (GM && GM.t) clearInterval(GM.t); if (GM) GM.t = null; }
+  function gameTime() { const t = $("gmTime"); const sec = Math.max(0, GM.left); t.textContent = Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); t.classList.toggle("low", GM.left <= 10); $("gmScore").textContent = "Пар: " + GM.score; }
+  function gameDeal() {
+    if (GM.used + 5 > GM.pool.length) { GM.pool = shuffle(GM.pool); GM.used = 0; }
+    const set = GM.pool.slice(GM.used, GM.used + 5); GM.used += 5; GM.open = set.length; GM.sel = null;
+    const he = $("gmHe"), ru = $("gmRu"); he.textContent = ""; ru.textContent = "";
+    const mk = (w, side) => {
+      const b = el("button", "gcard" + (side === "he" ? " he" : ""), side === "he" ? shown(w.he) : w.ru); b.type = "button";
+      if (side === "he") b.dir = "rtl";
+      b.onclick = () => gamePick(b, w, side); return b;
+    };
+    shuffle(set).forEach(w => he.appendChild(mk(w, "he")));
+    shuffle(set).forEach(w => ru.appendChild(mk(w, "ru")));
+  }
+  function gamePick(b, w, side) {
+    if (!GM || GM.left <= 0 || b.classList.contains("ok")) return;
+    const s = GM.sel;
+    if (!s || s.side === side) { if (s) s.b.classList.remove("sel"); GM.sel = { b, w, side }; b.classList.add("sel"); return; }
+    GM.sel = null; s.b.classList.remove("sel");
+    if (s.w === w) {
+      b.classList.add("ok"); s.b.classList.add("ok"); GM.score++; GM.open--; gameTime();
+      try { navigator.vibrate && navigator.vibrate(10); } catch (_) {}
+      if (!GM.open) setTimeout(() => GM && GM.left > 0 && gameDeal(), 280);
+    } else {
+      [b, s.b].forEach(x => { x.classList.add("no"); setTimeout(() => x.classList.remove("no"), 350); });
+      const hw = side === "he" ? w : s.w; GM.miss.set(hw.id, hw);
+      GM.left = Math.max(0, GM.left - 3); gameTime(); if (GM.left <= 0) gameEnd();
+    }
+  }
+  function gameEnd() {
+    if (!GM) return; gameStop();
+    const g = S.game = S.game || { best: 0, plays: 0 };
+    const rec = GM.score > (g.best || 0); g.best = Math.max(g.best || 0, GM.score); g.plays = (g.plays || 0) + 1;
+    const L = S.log[dkey()] || (S.log[dkey()] = { n: 0, ok: 0 }); L.act = (L.act || 0) + 1;   // a game keeps the streak
+    save();
+    $("gmPlay").hidden = true; $("gmEnd").hidden = false; $("gmTime").hidden = true;
+    $("gmFinal").textContent = GM.score;
+    $("gmEndTitle").textContent = rec && g.plays > 1 ? "Новый рекорд!" : "пар за минуту";
+    $("gmEndText").textContent = "Лучший результат: " + g.best + "." + (GM.miss.size ? " Эти слова перепутались, взгляните на них ещё раз:" : " Ни одной ошибки.");
+    const ms = $("gmMiss"); ms.textContent = "";
+    for (const w of GM.miss.values()) { const d = el("div"); d.appendChild(el("span", "hw", shown(w.he))); d.appendChild(el("span", "small", (w.tr ? w.tr + ": " : "") + w.ru)); ms.appendChild(d); }
+    const acts = $("gmActions"); acts.textContent = "";
+    const add = (label, fn, sec) => { const b = rich(el("button", "btn" + (sec ? " secondary" : "")), label); b.onclick = fn; acts.appendChild(b); };
+    add("Ещё раз", startGame);
+    const nl = nextLessonAction(); if (nl) add(nl.label, nl.fn, true);
+    add("На главную", goHome, true);
   }
 
   /* ================= lexicon & tap-to-translate ================= */
@@ -2160,18 +2350,30 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const acts = $("todayActions"); acts.textContent = "";
     const addBtn = (label, fn, secondary) => { const b = rich(el("button", "btn" + (secondary ? " secondary" : "")), label); b.onclick = fn; acts.appendChild(b); return b; };
     let primaryUsed = false;
-    if (due) { addBtn("Повторить (" + due + ")", startReview); primaryUsed = true; }
+    const capped = reviewCapped();
+    if (due && !capped) { addBtn("Повторить (" + due + ")", startReview); primaryUsed = true; }
+    const t = today(), tm = Math.floor(t.ms / MIN);
+    $("tTimeWrap").hidden = !t.ms;
+    $("tTime").textContent = "Занятие сегодня: " + tm + " мин из " + sessMin() + (tm >= sessMin() ? ". Цель выполнена, дальше по желанию." : "");
+    $("tTimeBar").style.width = Math.min(100, t.ms / (sessMin() * MIN) * 100) + "%";
     if (p.status === "done") {
       for (const u of UNITS) {
         if (!unitOpen(u)) continue;
         const st = lessonState(u);
-        if (st.nextL) { addBtn((u.kind === "module" ? "Урок " + u.module + "." + (st.ls.indexOf(st.nextL) + 1) : (u.short || "Тренировка")) + ": " + st.nextL.title, () => openLesson(st.nextL.id), primaryUsed); primaryUsed = true; }
+        if (st.nextL) {
+          const z = resumeFor(st.nextL.id), name = (u.kind === "module" ? "Урок " + u.module + "." + (st.ls.indexOf(st.nextL) + 1) : (u.short || "Тренировка")) + ": " + st.nextL.title;
+          if (z) addBtn("Продолжить " + name + " (осталось " + resumeLeft(z) + ")", () => resumeLesson(st.nextL.id), primaryUsed);
+          else addBtn(name, () => openLesson(st.nextL.id), primaryUsed);
+          primaryUsed = true;
+        }
         else if (u.reading && !(S.units[u.id] || {}).reading) { addBtn("Текст для чтения: " + u.reading.title, () => openReading(u), primaryUsed); primaryUsed = true; }
         else if (u.test && !(S.units[u.id] || {}).passed) { addBtn("Контрольный тест модуля " + u.module, () => startUnitTest(u), primaryUsed); primaryUsed = true; }
       }
+      if (due && capped) addBtn("Повторить ещё (" + due + ")", startReview, true);
       const nErr = activeErrors().length;
       if (nErr >= 3) addBtn("Разобрать ошибки (" + nErr + ")", startErrors, true);
       if (Object.keys(S.cards).length) addBtn("Разминка на 5 минут", startWarmup, true);
+      if (gameWords().length >= 5) addBtn("Мини-игра «Пары»", startGame, true);
       if (!due && Object.keys(S.cards).length) addBtn("Дополнительная практика", startExtra, true);
     }
     $("todayPanel").hidden = p.status !== "done" && !due;
@@ -2315,6 +2517,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("s-nikud").setAttribute("aria-checked", S.settings.nikud);
     $("s-translit").setAttribute("aria-checked", S.settings.translit);
     [...$("s-kb").children].forEach(b => b.setAttribute("aria-pressed", b.dataset.v === S.settings.kb));
+    [...$("s-sess").children].forEach(b => b.setAttribute("aria-pressed", +b.dataset.v === sessMin()));
     $("importConfirm").hidden = true;
     $("storeStatus").textContent = store.mode === "local" && store.reason === "standalone" ? "Прогресс хранится в этом браузере на этом устройстве." + (S.lastBackup ? " Последняя копия: " + new Date(S.lastBackup).toLocaleDateString("ru-RU") + "." : " Копий пока не было.") + " Чтобы перенести прогресс на другое устройство, сохраните копию и загрузите её там." : store.mode === "db" ? "Прогресс сохраняется в вашем аккаунте Claude и одинаков на телефоне и компьютере. Он виден только вам." : store.mode === "local" ? "Прогресс сохраняется только в этом браузере на этом устройстве." : "Прогресс сейчас не сохраняется.";
     $("aiStatus").textContent = sampleFn ? "Кнопки «Почему так?» и «Мой ответ тоже верный?» появляются после ответа на задание. При первом нажатии Claude попросит разрешение." : "Объяснения от Claude недоступны в этом просмотре. Откройте приложение в Claude, войдя в свой аккаунт.";
@@ -2397,7 +2600,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("lsNext").onclick = lessonNext;
     $("lsTestOut").onclick = testOut;
     $("wdPrev").onclick = () => { if (LS.wi > 0) { LS.wi--; renderWord(); } };
-    $("wdNext").onclick = () => { if (LS.wi < LS.lesson.words.length - 1) { LS.wi++; renderWord(); } else startLessonPractice(); };
+    $("wdNext").onclick = () => { tick("lesson"); if (LS.wi < LS.lesson.words.length - 1) { LS.wi++; renderWord(); } else startLessonPractice(); };
     $("wdSay").onclick = () => speak(IDX.words[LS.lesson.words[LS.wi]].he);
     $("b-quit").onclick = quitRun;
     $("b-say").onclick = () => cur && speak(cur.say);
@@ -2408,6 +2611,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("s-nikud").onclick = () => { S.settings.nikud = !S.settings.nikud; save(); renderSettings(); };
     $("s-translit").onclick = () => { S.settings.translit = !S.settings.translit; save(); renderSettings(); };
     [...$("s-kb").children].forEach(b => b.onclick = () => { S.settings.kb = b.dataset.v; save(); applyKbMode(); renderSettings(); });
+    [...$("s-sess").children].forEach(b => b.onclick = () => { S.settings.session = +b.dataset.v; save(); renderSettings(); });
+    $("pzGo").onclick = () => { if (!R) return goHome(); lastAct = Date.now(); show("run"); renderItem(); };
+    $("pzStop").onclick = () => { const r = leaveRun(); goHome(); toast(r && r.mode === "lesson" ? "Урок сохранён: завтра продолжите с того же места" : "До завтра!"); };
+    $("pzGame").onclick = () => { leaveRun(); startGame(); };
+    $("pzWarm").onclick = () => { leaveRun(); startWarmup(); };
+    $("gmQuit").onclick = () => { gameStop(); goHome(); };
     $("b-voice").onclick = () => speak("שָׁלוֹם, מָה שְׁלוֹמֵךְ?");
     $("b-export").onclick = exportProgress;
     $("b-import").onclick = importPick;
