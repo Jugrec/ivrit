@@ -513,6 +513,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     <div id="qtype" hidden style="display:flex;flex-direction:column;gap:12px">
       <input id="answer" class="answer" type="text" dir="rtl" lang="he" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ответ на иврите" aria-label="Ваш ответ на иврите">
       <div id="kbRun"></div>
+      <button class="btn ghost small" id="b-kbswap" type="button" style="align-self:center"></button>
     </div>
     </div>
     <div class="dock" id="qdock">
@@ -1176,6 +1177,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   }
   function applyKbMode() {
     const app = S.settings.kb === "app";
+    $("b-kbswap").textContent = app ? "⌨ Переключить на клавиатуру телефона" : "⌨ Переключить на встроенную клавиатуру";
     $("kbRun").hidden = !app; $("kbWords").hidden = !app;
     for (const id of ["answer", "cwHe"]) $(id).setAttribute("inputmode", app ? "none" : "text");
   }
@@ -1196,7 +1198,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function renderItem() {
     if (R.pos >= R.queue.length) return finishRun();
     const item = R.queue[R.pos]; cur = item.ex; picked = null; answered = false; built = []; lastResult = null;
-    $("qdock").className = "dock"; $("b-check").classList.remove("ok", "no"); $("kbRun").hidden = false;
+    $("qdock").className = "dock"; $("b-check").classList.remove("ok", "no"); $("kbRun").hidden = S.settings.kb !== "app"; $("b-kbswap").hidden = false;
     const qc = $("qcard"); qc.classList.remove("in", "out"); void qc.offsetWidth; if (R.pos) qc.classList.add("in");
     $("qcount").textContent = (R.pos + 1) + " / " + R.queue.length;
     $("qbar").style.width = (R.pos / R.queue.length * 100) + "%";
@@ -1283,7 +1285,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     answered = true;
     if (R.mode !== "placement") sfx(ok ? "ok" : "bad");
     $("qdock").classList.add(ok ? "right" : "wrong"); $("b-check").classList.add(ok ? "ok" : "no");
-    if (["type", "gap", "transform"].includes(cur.type)) $("kbRun").hidden = true;
+    if (["type", "gap", "transform"].includes(cur.type)) { $("kbRun").hidden = true; $("b-kbswap").hidden = true; }
     if (picked !== null && ok) { const pb = [...$("qopts").children].find(x => +x.dataset.i === picked); if (pb) pb.classList.add("picked"); }
     if (item.first !== false && R.mode !== "placement" && R.mode !== "test") { R.combo = ok ? (R.combo || 0) + 1 : 0; if (ok) comboCheer(R.combo); }
     const res = { item, ex: cur, ok, given, skipped: !!skipped, almost };
@@ -3234,6 +3236,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("wdNext").onclick = () => { if (!$("wdFlip").classList.contains("on")) return flipWord(); tick("lesson"); if (LS.wi < LS.lesson.words.length - 1) { LS.wi++; renderWord(); } else startLessonPractice(); };
     $("wdSay").onclick = (e) => e.stopPropagation() || speak(IDX.words[LS.lesson.words[LS.wi]].he);
     $("b-quit").onclick = quitRun;
+    $("b-kbswap").onclick = () => {
+      S.settings.kb = S.settings.kb === "app" ? "native" : "app"; save(); applyKbMode();
+      const a = $("answer");
+      if (S.settings.kb === "native") { a.blur(); setTimeout(() => a.focus(), 30); toast("Включите на телефоне ивритскую раскладку (значок глобуса или пробел с переключением языка)"); }
+      else a.blur();
+    };
     $("b-say").onclick = () => cur && speak(cur.say);
     $("b-check").onclick = () => check(false);
     $("b-skip").onclick = () => check(true);
