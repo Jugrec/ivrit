@@ -266,6 +266,63 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
 .gcard.ok { border-color: var(--good); background: var(--good-soft); opacity: 0; pointer-events: none; }
 .gcard.no { border-color: var(--bad); background: var(--bad-soft); transform: translateX(3px); }
 .gscore { font-size: 2.4rem; font-weight: 600; }
+/* Games hub */
+.xp { font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
+.glist { display: flex; flex-direction: column; gap: 10px; }
+.gitem { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.gitem:first-child { border-top: 0; }
+.gitem .gi { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-family: var(--font-he); font-size: 1.35rem; }
+.gitem .gt { font-weight: 500; }
+.gitem .gd { font-size: 0.86rem; color: var(--muted); }
+.gitem .gb { grid-column: 2; display: flex; gap: 8px; flex-wrap: wrap; }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 12px; }
+.badge { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: 0.78rem; color: var(--muted); }
+.badge .md { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 1.05rem; background: var(--key); color: var(--muted); border: 2px dashed var(--line); }
+.badge.on { color: var(--ink); }
+.badge.on .md { background: var(--good-soft); color: var(--good); border: 2px solid var(--good); }
+.badge .md.he { font-family: var(--font-he); font-size: 1.4rem; }
+/* Map */
+.mapwrap { max-height: 440px; overflow-y: auto; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); overscroll-behavior: contain; }
+.map { position: relative; }
+.map svg { position: absolute; inset: 0; }
+.map .reg { position: absolute; left: 0; right: 0; }
+.map .reg span { position: absolute; top: 8px; right: 10px; font-size: 0.72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.stop { position: absolute; display: flex; align-items: center; gap: 10px; transform: translate(-21px, -21px); background: none; border: 0; padding: 0; text-align: left; color: var(--ink); }
+.stop.flip { flex-direction: row-reverse; text-align: right; transform: translate(calc(-100% + 21px), -21px); }
+.stop .dot { width: 42px; height: 42px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 0.9rem; font-weight: 600; background: var(--surface); border: 2px solid var(--line); color: var(--muted); }
+.stop.done .dot { background: var(--good); border-color: var(--good); color: var(--surface); }
+.stop.cur .dot { background: var(--accent); border-color: var(--accent); color: var(--surface); box-shadow: 0 0 0 6px var(--accent-soft); }
+.stop.open .dot { border-color: var(--accent); color: var(--accent); }
+.stop .lb { display: flex; flex-direction: column; line-height: 1.2; max-width: 128px; }
+.stop .lb b { font-weight: 500; font-size: 0.9rem; }
+.stop .lb i { font-style: normal; font-family: var(--font-he); font-size: 1rem; color: var(--muted); direction: rtl; }
+@media (prefers-reduced-motion: no-preference) { .stop.cur .dot { animation: pulse 2.4s ease-in-out infinite; } }
+@keyframes pulse { 50% { box-shadow: 0 0 0 10px var(--accent-soft); } }
+/* Game screens */
+.gq { display: flex; flex-direction: column; gap: 14px; }
+.gq .gp { font-size: 1.02rem; }
+.gq .gw { font-family: var(--font-he); font-size: 2.2rem; text-align: center; direction: rtl; line-height: 1.35; }
+.gq .gw.sent { font-size: 1.5rem; }
+.lives { color: var(--bad); letter-spacing: 3px; font-size: 1.1rem; }
+.tbar { height: 4px; border-radius: 4px; background: var(--key); overflow: hidden; }
+.tbar i { display: block; height: 100%; background: var(--accent); transition: width .2s linear; }
+.wbuilt { min-height: 64px; display: flex; flex-direction: row-reverse; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.wbuilt span { width: 40px; height: 52px; border-bottom: 2px solid var(--line); display: grid; place-items: center; font-family: var(--font-he); font-size: 1.9rem; }
+.wbuilt span.f { border-color: var(--good); }
+.wtiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.wtiles button { width: 52px; height: 56px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); font-family: var(--font-he); font-size: 1.7rem; }
+.wtiles button:disabled { opacity: 0.2; }
+.shake { animation: shake .3s; border-color: var(--bad) !important; background: var(--bad-soft) !important; }
+@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.flash { animation: flash .5s; }
+@keyframes flash { 30% { background: var(--good-soft); } }
+.field { position: relative; height: min(58vh, 480px); border-radius: 12px; border: 1px solid var(--line); background: var(--surface); overflow: hidden; touch-action: manipulation; }
+.field .fall { position: absolute; top: 0; left: 0; padding: 8px 14px; border-radius: 10px; background: var(--accent-soft); color: var(--ink); border: 0; font-family: var(--font-he); font-size: 1.45rem; white-space: nowrap; will-change: transform; }
+.field .fall.cursive { font-size: 1.9rem; }
+.field .fall.hit { background: var(--good); color: var(--surface); }
+.field .fall.bad { background: var(--bad); color: var(--surface); }
+.target { font-size: 1.15rem; text-align: center; }
+.target b { font-size: 1.3rem; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media (max-width: 380px) { .opts { grid-template-columns: 1fr; } .word { font-size: 2.1rem; } .today b { font-size: 1.15rem; } }
 </style>
@@ -313,7 +370,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         <button class="btn secondary" id="b-dialogs">Разговор</button>
         <button class="btn secondary" id="b-writing">Письмо</button>
       </div>
-      <button class="btn secondary" id="b-cursive">Прописные буквы</button>
+      <div class="nav"><button class="btn secondary" id="b-cursive">Прописные буквы</button><button class="btn secondary" id="b-games">Игры</button></div>
       <p class="small muted" id="practiceNote"></p>
     </div>
 
@@ -408,22 +465,40 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <p class="muted" id="pzText"></p>
       <div class="actions">
         <button class="btn" id="pzStop">Закончить на сегодня</button>
-        <button class="btn secondary" id="pzGame">Мини-игра «Пары»</button>
+        <button class="btn secondary" id="pzGame">Мини-игры</button>
         <button class="btn secondary" id="pzWarm">Разминка на 5 минут</button>
         <button class="btn secondary" id="pzGo">Продолжить</button>
       </div>
     </div>
   </section>
 
-  <!-- PAIRS GAME -->
+  <!-- GAMES HUB -->
+  <section id="v-games" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <div class="row" style="justify-content:space-between;align-items:flex-end"><h1>Игры</h1><span class="xp" id="gxXp"></span></div>
+    <div class="panel">
+      <div class="row" style="justify-content:space-between"><h2>Путь по Израилю</h2><span class="small muted" id="gxWhere"></span></div>
+      <p class="small muted">Каждый модуль курса это остановка. Пройдите контрольный тест, и остановка загорится.</p>
+      <div class="mapwrap" id="gxMapWrap"><div class="map" id="gxMap"></div></div>
+      <p class="small" id="gxStop" hidden></p>
+    </div>
+    <div class="panel">
+      <h2>Мини-игры</h2>
+      <p class="small muted">Только выученные слова и темы. Игры не меняют расписание повторений, но сохраняют серию дней.</p>
+      <div class="glist" id="gxList"></div>
+    </div>
+    <div class="panel">
+      <div class="row" style="justify-content:space-between"><h2>Награды</h2><span class="small muted" id="gxBadgeN"></span></div>
+      <div class="badges" id="gxBadges"></div>
+    </div>
+  </section>
+
+  <!-- GAME -->
   <section id="v-game" class="view" hidden>
     <div class="ghead"><button class="btn ghost" id="gmQuit">← Выйти</button><span class="small muted" id="gmScore"></span><span class="gtime" id="gmTime"></span></div>
-    <div id="gmPlay" class="view">
-      <p class="small muted">Найдите пары: слово на иврите и перевод. За минуту как можно больше. Ошибка отнимает 3 секунды.</p>
-      <div class="gboard"><div class="gcol" id="gmHe"></div><div class="gcol" id="gmRu"></div></div>
-    </div>
+    <div id="gmPlay" class="view"></div>
     <div class="panel" id="gmEnd" hidden>
-      <span class="eyebrow">Мини-игра «Пары»</span>
+      <span class="eyebrow" id="gmEndEye"></span>
       <div class="row" style="align-items:baseline;gap:14px"><span class="gscore" id="gmFinal"></span><h2 class="grow" id="gmEndTitle"></h2></div>
       <p class="muted" id="gmEndText"></p>
       <div class="mist" id="gmMiss"></div>
@@ -811,7 +886,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function dkey(t) { const d = new Date(t || Date.now()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   let toastT = null;
   function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3400); }
-  const VIEWS = ["home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game"];
+  const VIEWS = ["home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games"];
   function show(view) { for (const v of VIEWS) $("v-" + v).hidden = v !== view; if ($("sheet")) $("sheet").hidden = true; window.scrollTo(0, 0); }
   function rich(el, text) {
     // [[hebrew]] → styled span; everything else plain text
@@ -878,7 +953,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   /* ================= stats log ================= */
   function logAnswer(ok, type, k) {
     const d = dkey();
-    const L = S.log[d] || (S.log[d] = { n: 0, ok: 0 }); L.n++; if (ok) L.ok++;
+    const L = S.log[d] || (S.log[d] = { n: 0, ok: 0 }); L.n++; if (ok) { L.ok++; if (typeof S.xp === "number") S.xp++; }
     const T = S.typeStats[type] || (S.typeStats[type] = [0, 0]); T[1]++; if (ok) T[0]++;
     if (k) { const K = S.skillStats[k] || (S.skillStats[k] = [0, 0]); K[1]++; if (ok) K[0]++; }
   }
@@ -1248,7 +1323,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       ? "На сегодня хватит, если хочется отдохнуть: урок сохранён, завтра он продолжится с этого места (осталось заданий: " + (R.queue.length - R.pos) + "). Если есть желание, можно продолжить урок или переключиться на лёгкую игру."
       : "Хорошее занятие. Можно закончить на сегодня, продолжить или переключиться на лёгкую игру.";
     $("pzGo").textContent = lesson ? "Продолжить урок" : "Продолжить повторение";
-    $("pzGame").hidden = gameWords().length < 5;
+    $("pzGame").hidden = !Object.keys(S.cards).length;
     $("pzWarm").hidden = lesson ? !Object.keys(S.cards).length : true;
     show("pause");
   }
@@ -1464,6 +1539,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     run(Object.assign(lessonRunCfg(lesson, unit, hard), { items }));
   }
   function completeLesson(lesson, unit, results, testedOut) {
+    if (!S.lessons[lesson.id]) addXp(10);
     S.lessons[lesson.id] = Date.now();
     if (S.resume && S.resume.id === lesson.id) S.resume = null;
     if (results.length) S.lastLessonAcc = results.filter(r => r.ok).length / results.length;
@@ -1528,7 +1604,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         const pct = results.length ? results.filter(r => r.ok).length / results.length : 0;
         const U = S.units[unit.id] = Object.assign(S.units[unit.id] || {}, {});
         U.testLast = Math.round(pct * 100); U.testBest = Math.max(U.testBest || 0, U.testLast);
-        const passed = pct >= unit.test.pass; if (passed) U.passed = Date.now();
+        const passed = pct >= unit.test.pass; if (passed) { if (!U.passed) addXp(50); U.passed = Date.now(); }
         save();
         const weak = {}; results.filter(r => !r.ok && r.ex.k).forEach(r => weak[r.ex.k] = (weak[r.ex.k] || 0) + 1);
         const wl = Object.keys(weak).map(k => (IDX.skillName[k] || "").replace(/\[\[|\]\]/g, "")).join(", ");
@@ -1768,9 +1844,20 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       onQuit: () => goHome() });
   }
 
-  /* ================= pairs game ================= */
-  // Learned words only; the game does not change the review schedule.
+  /* ================= games ================= */
+  // Learned material only. Games never change the review schedule; they keep the streak and add points.
+  // Points (S.xp) and records (S.game) are shown only in «Игры».
   let GM = null;
+  const PRON = ["אֲנִי", "אַתָּה", "אַתְּ", "הוּא", "הִיא", "אֲנַחְנוּ", "אַתֶּם", "הֵם"];
+  const GN4 = ["м.р., ед.ч.", "ж.р., ед.ч.", "м.р., мн.ч.", "ж.р., мн.ч."];
+  const IMP3 = ["ты (м.)", "ты (ж.)", "вы"], DEM3 = ["м.р.", "ж.р.", "мн.ч."];
+  function gstate() {
+    const g = S.game = S.game || {};
+    if (typeof g.best === "number") { g.pairs = { best: g.best, plays: g.plays || 0 }; delete g.best; delete g.plays; }
+    return g;
+  }
+  function xpInit() { if (typeof S.xp !== "number") { let x = 0; for (const L of Object.values(S.log)) x += L.ok || 0; S.xp = x + 10 * Object.keys(S.lessons).length; } }
+  function addXp(n) { xpInit(); S.xp += n; }
   function gameWords() {
     const seen = new Set(), out = [];
     for (const id of Object.keys(S.cards)) {
@@ -1780,61 +1867,397 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     }
     return out;
   }
-  function startGame() {
-    const words = gameWords();
-    if (words.length < 5) { toast("Для игры нужно хотя бы 5 выученных слов"); return; }
-    gameStop();
-    GM = { pool: shuffle(words), used: 0, score: 0, left: 60, sel: null, miss: new Map(), t: null };
-    $("gmPlay").hidden = false; $("gmEnd").hidden = true; $("gmTime").hidden = false;
-    show("game"); gameDeal(); gameTime();
-    GM.t = setInterval(() => { if (document.hidden) return; GM.left--; gameTime(); if (GM.left <= 0) gameEnd(); }, 1000);
+  function buildWords() { return gameWords().filter(w => { const b = norm(plene(w.he) || w.he); return !/\s/.test(b) && b.length >= 2 && b.length <= 8; }); }
+  function formWords() {
+    return gameWords().filter(w => !w.custom && w.forms).map(w => {
+      const fs = w.forms.split("·").map(x => x.trim()).filter(Boolean), bare = fs.map(norm);
+      let labels = null;
+      if (fs.length === 8) labels = PRON.map(p => "для [[" + p + "]]");
+      else if (fs.length === 4 && /ים$/.test(bare[2]) && /ות$/.test(bare[3])) labels = GN4;
+      else if (fs.length === 3) labels = /!/.test(w.ru) ? IMP3 : DEM3;
+      return labels ? { w, fs, labels } : null;
+    }).filter(Boolean);
   }
-  function gameStop() { if (GM && GM.t) clearInterval(GM.t); if (GM) GM.t = null; }
-  function gameTime() { const t = $("gmTime"); const sec = Math.max(0, GM.left); t.textContent = Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); t.classList.toggle("low", GM.left <= 10); $("gmScore").textContent = "Пар: " + GM.score; }
-  function gameDeal() {
+  const need5 = () => gameWords().length >= 5 ? null : "Откроется после 5 выученных слов";
+  const GAMES = [
+    { id: "pairs", icon: "⇄", name: "Пары", d: "Слово и перевод: как можно больше пар за минуту.", need: need5, start: () => gPairs() },
+    { id: "build", icon: "אב", name: "Собери слово", d: "Буквы рассыпаны: соберите слово по переводу. 90 секунд.", need: () => buildWords().length >= 5 ? null : "Откроется после 5 выученных слов", start: () => gBuild() },
+    { id: "surv", icon: "♥", name: "Выживание", d: "Задания подряд, три жизни. Чем дальше, тем сложнее и быстрее.", need: need5, start: () => gSurv() },
+    { id: "catch", icon: "↓", name: "Поймай", d: "Слова или буквы падают сверху: ловите нужное. Три жизни.", modes: [["words", "Слова"], ["letters", "Прописные буквы"]], need: () => null, start: (m) => gCatch(m) },
+    { id: "forms", icon: "ים", name: "Формы на время", d: "Глаголы, прилагательные, предлоги с окончаниями: нужная форма за минуту.", need: () => formWords().length >= 3 ? null : "Откроется, когда будут выучены слова с формами", start: () => gForms() }
+  ];
+
+  /* --- engine --- */
+  function gBegin(o) {
+    gameStop();
+    GM = Object.assign({ score: 0, miss: new Map(), t: null, raf: null, qt: null, left: null, lives: null, over: false, ended: false, quit: false }, o);
+    $("gmPlay").textContent = ""; $("gmPlay").hidden = false; $("gmEnd").hidden = true; $("gmTime").hidden = false;
+    show("game"); gHud();
+    if (GM.left != null) { const me = GM; GM.t = setInterval(() => { if (document.hidden || me.over) return; me.left--; gHud(); if (me.left <= 0) gEnd(); }, 1000); }
+  }
+  function later(fn, ms) { const me = GM; setTimeout(() => { if (GM === me && !me.ended && !me.quit) fn(); }, ms); }
+  function gHud() {
+    const t = $("gmTime");
+    if (GM.lives != null) { t.textContent = "♥".repeat(Math.max(0, GM.lives)) + "♡".repeat(Math.max(0, 3 - GM.lives)); t.className = "gtime lives"; }
+    else { const sec = Math.max(0, GM.left); t.textContent = Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); t.className = "gtime" + (sec <= 10 ? " low" : ""); }
+    $("gmScore").textContent = "Очки: " + GM.score;
+  }
+  const buzz = (ms) => { try { navigator.vibrate && navigator.vibrate(ms); } catch (_) {} };
+  function gGood() { GM.score++; gHud(); buzz(10); }
+  function gPenalty(sec) { GM.left = Math.max(0, GM.left - sec); gHud(); if (GM.left <= 0) gEnd(); }
+  function gLife() { GM.lives--; gHud(); buzz(40); if (GM.lives <= 0) { GM.over = true; later(gEnd, 1300); } }
+  function gMiss(key, he, ru) { GM.miss.set(key, { he, ru }); }
+  function gameStop() { if (!GM) return; GM.over = true; if (GM.t) clearInterval(GM.t); if (GM.raf) cancelAnimationFrame(GM.raf); if (GM.qt) clearTimeout(GM.qt); GM.t = GM.raf = GM.qt = null; }
+  function gEnd() {
+    if (!GM || GM.ended || GM.quit) return;
+    gameStop(); GM.ended = true;
+    const g = gstate(), rec = g[GM.key] = g[GM.key] || { best: 0, plays: 0 };
+    const isRec = GM.score > rec.best && rec.plays > 0;
+    rec.best = Math.max(rec.best, GM.score); rec.plays++;
+    addXp(GM.score); actLog(); save();
+    $("gmPlay").hidden = true; $("gmEnd").hidden = false; $("gmTime").hidden = true;
+    $("gmEndEye").textContent = "Мини-игра «" + GM.title + "»";
+    $("gmFinal").textContent = GM.score;
+    $("gmEndTitle").textContent = isRec ? "Новый рекорд!" : GM.unit;
+    $("gmEndText").textContent = "Лучший результат: " + rec.best + ". Очков получено: " + GM.score + "." + (GM.miss.size ? " Посмотрите ещё раз на то, что вызвало трудности:" : " Без ошибок.");
+    const ms = $("gmMiss"); ms.textContent = "";
+    for (const m of [...GM.miss.values()].slice(0, 12)) { const d = el("div"); if (m.he) d.appendChild(el("span", "hw", shown(m.he))); d.appendChild(rich(el("span", "small"), m.ru)); ms.appendChild(d); }
+    const acts = $("gmActions"); acts.textContent = "";
+    const add = (label, fn, sec) => { const b = rich(el("button", "btn" + (sec ? " secondary" : "")), label); b.onclick = fn; acts.appendChild(b); };
+    add("Ещё раз", GM.again); add("Другие игры", openGames, true);
+    const nl = nextLessonAction(); if (nl) add(nl.label, nl.fn, true);
+    add("На главную", goHome, true);
+  }
+
+  /* --- Пары --- */
+  function gPairs() {
+    gBegin({ key: "pairs", title: "Пары", unit: "пар за минуту", left: 60, pool: shuffle(gameWords()), used: 0, again: gPairs });
+    const area = $("gmPlay");
+    area.appendChild(el("p", "small muted", "Найдите пары: слово на иврите и перевод. Ошибка отнимает 3 секунды."));
+    const board = el("div", "gboard"); GM.he = el("div", "gcol"); GM.ru = el("div", "gcol"); board.append(GM.he, GM.ru); area.appendChild(board);
+    pairsDeal();
+  }
+  function pairsDeal() {
     if (GM.used + 5 > GM.pool.length) { GM.pool = shuffle(GM.pool); GM.used = 0; }
     const set = GM.pool.slice(GM.used, GM.used + 5); GM.used += 5; GM.open = set.length; GM.sel = null;
-    const he = $("gmHe"), ru = $("gmRu"); he.textContent = ""; ru.textContent = "";
+    GM.he.textContent = ""; GM.ru.textContent = "";
     const mk = (w, side) => {
       const b = el("button", "gcard" + (side === "he" ? " he" : ""), side === "he" ? shown(w.he) : w.ru); b.type = "button";
       if (side === "he") b.dir = "rtl";
-      b.onclick = () => gamePick(b, w, side); return b;
+      b.onclick = () => pairsPick(b, w, side); return b;
     };
-    shuffle(set).forEach(w => he.appendChild(mk(w, "he")));
-    shuffle(set).forEach(w => ru.appendChild(mk(w, "ru")));
+    shuffle(set).forEach(w => GM.he.appendChild(mk(w, "he")));
+    shuffle(set).forEach(w => GM.ru.appendChild(mk(w, "ru")));
   }
-  function gamePick(b, w, side) {
-    if (!GM || GM.left <= 0 || b.classList.contains("ok")) return;
+  function pairsPick(b, w, side) {
+    if (GM.over || b.classList.contains("ok")) return;
     const s = GM.sel;
     if (!s || s.side === side) { if (s) s.b.classList.remove("sel"); GM.sel = { b, w, side }; b.classList.add("sel"); return; }
     GM.sel = null; s.b.classList.remove("sel");
-    if (s.w === w) {
-      b.classList.add("ok"); s.b.classList.add("ok"); GM.score++; GM.open--; gameTime();
-      try { navigator.vibrate && navigator.vibrate(10); } catch (_) {}
-      if (!GM.open) setTimeout(() => GM && GM.left > 0 && gameDeal(), 280);
-    } else {
+    if (s.w === w) { b.classList.add("ok"); s.b.classList.add("ok"); GM.open--; gGood(); if (!GM.open) later(pairsDeal, 280); }
+    else {
       [b, s.b].forEach(x => { x.classList.add("no"); setTimeout(() => x.classList.remove("no"), 350); });
-      const hw = side === "he" ? w : s.w; GM.miss.set(hw.id, hw);
-      GM.left = Math.max(0, GM.left - 3); gameTime(); if (GM.left <= 0) gameEnd();
+      const hw = side === "he" ? w : s.w; gMiss(hw.id, hw.he, (hw.tr ? hw.tr + ": " : "") + hw.ru);
+      gPenalty(3);
     }
   }
-  function gameEnd() {
-    if (!GM) return; gameStop();
-    const g = S.game = S.game || { best: 0, plays: 0 };
-    const rec = GM.score > (g.best || 0); g.best = Math.max(g.best || 0, GM.score); g.plays = (g.plays || 0) + 1;
-    const L = S.log[dkey()] || (S.log[dkey()] = { n: 0, ok: 0 }); L.act = (L.act || 0) + 1;   // a game keeps the streak
-    save();
-    $("gmPlay").hidden = true; $("gmEnd").hidden = false; $("gmTime").hidden = true;
-    $("gmFinal").textContent = GM.score;
-    $("gmEndTitle").textContent = rec && g.plays > 1 ? "Новый рекорд!" : "пар за минуту";
-    $("gmEndText").textContent = "Лучший результат: " + g.best + "." + (GM.miss.size ? " Эти слова перепутались, взгляните на них ещё раз:" : " Ни одной ошибки.");
-    const ms = $("gmMiss"); ms.textContent = "";
-    for (const w of GM.miss.values()) { const d = el("div"); d.appendChild(el("span", "hw", shown(w.he))); d.appendChild(el("span", "small", (w.tr ? w.tr + ": " : "") + w.ru)); ms.appendChild(d); }
-    const acts = $("gmActions"); acts.textContent = "";
-    const add = (label, fn, sec) => { const b = rich(el("button", "btn" + (sec ? " secondary" : "")), label); b.onclick = fn; acts.appendChild(b); };
-    add("Ещё раз", startGame);
-    const nl = nextLessonAction(); if (nl) add(nl.label, nl.fn, true);
-    add("На главную", goHome, true);
+
+  /* --- Собери слово --- */
+  function gBuild() {
+    gBegin({ key: "build", title: "Собери слово", unit: "слов за 90 секунд", left: 90, pool: shuffle(buildWords()), used: 0, again: gBuild });
+    const area = $("gmPlay");
+    area.appendChild(el("p", "small muted", "Нажимайте буквы по порядку, справа налево. Неверная буква отнимает 2 секунды."));
+    const q = el("div", "gq"); GM.prompt = el("div", "target"); GM.built = el("div", "wbuilt"); GM.tiles = el("div", "wtiles");
+    const skip = el("button", "btn ghost small", "Показать слово (−5 секунд)"); skip.style.alignSelf = "center";
+    skip.onclick = () => { if (GM.over || GM.busy) return; gMiss(GM.w.id, GM.w.he, GM.w.ru); buildReveal(); };
+    q.append(GM.prompt, GM.built, GM.tiles, skip); area.appendChild(q);
+    buildNext();
+  }
+  function buildNext() {
+    if (GM.over) return;
+    if (GM.used >= GM.pool.length) { GM.pool = shuffle(GM.pool); GM.used = 0; }
+    const w = GM.w = GM.pool[GM.used++];
+    GM.word = [...norm(plene(w.he) || w.he)]; GM.pos = 0; GM.err = 0; GM.busy = false;
+    GM.prompt.textContent = ""; GM.prompt.appendChild(el("b", "", w.ru));
+    if (S.settings.translit && w.tr) GM.prompt.appendChild(el("div", "small muted", w.tr));
+    GM.built.textContent = ""; GM.slots = GM.word.map(() => GM.built.appendChild(el("span")));
+    GM.tiles.textContent = "";
+    let order = shuffle(GM.word); for (let n = 0; n < 5 && GM.word.length > 1 && order.join("") === GM.word.join(""); n++) order = shuffle(GM.word);
+    order.forEach(c => { const b = el("button", "", c); b.type = "button"; b.onclick = () => buildTap(b, c); GM.tiles.appendChild(b); });
+  }
+  function buildTap(b, c) {
+    if (GM.over || GM.busy || b.disabled) return;
+    if (c === GM.word[GM.pos]) {
+      b.disabled = true; GM.slots[GM.pos].textContent = c; GM.slots[GM.pos].classList.add("f"); GM.pos++;
+      if (GM.pos === GM.word.length) {
+        gGood(); if (GM.err) gMiss(GM.w.id, GM.w.he, GM.w.ru);
+        GM.busy = true; GM.built.classList.add("flash");
+        later(() => { GM.built.classList.remove("flash"); buildNext(); }, 450);
+      }
+    } else { b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 300); GM.err++; gPenalty(2); }
+  }
+  function buildReveal() {
+    GM.busy = true; GM.word.forEach((c, i) => { GM.slots[i].textContent = c; });
+    gPenalty(5); later(buildNext, 1200);
+  }
+
+  /* --- Выживание --- */
+  function gSurv() {
+    const skillPool = Object.keys(S.cards).filter(id => id.startsWith("k:"))
+      .flatMap(id => (IDX.skills[id.slice(2)] || []).filter(e => e.type === "choice" && e.options && e.options.length >= 2 && typeof e.answer === "number"));
+    gBegin({ key: "surv", title: "Выживание", unit: "верных ответов подряд", lives: 3, skillPool, again: gSurv });
+    GM.box = el("div", "gq"); $("gmPlay").appendChild(GM.box);
+    survNext();
+  }
+  function survQ() {
+    const W = gameWords(), s = GM.score, kinds = ["he"];
+    if (s >= 4) kinds.push("ru");
+    if (s >= 10 && GM.skillPool.length) kinds.push("k", "k");
+    const kind = pick(kinds);
+    if (kind === "k") { const ex = pick(GM.skillPool); return { prompt: ex.prompt, he: ex.he || "", script: ex.script, options: ex.options, answer: ex.answer, heOpts: ex.options.some(o => HEB.test(o)), miss: [ex.id, (ex.he || "").replace("___", "…"), "Ответ: " + ex.options[ex.answer]] }; }
+    const w = pick(W), others = shuffle(W.filter(x => x !== w && x.ru !== w.ru && norm(x.he) !== norm(w.he))).slice(0, 3);
+    const opts = shuffle([w].concat(others)), miss = [w.id, w.he, (w.tr ? w.tr + ": " : "") + w.ru];
+    if (kind === "he") return { prompt: "Что значит это слово?", he: w.he, options: opts.map(x => x.ru), answer: opts.indexOf(w), heOpts: false, miss };
+    return { prompt: "Как сказать на иврите: «" + w.ru + "»?", he: "", options: opts.map(x => x.he), answer: opts.indexOf(w), heOpts: true, miss };
+  }
+  function survNext() {
+    if (GM.over) return;
+    const q = GM.q = survQ(), area = GM.box; area.textContent = ""; GM.lock = false;
+    area.appendChild(rich(el("div", "gp"), q.prompt));
+    if (q.he) { const hw = el("div", "gw" + (q.he.length > 14 ? " sent" : "") + (q.script === "cursive" ? " cursive" : ""), shown(q.he).replace("___", "…")); hw.dir = "rtl"; area.appendChild(hw); }
+    const lim = GM.score >= 25 ? 6 : GM.score >= 12 ? 9 : 0;
+    if (lim) {
+      const tb = el("div", "tbar"), i = el("i"); tb.appendChild(i); area.appendChild(tb);
+      i.style.width = "100%"; i.style.transition = "width " + lim + "s linear";
+      requestAnimationFrame(() => requestAnimationFrame(() => { i.style.width = "0%"; }));
+      GM.qt = setTimeout(() => survAnswer(-1), lim * 1000);
+    }
+    const box = el("div", "opts");
+    q.options.forEach((o, idx) => { const b = el("button", "opt" + (q.heOpts ? " he" : ""), q.heOpts ? shown(o) : o); b.type = "button"; if (q.heOpts) b.dir = "rtl"; b.onclick = () => survAnswer(idx); box.appendChild(b); });
+    area.appendChild(box); GM.opts = box;
+  }
+  function survAnswer(idx) {
+    if (GM.over || GM.lock) return;
+    GM.lock = true; clearTimeout(GM.qt);
+    const q = GM.q, ok = idx === q.answer;
+    [...GM.opts.children].forEach((b, i) => { if (i === q.answer) b.classList.add("right"); else if (i === idx) b.classList.add("wrong"); });
+    if (ok) gGood(); else { gMiss(...q.miss); gLife(); }
+    if (!GM.over) later(survNext, ok ? 550 : 1500);
+  }
+
+  /* --- Поймай --- */
+  function gCatch(mode) {
+    const letters = mode === "letters";
+    const pool = letters ? LETTERS.map(([c, n]) => ({ id: c, he: c, ru: n })) : gameWords();
+    gBegin({ key: "catch:" + mode, title: letters ? "Поймай букву" : "Поймай слово", unit: "поймано за игру", lives: 3, letters, pool, items: [], spawnT: 0.3, since: 0, again: () => gCatch(mode) });
+    const area = $("gmPlay");
+    GM.tgt = el("div", "target"); GM.field = el("div", "field");
+    area.append(GM.tgt, GM.field);
+    area.appendChild(el("p", "small muted", letters ? "Нажимайте на прописную букву с этим названием. Пропущенная нужная буква или неверная отнимают жизнь." : "Нажимайте на слово с этим значением. Пропущенное нужное слово или неверное отнимают жизнь."));
+    catchTarget();
+    GM.last = performance.now(); GM.raf = requestAnimationFrame(catchLoop);
+  }
+  function catchTarget() {
+    const old = GM.target;
+    GM.target = pick(GM.pool.filter(x => x !== old));
+    GM.tgt.textContent = "Ловите: "; GM.tgt.appendChild(el("b", "", GM.target.ru));
+  }
+  function catchSpawn() {
+    const T = GM.target, hasRight = GM.items.some(it => it.right && !it.done);
+    const right = !hasRight && (Math.random() < 0.4 || GM.since >= 3);
+    let x = T;
+    if (!right) {
+      const pair = GM.letters && Math.random() < 0.5 ? CPAIRS.find(p => p.includes(T.he)) : null;
+      const alt = pair ? GM.pool.find(p => p.he === (pair[0] === T.he ? pair[1] : pair[0])) : null;
+      x = alt || pick(GM.pool.filter(p => p.ru !== T.ru && norm(p.he) !== norm(T.he)));
+    }
+    GM.since = right ? 0 : GM.since + 1;
+    const b = el("button", "fall" + (GM.letters ? " cursive" : ""), GM.letters ? x.he : shown(x.he)); b.type = "button"; b.dir = "rtl";
+    GM.field.appendChild(b);
+    const W = GM.field.clientWidth, bw = b.offsetWidth;
+    const it = { b, w: x, x: 4 + Math.random() * Math.max(0, W - bw - 8), y: -60, right, done: false };
+    b.style.transform = "translate(" + it.x + "px," + it.y + "px)";
+    b.addEventListener("pointerdown", e => { e.preventDefault(); catchTap(it); });
+    GM.items.push(it);
+  }
+  function catchTap(it) {
+    if (GM.over || it.done) return;
+    it.done = true;
+    if (it.right) {
+      it.b.classList.add("hit"); gGood();
+      for (const o of GM.items) if (o !== it && !o.done) { o.done = true; o.b.remove(); }
+      setTimeout(() => it.b.remove(), 220);
+      catchTarget(); GM.spawnT = 0.35;
+    } else {
+      it.b.classList.add("bad"); setTimeout(() => it.b.remove(), 260);
+      gMiss(it.w.id + ">" + GM.target.id, it.w.he, "Это не «" + GM.target.ru + "», а «" + it.w.ru + "»");
+      gLife();
+    }
+  }
+  function catchLoop(now) {
+    if (!GM || GM.over || !GM.field) return;
+    const dt = Math.min(0.05, (now - GM.last) / 1000); GM.last = now;
+    if (!document.hidden) {
+      GM.spawnT -= dt;
+      if (GM.spawnT <= 0) { catchSpawn(); GM.spawnT = Math.max(0.6, 1.5 - GM.score * 0.03); }
+      const H = GM.field.clientHeight, v = 55 + GM.score * 3.5;
+      for (const it of GM.items) {
+        if (it.done) continue;
+        it.y += v * dt; it.b.style.transform = "translate(" + it.x + "px," + it.y + "px)";
+        if (it.y > H) {
+          it.done = true; it.b.remove();
+          if (it.right) { gMiss(it.w.id, it.w.he, "Пропущено: «" + it.w.ru + "»"); gLife(); if (GM.over) return; }
+        }
+      }
+      GM.items = GM.items.filter(it => !it.done || it.b.isConnected);
+    }
+    GM.raf = requestAnimationFrame(catchLoop);
+  }
+
+  /* --- Формы на время --- */
+  function gForms() {
+    gBegin({ key: "forms", title: "Формы на время", unit: "форм за минуту", left: 60, pool: formWords(), again: gForms });
+    $("gmPlay").appendChild(el("p", "small muted", "Выберите нужную форму слова. Ошибка отнимает 3 секунды."));
+    GM.box = el("div", "gq"); $("gmPlay").appendChild(GM.box);
+    formsNext();
+  }
+  function formsNext() {
+    if (GM.over) return;
+    const f = pick(GM.pool), i = Math.floor(Math.random() * f.fs.length), right = f.fs[i];
+    const opts = shuffle([right].concat(shuffle([...new Set(f.fs)].filter(x => x !== right)).slice(0, 3)));
+    GM.q = { f, i, right, opts }; GM.lock = false;
+    const area = GM.box; area.textContent = "";
+    const hw = el("div", "gw", shown(f.w.he)); hw.dir = "rtl"; area.appendChild(hw);
+    area.appendChild(el("div", "small muted", f.w.ru)).style.textAlign = "center";
+    area.appendChild(rich(el("div", "target"), "Форма: " + f.labels[i]));
+    const box = el("div", "opts");
+    opts.forEach((o, idx) => { const b = el("button", "opt he", shown(o)); b.type = "button"; b.dir = "rtl"; b.onclick = () => formsAnswer(idx); box.appendChild(b); });
+    area.appendChild(box); GM.opts = box;
+  }
+  function formsAnswer(idx) {
+    if (GM.over || GM.lock) return;
+    GM.lock = true;
+    const q = GM.q, ok = q.opts[idx] === q.right;
+    [...GM.opts.children].forEach((b, i) => { if (q.opts[i] === q.right) b.classList.add("right"); else if (i === idx) b.classList.add("wrong"); });
+    if (ok) { gGood(); later(formsNext, 350); }
+    else { gMiss(q.f.w.id + ":" + q.i, q.right, (q.f.w.ru + ", " + q.f.labels[q.i])); gPenalty(3); if (!GM.over) later(formsNext, 1300); }
+  }
+
+  /* --- hub: map, games, badges --- */
+  const STOPS = [["Тель-Авив", "תֵּל אָבִיב"], ["Яффо", "יָפוֹ"], ["Герцлия", "הֶרְצְלִיָּה"], ["Нетания", "נְתַנְיָה"], ["Кейсария", "קֵיסַרְיָה"],
+    ["Зихрон-Яаков", "זִכְרוֹן יַעֲקֹב"], ["Хайфа", "חֵיפָה"], ["Акко", "עַכּוֹ"], ["Рош-ха-Никра", "רֹאשׁ הַנִּקְרָה"], ["Цфат", "צְפַת"],
+    ["Тверия", "טְבֶרְיָה"], ["Назарет", "נָצְרַת"], ["Бейт-Шеан", "בֵּית שְׁאָן"], ["Бейт-Шемеш", "בֵּית שֶׁמֶשׁ"], ["Иерусалим", "יְרוּשָׁלַיִם"],
+    ["Эйн-Геди", "עֵין גֶּדִי"], ["Масада", "מְצָדָה"], ["Арад", "עֲרָד"], ["Беэр-Шева", "בְּאֵר שֶׁבַע"], ["Сде-Бокер", "שְׂדֵה בֹּקֶר"],
+    ["Мицпе-Рамон", "מִצְפֵּה רָמוֹן"], ["Тимна", "תִּמְנָע"], ["Эйлат", "אֵילַת"]];
+  const REGIONS = [{ a: 1, b: 9, name: "Побережье", k: "sea" }, { a: 10, b: 13, name: "Галилея", k: "hills" }, { a: 14, b: 15, name: "Иудейские горы", k: "city" }, { a: 16, b: 23, name: "Мёртвое море и Негев", k: "desert" }];
+  function moduleStatus(n) {
+    const p = S.placement, start = p.result ? p.result.start : null;
+    const u = UNITS.find(x => x.kind === "module" && x.module === n);
+    if (u && (S.units[u.id] || {}).passed) return "done";
+    if (!u && start !== null && n < start) return "done";
+    if (u && p.status === "done" && unitOpen(u)) return "open";
+    return "";
+  }
+  function renderMap() {
+    const wrap = $("gxMapWrap"), map = $("gxMap"); map.textContent = "";
+    const mods = C.modules.slice(0, STOPS.length);
+    const W = Math.max(280, wrap.clientWidth), RH = 76, TOP = 46;
+    const pts = mods.map((m, i) => ({ m, i, x: Math.round(W / 2 + Math.sin(i * 0.95) * W * 0.27), y: TOP + i * RH, st: moduleStatus(m.n) }));
+    const H = TOP + (mods.length - 1) * RH + 50; map.style.height = H + "px";
+    let cur = pts.findIndex(p => p.st === "open"); if (cur < 0) cur = pts.filter(p => p.st === "done").length - 1;
+    if (pts[cur] && pts[cur].st === "open") pts[cur].st = "cur";
+    const tint = { sea: "var(--accent-soft)", hills: "var(--good-soft)", city: "var(--warn-soft)", desert: "var(--warn-soft)" };
+    for (const r of REGIONS) {
+      if (r.a > mods.length) continue;
+      const y0 = r.a === 1 ? 0 : TOP + (r.a - 1.5) * RH, y1 = r.b >= mods.length ? H : TOP + (r.b - 0.5) * RH;
+      const d = el("div", "reg"); d.style.top = y0 + "px"; d.style.height = (y1 - y0) + "px"; d.style.background = tint[r.k]; d.style.opacity = r.k === "desert" ? "0.75" : "0.55";
+      d.appendChild(el("span", "", r.name)); map.appendChild(d);
+    }
+    const NS = "http://www.w3.org/2000/svg", svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("aria-hidden", "true");
+    const curve = (ps) => ps.map((p, i) => {
+      if (!i) return "M" + p.x + " " + p.y;
+      const p0 = ps[i - 2] || ps[i - 1], p1 = ps[i - 1], p3 = ps[i + 1] || p;
+      const c1x = p1.x + (p.x - p0.x) / 6, c1y = p1.y + (p.y - p0.y) / 6, c2x = p.x - (p3.x - p1.x) / 6, c2y = p.y - (p3.y - p1.y) / 6;
+      return "C" + c1x.toFixed(1) + " " + c1y.toFixed(1) + " " + c2x.toFixed(1) + " " + c2y.toFixed(1) + " " + p.x + " " + p.y;
+    }).join(" ");
+    const path = (d, attrs) => { const e = document.createElementNS(NS, "path"); e.setAttribute("d", d); e.setAttribute("fill", "none"); for (const k in attrs) e.setAttribute(k, attrs[k]); svg.appendChild(e); return e; };
+    path(curve(pts), { stroke: "var(--line)", "stroke-width": 4, "stroke-dasharray": "2 9", "stroke-linecap": "round" });
+    if (cur > 0) path(curve(pts.slice(0, cur + 1)), { stroke: "var(--good)", "stroke-width": 4, "stroke-linecap": "round" });
+    // small decorations in free space beside the path
+    const deco = { sea: "M0 6 q4 -6 8 0 t8 0 t8 0 M0 14 q4 -6 8 0 t8 0 t8 0", hills: "M0 16 L8 4 L14 12 L19 6 L28 16 Z", city: "M2 16 V8 H7 V4 H12 V8 H16 V2 H21 V16 Z", desert: "M14 7 m-5 0 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0 M0 18 q7 -6 14 0 t14 0" };
+    pts.forEach((p, i) => {
+      if (i % 2) return;
+      const r = REGIONS.find(r => p.m.n >= r.a && p.m.n <= r.b); if (!r) return;
+      const left = p.x > W / 2, gx = left ? 10 : W - 40, g = document.createElementNS(NS, "path");
+      g.setAttribute("d", deco[r.k]); g.setAttribute("transform", "translate(" + gx + " " + (p.y - 8) + ")");
+      g.setAttribute("fill", r.k === "hills" || r.k === "city" ? "var(--muted)" : "none"); g.setAttribute("stroke", "var(--muted)"); g.setAttribute("stroke-width", "1.5"); g.setAttribute("opacity", r.k === "hills" || r.k === "city" ? "0.18" : "0.4");
+      svg.appendChild(g);
+    });
+    map.appendChild(svg);
+    pts.forEach(p => {
+      const [ru, he] = STOPS[p.i];
+      const b = el("button", "stop " + (p.st || "") + (p.x > W / 2 ? " flip" : "")); b.type = "button";
+      b.style.left = p.x + "px"; b.style.top = p.y + "px";
+      b.appendChild(el("span", "dot", p.st === "done" ? "✓" : String(p.m.n)));
+      const lb = el("span", "lb"); lb.appendChild(el("b", "", ru)); const hi = el("i", "", shown(he)); lb.appendChild(hi); b.appendChild(lb);
+      b.onclick = () => {
+        const s = $("gxStop"); s.hidden = false;
+        const stTxt = p.st === "done" ? "пройден" : p.st === "cur" ? "вы здесь" : p.st === "open" ? "открыт" : "впереди";
+        rich(s, "Модуль " + p.m.n + " · " + ru + " ([[" + he + "]]): " + p.m.title.replace(/^Бет:\s*/, "") + ". Сейчас: " + stTxt + ".");
+      };
+      map.appendChild(b);
+    });
+    const c = pts[Math.max(0, cur)];
+    $("gxWhere").textContent = c ? (c.st === "done" ? "Пройдено: " + STOPS[c.i][0] : "Вы в пути: " + STOPS[c.i][0]) : "";
+    wrap.scrollTop = Math.max(0, (c ? c.y : 0) - 170);
+  }
+  function bestStreak() {
+    const days = Object.keys(S.log).filter(d => S.log[d].n > 0 || S.log[d].act > 0).sort();
+    let best = 0, run = 0, prev = null;
+    for (const d of days) { const t = new Date(d + "T12:00:00").getTime(); run = prev && Math.round((t - prev) / DAY) === 1 ? run + 1 : 1; best = Math.max(best, run); prev = t; }
+    return best;
+  }
+  function badgeList() {
+    const g = gstate(), nl = Object.keys(S.lessons).length, nw = Object.keys(S.cards).filter(i => i.startsWith("w:")).length, bs = bestStreak();
+    const passed = (n) => { const u = UNITS.find(x => x.kind === "module" && x.module === n); return !!(u && (S.units[u.id] || {}).passed); };
+    const best = (k) => (g[k] || {}).best || 0;
+    return [
+      ["1", "Первый урок", nl >= 1], ["10", "10 уроков", nl >= 10], ["50", "50 уроков", nl >= 50],
+      ["7", "7 дней подряд", bs >= 7], ["30", "30 дней подряд", bs >= 30], ["100", "100 дней подряд", bs >= 100],
+      ["50", "50 слов", nw >= 50], ["200", "200 слов", nw >= 200], ["500", "500 слов", nw >= 500],
+      ["אב", "Прописные буквы", !!S.cards["k:cursive"], 1], ["א", "Уровень Алеф: Иерусалим", passed(15), 1], ["ב", "Уровень Бет: Эйлат", passed(23), 1],
+      ["15", "15 пар за минуту", best("pairs") >= 15], ["10", "Собрано 10 слов", best("build") >= 10], ["25", "Выживание: 25", best("surv") >= 25],
+      ["30", "Поймано 30", Math.max(best("catch:words"), best("catch:letters")) >= 30], ["20", "20 форм за минуту", best("forms") >= 20]
+    ];
+  }
+  function openGames() {
+    gameStop(); xpInit();
+    show("games");
+    $("gxXp").textContent = "Очки: " + S.xp.toLocaleString("ru-RU");
+    $("gxStop").hidden = true;
+    renderMap();
+    const g = gstate(), list = $("gxList"); list.textContent = "";
+    for (const G of GAMES) {
+      const row = el("div", "gitem"), ic = el("span", "gi", G.icon); if (!HEB.test(G.icon)) ic.style.fontFamily = "inherit";
+      const t = el("div"); t.appendChild(el("div", "gt", G.name)); t.appendChild(el("div", "gd", G.d));
+      const recs = (G.modes || [[null]]).map(([m]) => (g[m ? G.id + ":" + m : G.id] || {}).best || 0);
+      if (Math.max(...recs)) t.appendChild(el("div", "gd", "Рекорд: " + (G.modes ? G.modes.map((m, i) => m[1].toLowerCase() + " " + recs[i]).join(", ") : recs[0])));
+      row.append(ic, t);
+      const bb = el("div", "gb"), why = G.need();
+      for (const [m, label] of (G.modes || [[null, "Играть"]])) {
+        const lock = m === "words" ? need5() : why;
+        const b = el("button", "btn small" + (m === "letters" ? " secondary" : ""), label); b.type = "button";
+        b.disabled = !!lock; b.onclick = () => G.start(m); bb.appendChild(b);
+      }
+      if (why && !G.modes) bb.appendChild(el("span", "small muted", why));
+      row.appendChild(bb); list.appendChild(row);
+    }
+    const bl = badgeList(), box = $("gxBadges"); box.textContent = "";
+    for (const [ic, name, on, he] of bl) {
+      const d = el("div", "badge" + (on ? " on" : "")); d.appendChild(el("span", "md" + (he ? " he" : ""), ic)); d.appendChild(el("span", "", name)); box.appendChild(d);
+    }
+    $("gxBadgeN").textContent = bl.filter(b => b[2]).length + " из " + bl.length;
   }
 
   /* ================= lexicon & tap-to-translate ================= */
@@ -2373,7 +2796,6 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       const nErr = activeErrors().length;
       if (nErr >= 3) addBtn("Разобрать ошибки (" + nErr + ")", startErrors, true);
       if (Object.keys(S.cards).length) addBtn("Разминка на 5 минут", startWarmup, true);
-      if (gameWords().length >= 5) addBtn("Мини-игра «Пары»", startGame, true);
       if (!due && Object.keys(S.cards).length) addBtn("Дополнительная практика", startExtra, true);
     }
     $("todayPanel").hidden = p.status !== "done" && !due;
@@ -2614,9 +3036,10 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     [...$("s-sess").children].forEach(b => b.onclick = () => { S.settings.session = +b.dataset.v; save(); renderSettings(); });
     $("pzGo").onclick = () => { if (!R) return goHome(); lastAct = Date.now(); show("run"); renderItem(); };
     $("pzStop").onclick = () => { const r = leaveRun(); goHome(); toast(r && r.mode === "lesson" ? "Урок сохранён: завтра продолжите с того же места" : "До завтра!"); };
-    $("pzGame").onclick = () => { leaveRun(); startGame(); };
+    $("pzGame").onclick = () => { leaveRun(); openGames(); };
     $("pzWarm").onclick = () => { leaveRun(); startWarmup(); };
-    $("gmQuit").onclick = () => { gameStop(); goHome(); };
+    $("gmQuit").onclick = () => { if (GM) GM.quit = true; openGames(); };
+    $("b-games").onclick = openGames;
     $("b-voice").onclick = () => speak("שָׁלוֹם, מָה שְׁלוֹמֵךְ?");
     $("b-export").onclick = exportProgress;
     $("b-import").onclick = importPick;
@@ -2668,7 +3091,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     } catch (e) { document.querySelector(".wrap").textContent = "Не удалось загрузить материалы курса. Обновите страницу."; return; }
     renderHome(); show("home");
     await initStore();
-    buildCursive();
+    buildCursive(); xpInit();
     applyKbMode(); renderHome();
     try { if (window.claude && claude.use) sampleFn = await claude.use("sample"); } catch (_) { sampleFn = null; }
     if ("speechSynthesis" in window) {
