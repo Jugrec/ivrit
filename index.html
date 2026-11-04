@@ -324,6 +324,19 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
 .field .fall.bad { background: var(--bad); color: var(--surface); }
 .target { font-size: 1.15rem; text-align: center; }
 .target b { font-size: 1.3rem; }
+/* Hoopoe mascot */
+.bird { flex: none; display: block; }
+.bird.hop { animation: hop .55s cubic-bezier(.3,1.5,.5,1); }
+@keyframes hop { 30% { transform: translateY(-7px) rotate(-3deg); } 60% { transform: translateY(0); } }
+.dock .fb .verdict .bird { margin-left: auto; margin-block: -10px -6px; }
+.vsub { display: block; font-size: 0.86rem; font-weight: 400; color: var(--muted); }
+.greet { flex-direction: row; align-items: center; gap: 12px; padding: 14px 16px; }
+.greet .gh { font-family: var(--font-he); font-size: 1.45rem; direction: rtl; line-height: 1.2; align-self: flex-start; }
+.greet .gtxt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.smbird { display: flex; align-items: center; gap: 10px; }
+.bubble { background: var(--accent-soft); border-radius: 14px; padding: 8px 12px; font-size: 0.95rem; position: relative; }
+.bubble::before { content: ""; position: absolute; left: -6px; top: 50%; margin-top: -6px; border: 6px solid transparent; border-left: 0; border-right-color: var(--accent-soft); }
+@media (prefers-reduced-motion: reduce) { .bird.hop { animation: none; } }
 /* ===== lesson animation (Duolingo-style) ===== */
 .btn:not(.ghost) { box-shadow: 0 3px 0 color-mix(in srgb, var(--accent) 62%, #000); transition: transform .07s, box-shadow .07s, background .2s; }
 .btn.secondary { box-shadow: 0 3px 0 color-mix(in srgb, var(--accent-soft) 65%, var(--accent)); }
@@ -396,6 +409,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     </div>
 
     <div id="storeNote" class="banner" hidden></div>
+    <div class="panel greet" id="greet" hidden><span id="grBird"></span><div class="gtxt"><span class="gh" id="grHe"></span><span class="small muted" id="grTr"></span><span id="grText"></span></div></div>
 
     <div class="panel" id="todayPanel">
       <div class="row" style="justify-content:space-between"><h2>Сегодня</h2><span class="small muted" id="todayDate"></span></div>
@@ -514,6 +528,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   <section id="v-summary" class="view" hidden>
     <div class="panel">
       <span class="eyebrow" id="smEyebrow"></span>
+      <div class="smbird" id="smBird" hidden><span id="smBirdPic"></span><span class="bubble" id="smBirdSay"></span></div>
       <div class="row" style="align-items:center;gap:16px"><div class="ring" id="smRing"><svg viewBox="0 0 120 120"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rv" id="smArc" cx="60" cy="60" r="52"/></svg><span class="score" id="smScore"></span></div><div class="grow" style="display:flex;flex-direction:column;gap:4px"><h2 id="smTitle"></h2><span class="xpgain" id="smXp" hidden></span></div></div>
       <p class="muted" id="smText"></p>
       <div class="actions" id="smActions"></div>
@@ -891,6 +906,32 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     return a;
   }
   const save = () => store.save();
+
+  /* ================= hoopoe mascot ================= */
+  // הַדּוּכִיפַת, the national bird of Israel, drawn as SVG in three moods: happy, calm, support.
+  let birdN = 0;
+  function hoopoe(mood, size) {
+    const O = "#E9A46A", O2 = "#D98C4E", K = "#26221F", id = "bw" + (++birdN);
+    const crest = { happy: [-64, -40, -16, 8, 30], calm: [-86, -70, -54, -40, -26], support: [-80, -62, -44, -28, -12] }[mood] || [-86, -70, -54, -40, -26];
+    const feathers = crest.map((a, i) => '<g transform="rotate(' + a + ' 94 50)"><ellipse cx="94" cy="34" rx="5.2" ry="15" fill="' + (i % 2 ? O2 : O) + '"/><ellipse cx="94" cy="24.5" rx="4.6" ry="2.6" fill="#fff"/><ellipse cx="94" cy="20" rx="4.4" ry="4.6" fill="' + K + '"/></g>').join("");
+    const eye = mood === "happy" ? '<path d="M100 62 Q104.5 56 109 62" fill="none" stroke="' + K + '" stroke-width="2.8" stroke-linecap="round"/>'
+      : mood === "support" ? '<circle cx="104.5" cy="60.5" r="4.2" fill="' + K + '"/><circle cx="106" cy="59" r="1.4" fill="#fff"/><circle cx="103.4" cy="62.2" r=".7" fill="#fff"/><path d="M100 53 Q104.5 49 109 53" fill="none" stroke="' + K + '" stroke-width="2" stroke-linecap="round"/>'
+      : '<circle cx="104.5" cy="60" r="3.6" fill="' + K + '"/><circle cx="105.7" cy="58.8" r="1.1" fill="#fff"/>';
+    const tilt = mood === "support" ? ' transform="rotate(7 92 70)"' : mood === "happy" ? ' transform="rotate(-6 92 70)"' : "";
+    const beak = mood === "support" ? "M116 67 Q133 73 145 88" : "M116 66 Q134 70 148 84";
+    const extra = mood === "happy" ? '<g fill="' + O2 + '"><path d="M134 34 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2z"/><path d="M146 52 l1.3 3 3 1.3 -3 1.3 -1.3 3 -1.3 -3 -3 -1.3 3 -1.3z"/></g>'
+      : mood === "support" ? '<path d="M138 40 c-3 -5 -10 -2 -7 3.5 l7 7 7 -7 c3 -5.5 -4 -8.5 -7 -3.5z" fill="#EE7F7F" opacity=".85"/>' : "";
+    return '<svg class="bird" viewBox="0 0 160 160" width="' + size + '" height="' + size + '" aria-hidden="true">' +
+      '<g stroke="#8A6A55" stroke-width="3.2" stroke-linecap="round" fill="none"><path d="M66 122 L63 142 M58 143 L69 143"/><path d="M82 122 L82 142 M77 143 L88 143"/></g>' +
+      '<path d="M48 96 L14 120 Q16 128 24 128 L58 106 Z" fill="' + K + '"/><path d="M28 112 L38 122" stroke="#fff" stroke-width="4"/>' +
+      '<ellipse cx="72" cy="100" rx="35" ry="27" fill="' + O + '"/>' +
+      '<clipPath id="' + id + '"><ellipse cx="64" cy="104" rx="25" ry="15" transform="rotate(-14 64 104)"/></clipPath>' +
+      '<g clip-path="url(#' + id + ')"><rect x="30" y="80" width="70" height="50" fill="' + K + '"/><g stroke="#fff" stroke-width="4" fill="none"><path d="M44 92 Q58 100 52 122"/><path d="M58 88 Q72 98 66 122"/><path d="M72 86 Q86 96 80 120"/></g></g>' +
+      '<g' + tilt + '>' + feathers + '<ellipse cx="88" cy="80" rx="17" ry="15" fill="' + O + '"/><circle cx="99" cy="64" r="20" fill="' + O + '"/>' +
+      '<path d="' + beak + '" fill="none" stroke="#5A4A3E" stroke-width="3.6" stroke-linecap="round"/>' + eye +
+      (mood !== "calm" ? '<ellipse cx="101" cy="72.5" rx="4.5" ry="2.6" fill="#EE7F7F" opacity=".45"/>' : "") + '</g>' + extra + '</svg>';
+  }
+  function birdEl(mood, size, hop) { const w = el("span"); w.innerHTML = hoopoe(mood, size); const b = w.firstChild; if (hop && !reduceMotion()) b.classList.add("hop"); return b; }
 
   /* ================= sound effects ================= */
   // Short tones generated in the browser (Web Audio): no files, works offline.
@@ -1272,7 +1313,11 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const fb = $("qfb"); fb.hidden = false; fb.className = "fb " + (res.ok ? "right" : "wrong"); fb.textContent = "";
     const vd = el("span", "verdict"), vic = el("span", "vic");
     vic.innerHTML = res.ok ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
-    vd.appendChild(vic); vd.appendChild(el("span", "vt", res.override ? "Верно: Claude засчитал ваш вариант" : res.almost ? "Верно, но проверьте конечные буквы" : res.ok ? pick(["Верно!", "Отлично!", "Правильно!", "Точно!"]) : res.skipped ? "Правильный ответ" : "Неверно"));
+    vd.appendChild(vic);
+    const vtw = el("span"); vtw.appendChild(el("span", "vt", res.override ? "Верно: Claude засчитал ваш вариант" : res.almost ? "Верно, но проверьте конечные буквы" : res.ok ? pick(["Верно!", "Отлично!", "Правильно!", "Точно!"]) : res.skipped ? "Правильный ответ" : "Неверно"));
+    if (!res.ok && R.mode !== "placement") vtw.appendChild(el("span", "vsub", res.skipped ? pick(["Ничего, теперь вы знаете", "Запомним вместе", "Это задание вернётся чуть позже"]) : pick(["Ничего, разберёмся", "Почти! Посмотрите, как правильно", "Ошибки помогают запомнить", "Так и учатся, идём дальше"])));
+    vd.appendChild(vtw);
+    if (R.mode !== "placement") vd.appendChild(birdEl(res.ok ? "happy" : "support", 54, true));
     fb.appendChild(vd);
     const ct = correctText(res.ex);
     if (HEB.test(ct) && (!res.ok || res.almost || res.ex.type !== "choice")) {
@@ -1479,6 +1524,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       arc.style.transition = ""; arc.style.strokeDashoffset = CIRC * (1 - pct / 100);
       if (!reduceMotion()) { const t0 = performance.now(); const step = (t) => { const k = Math.min(1, (t - t0) / 1000); $("smScore").textContent = Math.round(pct * (1 - Math.pow(1 - k, 3))) + "%"; if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
     }));
+    const sb = $("smBird"); sb.hidden = pct === null;
+    if (pct !== null) {
+      const mood = pct >= 80 ? "happy" : pct >= 50 ? "calm" : "support";
+      $("smBirdPic").textContent = ""; $("smBirdPic").appendChild(birdEl(mood, 76, true));
+      $("smBirdSay").textContent = pct >= 95 ? "Блестяще! Почти без ошибок." : pct >= 80 ? "Отличная работа!" : pct >= 50 ? "Хорошо! Повторение закрепит остальное." : "Непростая тема, но вы справились. Трудное вернётся в повторении.";
+    }
     const gain = typeof runXp0 === "number" && typeof S.xp === "number" ? S.xp - runXp0 : 0; runXp0 = null;
     $("smXp").hidden = !(gain > 0); $("smXp").textContent = "+" + gain + " очков";
     if (pct >= 80 && firsts.length >= 5 && !reduceMotion()) setTimeout(confetti, 450);
@@ -2879,9 +2930,26 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   }
 
   /* ================= home ================= */
+  function renderGreet() {
+    const h = new Date().getHours();
+    const g = h >= 5 && h < 12 ? ["בֹּקֶר טוֹב", "бо́кер тов, доброе утро"] : h >= 12 && h < 17 ? ["צָהֳרַיִם טוֹבִים", "цоhора́им тови́м, добрый день"] : h >= 17 && h < 22 ? ["עֶרֶב טוֹב", "э́рев тов, добрый вечер"] : ["לַיְלָה טוֹב", "ла́йла тов, доброй ночи"];
+    const t = today(), mins = Math.floor(t.ms / MIN), goal = sessMin(), st = streak(), started = Object.keys(S.lessons).length > 0;
+    const done = mins >= goal;
+    let txt;
+    if (S.placement.status !== "done") txt = "Я удод, הַדּוּכִיפַת. Начнём с короткого теста, чтобы найти ваш уровень.";
+    else if (done) txt = "Цель на сегодня выполнена! Дальше можно по желанию: игры или ещё урок.";
+    else if (mins > 0) txt = "Сегодня уже " + mins + " мин из " + goal + ". Продолжим?";
+    else if (st >= 2) txt = st + " " + (st % 10 === 1 && st % 100 !== 11 ? "день" : st % 10 >= 2 && st % 10 <= 4 && (st % 100 < 12 || st % 100 > 14) ? "дня" : "дней") + " подряд! Не прерываем серию.";
+    else txt = started ? "Рад вас видеть. Сегодня " + goal + " минут, и прогресс будет заметен." : "Я удод, הַדּוּכִיפַת. Буду рядом на уроках.";
+    $("grHe").textContent = shown(g[0]); $("grTr").textContent = g[1];
+    rich($("grText"), txt.replace("הַדּוּכִיפַת", "[[" + shown("הַדּוּכִיפַת") + "]]"));
+    const pic = $("grBird"); pic.textContent = ""; pic.appendChild(birdEl(done ? "happy" : "calm", 64, false));
+    $("greet").hidden = false;
+  }
   function goHome() { if (window.__swReload) { location.reload(); return; } renderHome(); show("home"); }
   function renderHome() {
     const p = S.placement;
+    renderGreet();
     const sn = $("storeNote");
     if (store.mode === "local" && store.reason === "standalone") {
       const old = !S.lastBackup || Date.now() - S.lastBackup > 7 * DAY;
