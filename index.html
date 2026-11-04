@@ -28,6 +28,7 @@
   --bad-soft: #F8E4E1;
   --warn-soft: #FBF0DA;
   --key: #E8ECF1;
+  --hot: #D9822B;
   --font-ui: "Rubik", "Segoe UI", system-ui, -apple-system, sans-serif;
   --font-he: "Frank Ruhl Libre", "David", "Times New Roman", serif;
   --r: 12px;
@@ -35,11 +36,11 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #11151B; --surface: #1A2029; --ink: #E7EAEF; --muted: #9AA4B3; --line: #2B3340;
   --accent: #82B2DE; --accent-soft: #1E2D3D; --good: #6BC08E; --good-soft: #17291F;
-  --bad: #EE8A80; --bad-soft: #351C1A; --warn-soft: #33291A; --key: #262E3A; color-scheme: dark; } }
+  --bad: #EE8A80; --bad-soft: #351C1A; --warn-soft: #33291A; --key: #262E3A; --hot: #F0A35E; color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #11151B; --surface: #1A2029; --ink: #E7EAEF; --muted: #9AA4B3; --line: #2B3340;
   --accent: #82B2DE; --accent-soft: #1E2D3D; --good: #6BC08E; --good-soft: #17291F;
-  --bad: #EE8A80; --bad-soft: #351C1A; --warn-soft: #33291A; --key: #262E3A; color-scheme: dark; }
+  --bad: #EE8A80; --bad-soft: #351C1A; --warn-soft: #33291A; --key: #262E3A; --hot: #F0A35E; color-scheme: dark; }
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -323,6 +324,57 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
 .field .fall.bad { background: var(--bad); color: var(--surface); }
 .target { font-size: 1.15rem; text-align: center; }
 .target b { font-size: 1.3rem; }
+/* ===== lesson animation (Duolingo-style) ===== */
+.btn:not(.ghost) { box-shadow: 0 3px 0 color-mix(in srgb, var(--accent) 62%, #000); transition: transform .07s, box-shadow .07s, background .2s; }
+.btn.secondary { box-shadow: 0 3px 0 color-mix(in srgb, var(--accent-soft) 65%, var(--accent)); }
+.btn:not(.ghost):not(:disabled):active { transform: translateY(3px); box-shadow: 0 0 0 transparent; }
+.btn.ok { background: var(--good); box-shadow: 0 3px 0 color-mix(in srgb, var(--good) 62%, #000); }
+.btn.no { background: var(--bad); box-shadow: 0 3px 0 color-mix(in srgb, var(--bad) 62%, #000); }
+.opt, .tok, .gcard, .wtiles button { box-shadow: 0 3px 0 var(--line); transition: transform .07s, box-shadow .07s, background .15s, border-color .15s, opacity .25s; }
+.opt:not(:disabled):active, .tok:not(:disabled):active, .gcard:active, .wtiles button:not(:disabled):active { transform: translateY(3px); box-shadow: 0 0 0 transparent; }
+.opt.sel { box-shadow: 0 3px 0 var(--accent); }
+.opt.right { box-shadow: 0 3px 0 var(--good); }
+.opt.wrong { box-shadow: 0 3px 0 var(--bad); animation: shake .3s; }
+.opt.right.picked { animation: pop .35s cubic-bezier(.3,1.6,.5,1); }
+.kb button { box-shadow: 0 2px 0 color-mix(in srgb, var(--key) 78%, #000); transition: transform .06s, box-shadow .06s; }
+.kb button:active, .kb button.hit { transform: translateY(2px); box-shadow: 0 0 0 transparent; }
+.qcard { display: flex; flex-direction: column; gap: 18px; }
+.qcard.in { animation: qin .28s ease-out; }
+.qcard.out { animation: qout .14s ease-in forwards; }
+@keyframes qin { from { transform: translateX(40px); opacity: 0; } }
+@keyframes qout { to { transform: translateX(-40px); opacity: 0; } }
+.dock { position: sticky; bottom: 0; z-index: 5; margin: 0 -16px -48px; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--bg); display: flex; flex-direction: column; gap: 12px; border-top: 1px solid transparent; transition: background .2s; }
+.dock.right { background: var(--good-soft); border-top-color: var(--good); }
+.dock.wrong { background: var(--bad-soft); border-top-color: var(--bad); }
+.dock .fb { background: none; padding: 0; max-height: 50vh; overflow-y: auto; animation: up .26s ease-out; }
+@keyframes up { from { transform: translateY(18px); opacity: 0; } }
+.fb .verdict { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; }
+.vic { width: 32px; height: 32px; flex: none; border-radius: 50%; display: grid; place-items: center; color: var(--surface); animation: pop .4s cubic-bezier(.3,1.6,.5,1); }
+.vic svg { width: 18px; height: 18px; }
+.fb.right .vic { background: var(--good); }
+.fb.wrong .vic { background: var(--bad); }
+@keyframes pop { from { transform: scale(.3); opacity: .4; } }
+.progress.glow > i { background: var(--hot); box-shadow: 0 0 10px var(--hot); }
+.combo { position: fixed; top: 16%; left: 50%; z-index: 20; transform: translateX(-50%); background: var(--surface); color: var(--hot); border: 2px solid var(--hot); border-radius: 99px; padding: 8px 18px; font-weight: 600; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.14); pointer-events: none; animation: combo 1.7s ease-out forwards; }
+@keyframes combo { 0% { opacity: 0; transform: translateX(-50%) scale(.6); } 15% { opacity: 1; transform: translateX(-50%) scale(1.08); } 25% { transform: translateX(-50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-12px); } }
+.flip { perspective: 1200px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.flip .inner { display: grid; transition: transform .55s cubic-bezier(.3,.7,.3,1); transform-style: preserve-3d; }
+.flip.on .inner { transform: rotateY(180deg); }
+.flip.noanim .inner { transition: none; }
+.flip .face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; min-height: 230px; justify-content: center; }
+.flip .back { transform: rotateY(180deg); }
+.wcard .w.sm { font-size: 2rem; }
+.fliphint { margin-top: 8px; }
+.ring { position: relative; width: 92px; height: 92px; flex: none; display: grid; place-items: center; }
+.ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 10; }
+.ring .rt { stroke: var(--key); }
+.ring .rv { stroke: var(--good); stroke-linecap: round; transition: stroke-dashoffset 1s ease-out; }
+.ring .score { font-size: 1.45rem; }
+.xpgain { color: var(--accent); font-weight: 600; animation: pop .45s .7s both cubic-bezier(.3,1.6,.5,1); }
+.confetti { position: fixed; top: -14px; width: 8px; height: 13px; border-radius: 2px; z-index: 30; pointer-events: none; animation: fall var(--d) cubic-bezier(.25,.6,.5,1) forwards; }
+@keyframes fall { to { transform: translate(var(--x), 108vh) rotate(var(--r)); } }
+@media (prefers-reduced-motion: reduce) { .qcard.in, .qcard.out, .dock .fb, .combo, .vic, .xpgain, .opt.wrong, .opt.right.picked { animation: none !important; } .confetti { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media (max-width: 380px) { .opts { grid-template-columns: 1fr; } .word { font-size: 2.1rem; } .today b { font-size: 1.15rem; } }
 </style>
@@ -407,14 +459,22 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   <section id="v-words" class="view" hidden>
     <div class="qhead"><button class="btn ghost" data-home>← Прервать</button><span class="small muted" id="wdCount"></span></div>
     <div class="progress"><i id="wdBar"></i></div>
-    <div class="panel wcard">
-      <span class="eyebrow" id="wdG"></span>
-      <div class="w" id="wdHe"></div>
-      <div class="tr" id="wdTr"></div>
-      <div class="ru" id="wdRu"></div>
-      <div class="forms" id="wdForms"></div>
-      <p class="small muted" id="wdNote"></p>
-      <button class="btn secondary small" id="wdSay" hidden>▶ Прослушать</button>
+    <div class="flip" id="wdFlip" role="button" tabindex="0" aria-label="Перевернуть карточку">
+      <div class="inner">
+        <div class="panel wcard face front">
+          <span class="eyebrow" id="wdG"></span>
+          <div class="w" id="wdHe"></div>
+          <div class="tr" id="wdTr"></div>
+          <span class="small muted fliphint">Нажмите, чтобы увидеть перевод</span>
+        </div>
+        <div class="panel wcard face back">
+          <div class="w sm" id="wdHe2"></div>
+          <div class="ru" id="wdRu"></div>
+          <div class="forms" id="wdForms"></div>
+          <p class="small muted" id="wdNote"></p>
+          <button class="btn secondary small" id="wdSay" hidden>▶ Прослушать</button>
+        </div>
+      </div>
     </div>
     <div class="row"><button class="btn secondary" id="wdPrev">Назад</button><button class="btn grow" id="wdNext">Дальше</button></div>
   </section>
@@ -426,6 +486,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <span class="small muted" id="qcount"></span>
     </div>
     <div class="progress"><i id="qbar"></i></div>
+    <div class="qcard" id="qcard">
     <div class="eyebrow" id="qmod"></div>
     <p class="prompt" id="qprompt"></p>
     <div class="word" id="qword" hidden></div>
@@ -439,10 +500,13 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <input id="answer" class="answer" type="text" dir="rtl" lang="he" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ответ на иврите" aria-label="Ваш ответ на иврите">
       <div id="kbRun"></div>
     </div>
-    <div id="qfb" hidden></div>
-    <div class="row">
-      <button class="btn grow" id="b-check">Проверить</button>
-      <button class="btn secondary" id="b-skip">Не знаю</button>
+    </div>
+    <div class="dock" id="qdock">
+      <div id="qfb" hidden></div>
+      <div class="row">
+        <button class="btn grow" id="b-check">Проверить</button>
+        <button class="btn secondary" id="b-skip">Не знаю</button>
+      </div>
     </div>
   </section>
 
@@ -450,7 +514,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   <section id="v-summary" class="view" hidden>
     <div class="panel">
       <span class="eyebrow" id="smEyebrow"></span>
-      <div class="row" style="align-items:baseline;gap:14px"><span class="score" id="smScore"></span><h2 id="smTitle" class="grow"></h2></div>
+      <div class="row" style="align-items:center;gap:16px"><div class="ring" id="smRing"><svg viewBox="0 0 120 120"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rv" id="smArc" cx="60" cy="60" r="52"/></svg><span class="score" id="smScore"></span></div><div class="grow" style="display:flex;flex-direction:column;gap:4px"><h2 id="smTitle"></h2><span class="xpgain" id="smXp" hidden></span></div></div>
       <p class="muted" id="smText"></p>
       <div class="actions" id="smActions"></div>
     </div>
@@ -1076,19 +1140,23 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   }
 
   /* ================= runner ================= */
-  let R = null, cur = null, picked = null, answered = false, built = [], lastResult = null;
+  let R = null, cur = null, picked = null, answered = false, built = [], lastResult = null, runXp0 = null;
+  const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 
   function run(cfg) {
     R = Object.assign({ requeue: true, grade: false }, cfg);
     R.queue = cfg.items.filter(it => it && it.ex);
     R.pos = cfg.pos || 0; R.results = cfg.results || []; R.requeued = new Set(cfg.requeued || []);
     if (!R.queue.length) { toast("Нет заданий"); return; }
-    lastAct = Date.now();
+    lastAct = Date.now(); runXp0 = S.xp; R.combo = 0;
     show("run"); renderItem();
   }
   function renderItem() {
     if (R.pos >= R.queue.length) return finishRun();
     const item = R.queue[R.pos]; cur = item.ex; picked = null; answered = false; built = []; lastResult = null;
+    $("qdock").className = "dock"; $("b-check").classList.remove("ok", "no"); $("kbRun").hidden = false;
+    const qc = $("qcard"); qc.classList.remove("in", "out"); void qc.offsetWidth; if (R.pos) qc.classList.add("in");
     $("qcount").textContent = (R.pos + 1) + " / " + R.queue.length;
     $("qbar").style.width = (R.pos / R.queue.length * 100) + "%";
     rich($("qmod"), R.label ? R.label(item) : (cur.k ? IDX.skillName[cur.k] || "" : (cur.word ? "Слова" : "")));
@@ -1149,7 +1217,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     return ex.options[ex.answer];
   }
   function check(skipped) {
-    if (!R) return;
+    if (!R || R.leaving) return;
     if (answered) return next();
     const item = R.queue[R.pos];
     let ok = false, given = "", almost = false;
@@ -1173,6 +1241,10 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     }
     answered = true;
     if (R.mode !== "placement") sfx(ok ? "ok" : "bad");
+    $("qdock").classList.add(ok ? "right" : "wrong"); $("b-check").classList.add(ok ? "ok" : "no");
+    if (["type", "gap", "transform"].includes(cur.type)) $("kbRun").hidden = true;
+    if (picked !== null && ok) { const pb = [...$("qopts").children].find(x => +x.dataset.i === picked); if (pb) pb.classList.add("picked"); }
+    if (item.first !== false && R.mode !== "placement" && R.mode !== "test") { R.combo = ok ? (R.combo || 0) + 1 : 0; if (ok) comboCheer(R.combo); }
     const res = { item, ex: cur, ok, given, skipped: !!skipped, almost };
     lastResult = res;
     if (item.first !== false) {
@@ -1198,7 +1270,10 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   }
   function renderFeedback(res) {
     const fb = $("qfb"); fb.hidden = false; fb.className = "fb " + (res.ok ? "right" : "wrong"); fb.textContent = "";
-    fb.appendChild(el("span", "verdict", res.override ? "Верно: Claude засчитал ваш вариант" : res.almost ? "Верно, но проверьте конечные буквы" : res.ok ? "Верно" : res.skipped ? "Правильный ответ" : "Неверно"));
+    const vd = el("span", "verdict"), vic = el("span", "vic");
+    vic.innerHTML = res.ok ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
+    vd.appendChild(vic); vd.appendChild(el("span", "vt", res.override ? "Верно: Claude засчитал ваш вариант" : res.almost ? "Верно, но проверьте конечные буквы" : res.ok ? pick(["Верно!", "Отлично!", "Правильно!", "Точно!"]) : res.skipped ? "Правильный ответ" : "Неверно"));
+    fb.appendChild(vd);
     const ct = correctText(res.ex);
     if (HEB.test(ct) && (!res.ok || res.almost || res.ex.type !== "choice")) {
       const c = el("div", "corr"); c.appendChild(el("span", "", shown(ct)));
@@ -1313,7 +1388,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       if (R.onOverride) R.onOverride(res);
     } else { res.ok = true; res.override = true; }
     save();
-    const v = $("qfb").querySelector(".verdict"); if (v) v.textContent = "Верно: Claude засчитал ваш вариант"; sfx("ok");
+    const v = $("qfb").querySelector(".verdict .vt"); if (v) v.textContent = "Верно: Claude засчитал ваш вариант"; sfx("ok");
+    $("qdock").className = "dock right"; $("b-check").classList.replace("no", "ok");
     $("qfb").className = "fb right";
     $("answer").classList.remove("wrong"); $("answer").classList.add("right");
   }
@@ -1321,7 +1397,16 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     if (!R) return;
     if (R.shouldStop && R.shouldStop()) R.pos = R.queue.length; else R.pos++;
     if (R.pos < R.queue.length && (R.mode === "lesson" || R.mode === "review") && timeUp()) return showPause();
-    renderItem();
+    if (R.pos >= R.queue.length || reduceMotion()) return renderItem();
+    if (R.leaving) return;
+    R.leaving = true; const r = R, qc = $("qcard"); qc.classList.remove("in"); qc.classList.add("out");
+    setTimeout(() => { if (R !== r) return; r.leaving = false; renderItem(); }, 140);
+  }
+  function comboCheer(n) {
+    if (!(n === 3 || n === 5 || (n >= 10 && n % 5 === 0))) return;
+    const c = el("div", "combo", "★ " + n + " подряд!" + (n === 5 ? " Отлично!" : n >= 10 ? " Блестяще!" : ""));
+    document.body.appendChild(c); setTimeout(() => c.remove(), 1800);
+    const pr = $("qbar").parentElement; pr.classList.add("glow"); setTimeout(() => pr.classList.remove("glow"), 1200);
   }
 
   /* ================= session time ================= */
@@ -1383,9 +1468,20 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   /* ================= summary ================= */
   function summary({ eyebrow, title, text, results, actions }) {
     const firsts = results;
-    const ok = firsts.filter(r => r.ok).length;
+    const ok = firsts.filter(r => r.ok).length, pct = firsts.length ? Math.round(ok / firsts.length * 100) : null;
     $("smEyebrow").textContent = eyebrow || "";
-    $("smScore").textContent = firsts.length ? Math.round(ok / firsts.length * 100) + "%" : "";
+    $("smRing").hidden = pct === null;
+    const arc = $("smArc"), CIRC = 2 * Math.PI * 52;
+    arc.style.strokeDasharray = CIRC; arc.style.transition = "none"; arc.style.strokeDashoffset = CIRC;
+    arc.style.stroke = pct >= 80 ? "var(--good)" : pct >= 50 ? "var(--hot)" : "var(--bad)";
+    $("smScore").textContent = pct === null ? "" : (reduceMotion() ? pct : 0) + "%";
+    if (pct !== null) requestAnimationFrame(() => requestAnimationFrame(() => {
+      arc.style.transition = ""; arc.style.strokeDashoffset = CIRC * (1 - pct / 100);
+      if (!reduceMotion()) { const t0 = performance.now(); const step = (t) => { const k = Math.min(1, (t - t0) / 1000); $("smScore").textContent = Math.round(pct * (1 - Math.pow(1 - k, 3))) + "%"; if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
+    }));
+    const gain = typeof runXp0 === "number" && typeof S.xp === "number" ? S.xp - runXp0 : 0; runXp0 = null;
+    $("smXp").hidden = !(gain > 0); $("smXp").textContent = "+" + gain + " очков";
+    if (pct >= 80 && firsts.length >= 5 && !reduceMotion()) setTimeout(confetti, 450);
     rich($("smTitle"), title);
     $("smText").textContent = text || (ok + " из " + firsts.length + " верно с первой попытки.");
     const acts = $("smActions"); acts.textContent = "";
@@ -1393,6 +1489,16 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     renderMistakes($("smMist"), firsts.filter(r => !r.ok));
     $("smMistWrap").hidden = !firsts.some(r => !r.ok);
     show("summary");
+  }
+  function confetti() {
+    const colors = ["var(--accent)", "var(--good)", "var(--hot)", "var(--bad)", "#E7C44A"];
+    for (let i = 0; i < 46; i++) {
+      const c = el("i", "confetti"); c.style.left = (Math.random() * 100) + "vw"; c.style.background = colors[i % colors.length];
+      c.style.setProperty("--x", (Math.random() * 120 - 60) + "px"); c.style.setProperty("--r", (Math.random() * 720 - 360) + "deg");
+      c.style.setProperty("--d", (1.6 + Math.random() * 1.4) + "s"); c.style.animationDelay = (Math.random() * 0.35) + "s";
+      if (i % 3 === 0) { c.style.width = "10px"; c.style.height = "10px"; c.style.borderRadius = "50%"; }
+      document.body.appendChild(c); setTimeout(() => c.remove(), 3600);
+    }
   }
   function renderMistakes(box, list) {
     box.textContent = "";
@@ -1540,14 +1646,15 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("wdCount").textContent = "Слово " + (LS.wi + 1) + " из " + ids.length;
     $("wdBar").style.width = ((LS.wi + 1) / ids.length * 100) + "%";
     $("wdG").textContent = w.g === "м" ? "мужской род" : w.g === "ж" ? "женский род" : "";
-    $("wdHe").textContent = shown(w.he);
+    $("wdHe").textContent = shown(w.he); $("wdHe2").textContent = shown(w.he);
+    const fl = $("wdFlip"); fl.classList.add("noanim"); fl.classList.remove("on"); void fl.offsetWidth; fl.classList.remove("noanim");
     $("wdTr").textContent = S.settings.translit ? (w.tr || "") : ""; $("wdTr").hidden = !S.settings.translit;
     $("wdRu").textContent = w.ru;
     $("wdForms").textContent = w.forms ? shown(w.forms) : w.pl ? "мн.ч. " + shown(w.pl) : "";
     rich($("wdNote"), w.note || "");
     $("wdSay").hidden = !heVoice;
     $("wdPrev").disabled = LS.wi === 0;
-    $("wdNext").textContent = LS.wi === ids.length - 1 ? "К упражнениям" : "Дальше";
+    $("wdNext").textContent = "Показать перевод";
   }
   function startLessonPractice() {
     const { lesson, unit } = LS;
@@ -3053,8 +3160,11 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("lsNext").onclick = lessonNext;
     $("lsTestOut").onclick = testOut;
     $("wdPrev").onclick = () => { if (LS.wi > 0) { LS.wi--; renderWord(); } };
-    $("wdNext").onclick = () => { tick("lesson"); if (LS.wi < LS.lesson.words.length - 1) { LS.wi++; renderWord(); } else startLessonPractice(); };
-    $("wdSay").onclick = () => speak(IDX.words[LS.lesson.words[LS.wi]].he);
+    const flipWord = () => { const fl = $("wdFlip"); fl.classList.toggle("on"); $("wdNext").textContent = fl.classList.contains("on") ? (LS.wi === LS.lesson.words.length - 1 ? "К упражнениям" : "Дальше") : "Показать перевод"; };
+    $("wdFlip").onclick = flipWord;
+    $("wdFlip").onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flipWord(); } };
+    $("wdNext").onclick = () => { if (!$("wdFlip").classList.contains("on")) return flipWord(); tick("lesson"); if (LS.wi < LS.lesson.words.length - 1) { LS.wi++; renderWord(); } else startLessonPractice(); };
+    $("wdSay").onclick = (e) => e.stopPropagation() || speak(IDX.words[LS.lesson.words[LS.wi]].he);
     $("b-quit").onclick = quitRun;
     $("b-say").onclick = () => cur && speak(cur.say);
     $("b-check").onclick = () => check(false);
