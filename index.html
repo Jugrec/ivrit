@@ -703,6 +703,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <div class="set"><div><div>Транслитерация</div><div class="small muted">Кириллицей у новых слов</div></div><button class="switch" id="s-translit" role="switch" aria-checked="true" aria-label="Транслитерация"></button></div>
       <div class="set"><div><div>Клавиатура</div><div class="small muted">Встроенная или клавиатура телефона с ивритской раскладкой</div></div>
         <div class="seg" id="s-kb"><button data-v="app" aria-pressed="true">Встроенная</button><button data-v="native" aria-pressed="false">Телефона</button></div></div>
+      <div class="set"><div><div>Звуковые эффекты</div><div class="small muted">Короткий сигнал после верного и неверного ответа</div></div><button class="switch" id="s-sfx" role="switch" aria-checked="true" aria-label="Звуковые эффекты"></button></div>
       <div class="set"><div><div>Длина занятия</div><div class="small muted">Потом приложение предложит закончить или сыграть. Повторение карточек не больше 10 минут.</div></div>
         <div class="seg" id="s-sess"><button data-v="20">20</button><button data-v="25" aria-pressed="true">25</button><button data-v="30">30</button></div></div>
     </div>
@@ -762,7 +763,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   const STANDALONE = !(window.claude && window.claude.use);
 
   function defaults() {
-    return { v: 2, settings: { nikud: true, translit: true, kb: "app", session: 25 },
+    return { v: 2, settings: { nikud: true, translit: true, kb: "app", session: 25, sfx: true },
       placement: { status: "none", idx: 0, answers: {}, startedAt: null, finishedAt: null, result: null },
       cards: {}, lessons: {}, units: {}, log: {}, skillStats: {}, typeStats: {}, altOk: {}, custom: [], recent: [], errors: {} };
   }
@@ -826,6 +827,27 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     return a;
   }
   const save = () => store.save();
+
+  /* ================= sound effects ================= */
+  // Short tones generated in the browser (Web Audio): no files, works offline.
+  let AC = null;
+  const SFX = { ok: [[660, 0, 0.1], [880, 0.08, 0.16]], bad: [[311, 0, 0.13], [233, 0.11, 0.24]], win: [[523, 0, 0.12], [659, 0.11, 0.12], [784, 0.22, 0.12], [1047, 0.33, 0.3]] };
+  function sfx(kind) {
+    if (S.settings.sfx === false || !SFX[kind]) return;
+    try {
+      AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+      if (AC.state === "suspended") AC.resume();
+      const t0 = AC.currentTime + 0.01;
+      for (const [f, at, dur] of SFX[kind]) {
+        const o = AC.createOscillator(), g = AC.createGain();
+        o.type = kind === "bad" ? "triangle" : "sine"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t0 + at);
+        g.gain.exponentialRampToValueAtTime(kind === "bad" ? 0.22 : 0.16, t0 + at + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + at + dur);
+        o.connect(g); g.connect(AC.destination); o.start(t0 + at); o.stop(t0 + at + dur + 0.03);
+      }
+    } catch (_) {}
+  }
 
   /* ================= speech ================= */
   let heVoice = null, voicesChecked = false;
@@ -1150,6 +1172,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       [...$("qopts").children].forEach(x => { const i = +x.dataset.i; if (i === cur.answer) x.classList.add("right"); else if (i === picked) x.classList.add("wrong"); });
     }
     answered = true;
+    if (R.mode !== "placement") sfx(ok ? "ok" : "bad");
     const res = { item, ex: cur, ok, given, skipped: !!skipped, almost };
     lastResult = res;
     if (item.first !== false) {
@@ -1290,7 +1313,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       if (R.onOverride) R.onOverride(res);
     } else { res.ok = true; res.override = true; }
     save();
-    const v = $("qfb").querySelector(".verdict"); if (v) v.textContent = "Верно: Claude засчитал ваш вариант";
+    const v = $("qfb").querySelector(".verdict"); if (v) v.textContent = "Верно: Claude засчитал ваш вариант"; sfx("ok");
     $("qfb").className = "fb right";
     $("answer").classList.remove("wrong"); $("answer").classList.add("right");
   }
@@ -1561,6 +1584,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     else if (unit.reading && !(S.units[unit.id] || {}).reading) actions.push({ label: "Текст для чтения: " + unit.reading.title, fn: () => openReading(unit) });
     else if (unit.test) actions.push({ label: "Контрольный тест модуля", fn: () => startUnitTest(unit) });
     actions.push({ label: "На главную", fn: goHome });
+    sfx("win");
     summary({ eyebrow: testedOut ? "Урок сдан досрочно" : "Урок пройден", title: lesson.title, results, actions,
       text: undefined });
     const t = $("smText"); t.textContent += " Слова и темы урока добавлены в повторение: первое повторение завтра.";
@@ -1903,9 +1927,9 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("gmScore").textContent = "Очки: " + GM.score;
   }
   const buzz = (ms) => { try { navigator.vibrate && navigator.vibrate(ms); } catch (_) {} };
-  function gGood() { GM.score++; gHud(); buzz(10); }
-  function gPenalty(sec) { GM.left = Math.max(0, GM.left - sec); gHud(); if (GM.left <= 0) gEnd(); }
-  function gLife() { GM.lives--; gHud(); buzz(40); if (GM.lives <= 0) { GM.over = true; later(gEnd, 1300); } }
+  function gGood() { GM.score++; gHud(); buzz(10); sfx("ok"); }
+  function gPenalty(sec) { sfx("bad"); GM.left = Math.max(0, GM.left - sec); gHud(); if (GM.left <= 0) gEnd(); }
+  function gLife() { sfx("bad"); GM.lives--; gHud(); buzz(40); if (GM.lives <= 0) { GM.over = true; later(gEnd, 1300); } }
   function gMiss(key, he, ru) { GM.miss.set(key, { he, ru }); }
   function gameStop() { if (!GM) return; GM.over = true; if (GM.t) clearInterval(GM.t); if (GM.raf) cancelAnimationFrame(GM.raf); if (GM.qt) clearTimeout(GM.qt); GM.t = GM.raf = GM.qt = null; }
   function gEnd() {
@@ -1915,6 +1939,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const isRec = GM.score > rec.best && rec.plays > 0;
     rec.best = Math.max(rec.best, GM.score); rec.plays++;
     addXp(GM.score); actLog(); save();
+    if (GM.score) setTimeout(() => sfx("win"), GM.lives === 0 ? 350 : 0);
     $("gmPlay").hidden = true; $("gmEnd").hidden = false; $("gmTime").hidden = true;
     $("gmEndEye").textContent = "Мини-игра «" + GM.title + "»";
     $("gmFinal").textContent = GM.score;
@@ -2938,6 +2963,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function renderSettings() {
     $("s-nikud").setAttribute("aria-checked", S.settings.nikud);
     $("s-translit").setAttribute("aria-checked", S.settings.translit);
+    $("s-sfx").setAttribute("aria-checked", S.settings.sfx !== false);
     [...$("s-kb").children].forEach(b => b.setAttribute("aria-pressed", b.dataset.v === S.settings.kb));
     [...$("s-sess").children].forEach(b => b.setAttribute("aria-pressed", +b.dataset.v === sessMin()));
     $("importConfirm").hidden = true;
@@ -3031,6 +3057,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("answer").addEventListener("input", () => { if (!answered) $("b-check").disabled = !norm($("answer").value); });
     $("answer").addEventListener("keydown", e => { if (e.key === "Enter" && !$("b-check").disabled) { e.preventDefault(); check(false); } });
     $("s-nikud").onclick = () => { S.settings.nikud = !S.settings.nikud; save(); renderSettings(); };
+    $("s-sfx").onclick = () => { S.settings.sfx = S.settings.sfx === false; save(); renderSettings(); if (S.settings.sfx) sfx("ok"); };
     $("s-translit").onclick = () => { S.settings.translit = !S.settings.translit; save(); renderSettings(); };
     [...$("s-kb").children].forEach(b => b.onclick = () => { S.settings.kb = b.dataset.v; save(); applyKbMode(); renderSettings(); });
     [...$("s-sess").children].forEach(b => b.onclick = () => { S.settings.session = +b.dataset.v; save(); renderSettings(); });
