@@ -2772,7 +2772,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   }
 
   /* ================= home ================= */
-  function goHome() { renderHome(); show("home"); }
+  function goHome() { if (window.__swReload) { location.reload(); return; } renderHome(); show("home"); }
   function renderHome() {
     const p = S.placement;
     const sn = $("storeNote");
@@ -3019,7 +3019,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("b-dialogs").hidden = true; $("b-dialogs").parentElement.className = "nav";
     try {
       const m = document.createElement("link"); m.rel = "manifest"; m.href = "manifest.json"; document.head.appendChild(m);
-      if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) navigator.serviceWorker.register("sw.js").catch(() => {});
+      if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
+        const hadSW = !!navigator.serviceWorker.controller;
+        navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(r => r.update()).catch(() => {});
+        // a new version took over: reload on the home screen (never in the middle of an exercise)
+        navigator.serviceWorker.addEventListener("controllerchange", () => { if (!hadSW || window.__swReload) return; window.__swReload = true; if (!$("v-home").hidden) location.reload(); });
+      }
     } catch (_) {}
   }
 
