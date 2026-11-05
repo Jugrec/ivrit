@@ -1263,13 +1263,14 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     if (!R || R.leaving) return;
     if (answered) return next();
     const item = R.queue[R.pos];
-    let ok = false, given = "", almost = false;
+    let ok = false, given = "", almost = false, typo = false;
     if (["type", "gap", "transform"].includes(cur.type)) {
       given = $("answer").value;
       const g = norm(given);
       const acc = cur.accept.flatMap(a => { const p = plene(a); return p ? [norm(a), norm(p)] : [norm(a)]; }).concat(S.altOk[cur.id] || []);
       ok = !skipped && !!g && acc.includes(g);
       if (!ok && !skipped && g) { almost = acc.some(x => unfinal(x) === unfinal(g)); if (almost) ok = true; }
+      if (!ok && !skipped && g && acc.some(x => isTypo(g, x))) { ok = true; almost = true; typo = true; }
       $("answer").classList.add(ok ? "right" : "wrong"); $("answer").readOnly = true;
     } else if (cur.type === "order") {
       const seq = built.map(b => b.dataset.t);
@@ -1288,7 +1289,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     if (["type", "gap", "transform"].includes(cur.type)) { $("kbRun").hidden = true; $("b-kbswap").hidden = true; }
     if (picked !== null && ok) { const pb = [...$("qopts").children].find(x => +x.dataset.i === picked); if (pb) pb.classList.add("picked"); }
     if (item.first !== false && R.mode !== "placement" && R.mode !== "test") { R.combo = ok ? (R.combo || 0) + 1 : 0; if (ok) comboCheer(R.combo); }
-    const res = { item, ex: cur, ok, given, skipped: !!skipped, almost };
+    const res = { item, ex: cur, ok, given, skipped: !!skipped, almost, typo };
     lastResult = res;
     if (item.first !== false) {
       R.results.push(res);
@@ -1316,7 +1317,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const vd = el("span", "verdict"), vic = el("span", "vic");
     vic.innerHTML = res.ok ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
     vd.appendChild(vic);
-    const vtw = el("span"); vtw.appendChild(el("span", "vt", res.override ? "Верно: Claude засчитал ваш вариант" : res.almost ? "Верно, но проверьте конечные буквы" : res.ok ? pick(["Верно!", "Отлично!", "Правильно!", "Точно!"]) : res.skipped ? "Правильный ответ" : "Неверно"));
+    const vtw = el("span"); vtw.appendChild(el("span", "vt", res.override ? "Верно: Claude засчитал ваш вариант" : res.typo ? "Засчитано, но есть опечатка" : res.almost ? "Верно, но проверьте конечные буквы" : res.ok ? pick(["Верно!", "Отлично!", "Правильно!", "Точно!"]) : res.skipped ? "Правильный ответ" : "Неверно"));
     if (!res.ok && R.mode !== "placement") vtw.appendChild(el("span", "vsub", res.skipped ? pick(["Ничего, теперь вы знаете", "Запомним вместе", "Это задание вернётся чуть позже"]) : pick(["Ничего, разберёмся", "Почти! Посмотрите, как правильно", "Ошибки помогают запомнить", "Так и учатся, идём дальше"])));
     vd.appendChild(vtw);
     if (R.mode !== "placement") vd.appendChild(birdEl(res.ok ? "happy" : "support", 54, true));
@@ -1329,7 +1330,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     } else if (!res.ok && res.ex.type === "choice") {
       fb.appendChild(el("span", "", "Правильный ответ: " + ct));
     }
-    if (!res.ok && !res.skipped && ["type", "gap", "transform"].includes(res.ex.type) && norm(res.given)) showDiff(fb, res);
+    if ((!res.ok || res.typo) && !res.skipped && ["type", "gap", "transform"].includes(res.ex.type) && norm(res.given)) showDiff(fb, res);
     if (res.ex.note) fb.appendChild(rich(el("span", "note small"), res.ex.note));
     const ai = el("div", "ai"); ai.hidden = true; ai.id = "aiOut";
     if (sampleFn && R.mode !== "placement") {
@@ -1362,6 +1363,51 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     }
     return { dist: d[n][m], ops };
   }
+  /* ---- typo or mistake? ----
+     A typo is accepted (graded «трудно», shown with the slip marked) only when it is clearly a slip of the finger:
+     exactly one change in an answer of 4+ letters; a neighbouring key on the Hebrew layout, two neighbouring letters
+     swapped, or a letter pressed twice; never a pair of letters learners really confuse (ה/ת, ו/י, ס/ש, א/ע …),
+     never a vowel letter or guttural added or dropped, never the first or last letter dropped, never a changed ending or prefix,
+     and never when the typed word is itself a real word from the course. */
+  const KROWS = [["", "", "ק","ר","א","ט","ו","ן","ם","פ"], ["ש","ד","ג","כ","ע","י","ח","ל","ך","ף"], ["ז","ס","ב","ה","נ","מ","צ","ת","ץ"]];
+  const KPOS = {}; KROWS.forEach((r, i) => r.forEach((c, j) => { if (c) KPOS[c] = [i, j]; }));
+  function keyNear(a, b) {
+    const p = KPOS[a], q = KPOS[b]; if (!p || !q) return false;
+    if (p[0] === q[0]) return Math.abs(p[1] - q[1]) === 1;
+    const [up, dn] = p[0] < q[0] ? [p, q] : [q, p];
+    return dn[0] - up[0] === 1 && (up[1] === dn[1] || up[1] === dn[1] + 1);
+  }
+  const confusable = (a, b) => CONFUSE.some(p => p.includes(a) && p.includes(b)) || unfinal(a) === unfinal(b);
+  function isTypo(g, c) {
+    if (!g || !c || c.replace(/\s/g, "").length < 4) return false;
+    const gw = g.split(" "), cw = c.split(" ");
+    if (gw.length !== cw.length) return false;
+    const diff = gw.map((w, i) => [w, cw[i]]).filter(([a, b]) => a !== b);
+    if (diff.length !== 1) return false;
+    const [a, b] = diff[0];
+    if (b.length < 3 || LEX.has(lexKey(a))) return false;   // short word or a real word: a mistake, not a typo
+    // two neighbouring letters swapped
+    if (a.length === b.length) {
+      const pos = [...a].map((x, i) => x !== b[i] ? i : -1).filter(i => i >= 0);
+      if (pos.length === 2 && pos[1] === pos[0] + 1 && a[pos[0]] === b[pos[1]] && a[pos[1]] === b[pos[0]] && !"וי".includes(a[pos[0]]) && !"וי".includes(a[pos[1]])) return true;
+    }
+    const r = editOps(a, b); if (r.dist !== 1) return false;
+    const i = r.ops.findIndex(op => op[0] !== "="), op = r.ops[i];
+    if (op[0] === "~") {
+      const end = i === r.ops.length - 1, ENDS = "התםןויךא", PFX = "בלמהושכ";
+      if (end && (ENDS.includes(op[1]) || ENDS.includes(op[2]))) return false;   // endings carry grammar
+      if (i === 0 && PFX.includes(op[1]) && PFX.includes(op[2])) return false;   // so do prefixes
+      return keyNear(op[1], op[2]) && !confusable(op[1], op[2]);
+    }
+    const V = "אהוחיע";
+    if (op[0] === "-") {   // an extra letter typed: only the same letter twice, never a vowel letter
+      const prev = r.ops[i - 1], nxt = r.ops[i + 1];
+      return !V.includes(op[1]) && ((prev && prev[1] === op[1]) || (nxt && nxt[1] === op[1]));
+    }
+    // a letter left out: only inside a word of 5+ letters, never a vowel letter or guttural
+    const at = r.ops.slice(0, i).filter(o => o[0] !== "-").length;
+    return b.length >= 5 && !V.includes(op[1]) && at > 0 && at < b.length - 1;
+  }
   function showDiff(fb, res) {
     const g = norm(res.given);
     const cands = (res.ex.accept || []).flatMap(a => { const p = plene(a); return p ? [norm(a), norm(p)] : [norm(a)]; });
@@ -1390,7 +1436,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         : "Здесь лишняя гласная буква [[" + vl[1] + "]]: в этом слове правильно [[" + word + "]].");
     }
     if (best.r.dist > Math.max(3, best.c.length / 2)) return;   // too different: a letter-by-letter view would only confuse
-    fb.appendChild(el("span", "lbl", "Ваш ответ, расхождения выделены:"));
+    fb.appendChild(el("span", "lbl", res.typo ? "Ваш ответ, опечатка выделена:" : "Ваш ответ, расхождения выделены:"));
     fb.appendChild(box);
     tips.slice(0, 3).forEach(t => fb.appendChild(rich(el("span", "small"), t)));
   }
