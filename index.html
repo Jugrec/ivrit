@@ -324,6 +324,24 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
 .field .fall.bad { background: var(--bad); color: var(--surface); }
 .target { font-size: 1.15rem; text-align: center; }
 .target b { font-size: 1.3rem; }
+/* Words of the day */
+.vocinfo { display: flex; gap: 8px; flex-wrap: wrap; }
+.vcard .face { min-height: 300px; align-items: center; text-align: center; gap: 10px; }
+.vcard .big-he { font-family: var(--font-he); font-size: 2.6rem; line-height: 1.3; direction: rtl; }
+.vcard .big-ru { font-size: 1.6rem; font-weight: 500; }
+.vcard .tr { color: var(--muted); }
+.vcard .gram { font-size: 0.9rem; color: var(--muted); }
+.vcard .vex { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; width: 100%; display: flex; flex-direction: column; gap: 4px; }
+.vcard .vex .he { font-family: var(--font-he); font-size: 1.25rem; direction: rtl; }
+.vcard .hint { font-size: 0.85rem; color: var(--muted); }
+.rate { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.rate button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; font-size: 0.95rem; color: #fff; }
+.rate button small { font-size: 0.72rem; opacity: .9; font-weight: 400; }
+.rate .r1 { background: var(--bad); box-shadow: 0 3px 0 color-mix(in srgb, var(--bad) 62%, #000); }
+.rate .r2 { background: var(--hot); box-shadow: 0 3px 0 color-mix(in srgb, var(--hot) 62%, #000); }
+.rate .r3 { background: var(--good); box-shadow: 0 3px 0 color-mix(in srgb, var(--good) 62%, #000); }
+.rate .r4 { background: var(--accent); }
+.chip.new { background: var(--warn-soft); color: var(--hot); font-weight: 500; }
 /* Hoopoe mascot */
 .bird { flex: none; display: block; }
 .bird.hop { animation: hop .55s cubic-bezier(.3,1.5,.5,1); }
@@ -420,6 +438,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       </div>
       <div class="tline" id="tTimeWrap" hidden><span class="small muted" id="tTime"></span><div class="progress"><i id="tTimeBar"></i></div></div>
       <div class="actions" id="todayActions"></div>
+    </div>
+
+    <div class="panel" id="vocPanel" hidden>
+      <div class="row" style="justify-content:space-between"><h2>Слова дня</h2><span class="small muted" id="vocTopic"></span></div>
+      <div class="vocinfo" id="vocInfo"></div>
+      <div class="actions" id="vocActions"></div>
     </div>
 
     <div class="panel" id="placementCard" hidden>
@@ -535,6 +559,25 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <div class="actions" id="smActions"></div>
     </div>
     <div class="panel" id="smMistWrap"><h2>Разбор ошибок</h2><div class="mist" id="smMist"></div></div>
+  </section>
+
+  <!-- WORDS OF THE DAY (Anki-style cards) -->
+  <section id="v-vocab" class="view" hidden>
+    <div class="qhead"><button class="btn ghost" id="vcQuit">← Закончить</button><span class="small muted" id="vcCount"></span></div>
+    <div class="progress"><i id="vcBar"></i></div>
+    <div class="row" style="gap:8px"><span class="chip" id="vcTopic"></span><span class="chip new" id="vcNew" hidden>новое слово</span><span class="chip" id="vcDir"></span></div>
+    <div class="flip vcard" id="vcFlip" role="button" tabindex="0" aria-label="Показать ответ">
+      <div class="inner"><div class="panel face front" id="vcFront"></div><div class="panel face back" id="vcBack"></div></div>
+    </div>
+    <div class="dock" id="vcDock">
+      <button class="btn" id="vcShow">Показать ответ</button>
+      <div class="rate" id="vcRate" hidden>
+        <button class="btn r1" data-g="1">Снова<small></small></button>
+        <button class="btn r2" data-g="2">Трудно<small></small></button>
+        <button class="btn r3" data-g="3">Хорошо<small></small></button>
+        <button class="btn r4" data-g="4">Легко<small></small></button>
+      </div>
+    </div>
   </section>
 
   <!-- PAUSE (session time is up) -->
@@ -784,6 +827,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <div class="set"><div><div>Клавиатура</div><div class="small muted">Встроенная или клавиатура телефона с ивритской раскладкой</div></div>
         <div class="seg" id="s-kb"><button data-v="app" aria-pressed="true">Встроенная</button><button data-v="native" aria-pressed="false">Телефона</button></div></div>
       <div class="set"><div><div>Звуковые эффекты</div><div class="small muted">Короткий сигнал после верного и неверного ответа</div></div><button class="switch" id="s-sfx" role="switch" aria-checked="true" aria-label="Звуковые эффекты"></button></div>
+      <div class="set"><div><div>Новых слов в день</div><div class="small muted">«Слова дня». Если повторений накопилось много, новых будет меньше.</div></div>
+        <div class="seg" id="s-vocn"><button data-v="10">10</button><button data-v="15">15</button><button data-v="20" aria-pressed="true">20</button></div></div>
       <div class="set"><div><div>Длина занятия</div><div class="small muted">Потом приложение предложит закончить или сыграть. Повторение карточек не больше 10 минут.</div></div>
         <div class="seg" id="s-sess"><button data-v="20">20</button><button data-v="25" aria-pressed="true">25</button><button data-v="30">30</button></div></div>
     </div>
@@ -843,7 +888,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   const STANDALONE = !(window.claude && window.claude.use);
 
   function defaults() {
-    return { v: 2, settings: { nikud: true, translit: true, kb: "app", session: 25, sfx: true },
+    return { v: 2, settings: { nikud: true, translit: true, kb: "app", session: 25, sfx: true, vocabNew: 20 },
       placement: { status: "none", idx: 0, answers: {}, startedAt: null, finishedAt: null, result: null },
       cards: {}, lessons: {}, units: {}, log: {}, skillStats: {}, typeStats: {}, altOk: {}, custom: [], recent: [], errors: {} };
   }
@@ -907,6 +952,145 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     return a;
   }
   const save = () => store.save();
+
+  /* ================= words of the day (Anki-style) ================= */
+  // Cards v:<id> (Hebrew -> meaning) and r:<id> (meaning -> Hebrew, added once the word is known for 3+ days).
+  // Self-rated like Anki: Снова / Трудно / Хорошо / Легко, scheduled by the same FSRS. Not part of the lesson review
+  // (cardUsable() is false for them) and not counted in the session timer.
+  let VOC = { topics: [], list: [], byId: {} }, VS = null;
+  function buildVocab(v) {
+    if (!v || !v.topics) return;
+    VOC.topics = v.topics;
+    for (const t of v.topics) for (const w of t.words) { w.topic = t.title; VOC.list.push(w); VOC.byId[w.id] = w; }
+  }
+  const isVoc = (id) => (id.startsWith("v:") || id.startsWith("r:")) && !!VOC.byId[id.slice(2)];
+  const vocDue = () => Object.keys(S.cards).filter(id => isVoc(id) && S.cards[id].due <= Date.now());
+  function vocToday() { const d = dkey(); if (!S.vocab || S.vocab.d !== d) S.vocab = { d, n: 0, extra: 0 }; return S.vocab; }
+  function vocLimit(dueN) { const lim = S.settings.vocabNew || 20; return (dueN > 200 ? Math.min(5, lim) : dueN > 120 ? Math.ceil(lim / 2) : lim) + (vocToday().extra || 0); }
+  const vocNewLeft = (dueN) => Math.max(0, vocLimit(dueN) - vocToday().n);
+  function vocNextNew(k) { const out = []; for (const w of VOC.list) { if (out.length >= k) break; if (!S.cards["v:" + w.id]) out.push(w); } return out; }
+  const vocKnown = () => Object.keys(S.cards).filter(id => id.startsWith("v:") && isVoc(id)).length;
+  function renderVocPanel() {
+    const p = $("vocPanel"); p.hidden = !VOC.list.length || S.placement.status !== "done";
+    if (p.hidden) return;
+    const due = vocDue().length, nw = Math.min(vocNewLeft(due), vocNextNew(1000).length), next = vocNextNew(1)[0];
+    $("vocTopic").textContent = next ? "Тема: " + next.topic : "";
+    const info = $("vocInfo"); info.textContent = "";
+    const chip = (t, cls) => info.appendChild(el("span", "chip" + (cls ? " " + cls : ""), t));
+    chip("новых: " + nw, nw ? "new" : ""); chip("повторить: " + due, due ? "start" : ""); chip("изучено слов: " + vocKnown() + " из " + VOC.list.length);
+    const acts = $("vocActions"); acts.textContent = "";
+    const add = (label, fn, sec) => { const b = el("button", "btn" + (sec ? " secondary" : ""), label); b.onclick = fn; acts.appendChild(b); };
+    if (due + nw) add("Учить слова (" + (due + nw) + ")", startVocab);
+    else {
+      info.appendChild(el("span", "small muted", "На сегодня всё. Новые слова будут завтра."));
+      if (vocNextNew(1).length) add("Ещё 10 новых слов", () => { vocToday().extra = (vocToday().extra || 0) + 10; save(); startVocab(); }, true);
+    }
+  }
+  function startVocab() {
+    const due = vocDue().sort((a, b) => S.cards[a].due - S.cards[b].due).slice(0, 300);
+    const fresh = vocNextNew(vocNewLeft(due.length));
+    const q = due.map(id => ({ id, kind: id[0], w: VOC.byId[id.slice(2)], isNew: false }));
+    // new words spread between reviews, like Anki
+    fresh.forEach((w, i) => { const at = Math.min(q.length, Math.round((i + 1) * (q.length / (fresh.length + 1))) + i); q.splice(at, 0, { id: "v:" + w.id, kind: "v", w, isNew: true }); });
+    if (!q.length) { toast("На сегодня слов нет"); return; }
+    VS = { q, pos: 0, shown: false, first: new Map(), again: new Map(), newN: 0, xp0: S.xp };
+    show("vocab"); vocRender();
+  }
+  function vocRender() {
+    const it = VS.q[VS.pos], w = it.w, rev = it.kind === "r";
+    VS.shown = false;
+    $("vcCount").textContent = (VS.pos + 1) + " / " + VS.q.length;
+    $("vcBar").style.width = (VS.pos / VS.q.length * 100) + "%";
+    $("vcTopic").textContent = w.topic; $("vcNew").hidden = !it.isNew;
+    $("vcDir").textContent = rev ? "перевод → иврит" : "иврит → перевод";
+    const fl = $("vcFlip"); fl.classList.add("noanim"); fl.classList.remove("on"); void fl.offsetWidth; fl.classList.remove("noanim");
+    const F = $("vcFront"), B = $("vcBack"); F.textContent = ""; B.textContent = "";
+    const heEl = (cls) => { const e = el("div", cls, shown(w.he)); e.dir = "rtl"; return e; };
+    const gramEl = () => w.gram ? rich(el("div", "gram"), w.gram.replace(HEBRUN_ALL, m => "[[" + shown(m) + "]]")) : null;
+    if (rev) {
+      F.appendChild(el("div", "big-ru", w.ru));
+      if (w.gram && /^(м|ж)\./.test(w.gram)) F.appendChild(el("div", "gram", w.gram.split(/[,;]/)[0]));
+      F.appendChild(el("div", "hint", "Вспомните слово на иврите"));
+    } else {
+      F.appendChild(heEl("big-he"));
+      F.appendChild(el("div", "hint", it.isNew ? "Новое слово: нажмите, чтобы увидеть перевод" : "Что значит это слово?"));
+    }
+    B.appendChild(heEl(rev ? "big-he" : "big-he sm"));
+    if (w.tr) B.appendChild(el("div", "tr", w.tr));
+    B.appendChild(el("div", "big-ru", w.ru));
+    const g = gramEl(); if (g) B.appendChild(g);
+    if (w.ex) { const ex = el("div", "vex"); const h = el("div", "he", shown(w.ex)); h.dir = "rtl"; ex.appendChild(h); ex.appendChild(el("div", "small muted", w.exru)); B.appendChild(ex); }
+    $("vcShow").hidden = false; $("vcRate").hidden = true;
+    $("vcShow").textContent = it.isNew ? "Показать перевод" : "Показать ответ";
+  }
+  function fmtIvl(ms) {
+    const m = ms / MIN;
+    if (m < 60) return Math.max(1, Math.round(m)) + " мин";
+    const d = ms / DAY;
+    if (d < 1) return Math.round(m / 60) + " ч";
+    if (d < 30) return Math.round(d) + " дн";
+    if (d < 365) return Math.round(d / 30) + " мес";
+    return (d / 365).toFixed(1).replace(".0", "") + " г";
+  }
+  function vocPlan(it, G) {
+    // returns the delay before the card comes back, without changing it
+    const now = Date.now();
+    if (it.isNew && !S.cards[it.id]) return G === 1 ? MIN : G === 2 ? 10 * MIN : G === 3 ? DAY : 4 * DAY;
+    const bak = S.cards[it.id]; if (!bak) return DAY;
+    S.cards[it.id] = JSON.parse(JSON.stringify(bak)); reviewCard(it.id, G);
+    const due = S.cards[it.id].due; S.cards[it.id] = bak;
+    return G === 1 ? MIN : due - now;
+  }
+  function vocReveal() {
+    if (!VS || VS.shown) return;
+    VS.shown = true; $("vcFlip").classList.add("on");
+    $("vcShow").hidden = true; $("vcRate").hidden = false;
+    const it = VS.q[VS.pos];
+    [...$("vcRate").children].forEach(b => { b.querySelector("small").textContent = fmtIvl(vocPlan(it, +b.dataset.g)); });
+  }
+  function vocRate(G) {
+    if (!VS || !VS.shown) return;
+    const it = VS.q[VS.pos], now = Date.now();
+    if (!VS.first.has(it.id)) VS.first.set(it.id, G);
+    if (it.isNew && !S.cards[it.id]) {
+      initCard(it.id, G); const c = S.cards[it.id];
+      c.due = G === 1 ? now + MIN : G === 2 ? now + 10 * MIN : G === 3 ? now + DAY : now + 4 * DAY;
+      if (G === 4) c.s = Math.max(c.s, 4);
+      vocToday().n++; VS.newN++;
+    } else {
+      reviewCard(it.id, G);
+      if (G === 1) S.cards[it.id].due = now + MIN;
+    }
+    // learning steps inside the session: «Снова» comes back soon, «Трудно» on a new word once more
+    const back = (G === 1) || (G === 2 && it.isNew && !it.again);
+    if (back) {
+      const k = (VS.again.get(it.id) || 0) + 1; VS.again.set(it.id, k);
+      if (k <= 3) VS.q.splice(Math.min(VS.q.length, VS.pos + (G === 1 ? 4 : 7)), 0, Object.assign({}, it, { isNew: false, again: true }));
+    }
+    if (G >= 2 && typeof S.xp === "number") S.xp++;
+    // the reverse card appears once the word has been known for a few days
+    if (it.kind === "v" && G >= 3 && !it.isNew && (S.cards[it.id].reps || 0) >= 2 && S.cards[it.id].due - now >= 3 * DAY && !S.cards["r:" + it.id.slice(2)]) {
+      S.cards["r:" + it.id.slice(2)] = { s: W[2], d: clampD(W[4]), reps: 0, lapses: 0, last: now, due: now + DAY };
+    }
+    if (G === 1) sfx("bad"); else if (G >= 3) sfx("ok");
+    actLog(); save();
+    VS.pos++;
+    if (VS.pos >= VS.q.length) return vocFinish(false);
+    vocRender();
+  }
+  function vocFinish(quit) {
+    if (!VS) return goHome();
+    const v = VS; VS = null; save();
+    if (!v.first.size) return goHome();
+    const results = [...v.first.values()].map(g => ({ ok: g > 1 }));
+    const hard = [...v.first.entries()].filter(([, g]) => g === 1).map(([id]) => VOC.byId[id.slice(2)]).filter(Boolean);
+    runXp0 = v.xp0;
+    const due = vocDue().length, more = vocNewLeft(due) > 0 && vocNextNew(1).length;
+    summary({ eyebrow: "Слова дня", title: quit ? "Перерыв в словах" : "Слова на сегодня пройдены",
+      text: "Карточек: " + v.first.size + ", из них новых слов: " + v.newN + ". Изучено слов всего: " + vocKnown() + " из " + VOC.list.length + "." + (due ? " Ещё ждут повторения: " + due + "." : ""),
+      results, words: hard,
+      actions: [{ label: "На главную", fn: goHome }].concat(due || more ? [{ label: "Продолжить слова", fn: startVocab }] : []) });
+  }
 
   /* ================= hoopoe mascot ================= */
   // הַדּוּכִיפַת, the national bird of Israel, drawn as SVG in three moods: happy, calm, support.
@@ -1014,7 +1198,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function dkey(t) { const d = new Date(t || Date.now()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   let toastT = null;
   function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3400); }
-  const VIEWS = ["home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games"];
+  const VIEWS = ["home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab"];
   function show(view) { for (const v of VIEWS) $("v-" + v).hidden = v !== view; if ($("sheet")) $("sheet").hidden = true; window.scrollTo(0, 0); }
   function rich(el, text) {
     // [[hebrew]] → styled span; everything else plain text
@@ -1029,6 +1213,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   // wrap every Hebrew run inside mixed text so word order stays correct
   const HR = "[" + U(0x590) + "-" + U(0x5FF) + "]";
   const HEBRUN = new RegExp("(" + HR + "+(?:[ " + U(0x5BE) + "]" + HR + "+)*)");
+  const HEBRUN_ALL = new RegExp(HEBRUN.source, "g");
   function appendMixed(node, text) {
     String(text).split(HEBRUN).forEach((seg, i) => {
       if (!seg) return;
@@ -1559,7 +1744,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   }
 
   /* ================= summary ================= */
-  function summary({ eyebrow, title, text, results, actions }) {
+  function summary({ eyebrow, title, text, results, actions, words }) {
     const firsts = results;
     const ok = firsts.filter(r => r.ok).length, pct = firsts.length ? Math.round(ok / firsts.length * 100) : null;
     $("smEyebrow").textContent = eyebrow || "";
@@ -1585,8 +1770,15 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("smText").textContent = text || (ok + " из " + firsts.length + " верно с первой попытки.");
     const acts = $("smActions"); acts.textContent = "";
     (actions || [{ label: "На главную", fn: goHome }]).forEach((a, i) => { const b = rich(el("button", "btn" + (i ? " secondary" : "")), a.label); b.onclick = a.fn; acts.appendChild(b); });
-    renderMistakes($("smMist"), firsts.filter(r => !r.ok));
-    $("smMistWrap").hidden = !firsts.some(r => !r.ok);
+    $("smMistWrap").querySelector("h2").textContent = words ? "Слова, которые пришлось повторить" : "Разбор ошибок";
+    if (words) {
+      const box = $("smMist"); box.textContent = "";
+      for (const w of words) { const d = el("div"); d.appendChild(el("span", "hw", shown(w.he))); d.appendChild(el("span", "small", (w.tr ? w.tr + ": " : "") + w.ru)); box.appendChild(d); }
+      $("smMistWrap").hidden = !words.length;
+    } else {
+      renderMistakes($("smMist"), firsts.filter(r => !r.ok));
+      $("smMistWrap").hidden = !firsts.some(r => !r.ok);
+    }
     show("summary");
   }
   function confetti() {
@@ -2091,8 +2283,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function gameWords() {
     const seen = new Set(), out = [];
     for (const id of Object.keys(S.cards)) {
-      if (!id.startsWith("w:")) continue;
-      const w = getWord(id.slice(2)); if (!w || !w.ru) continue;
+      if (!id.startsWith("w:") && !id.startsWith("v:")) continue;
+      const w = id.startsWith("v:") ? VOC.byId[id.slice(2)] : getWord(id.slice(2)); if (!w || !w.ru) continue;
       const key = norm(w.he); if (seen.has(key)) continue; seen.add(key); out.push(w);
     }
     return out;
@@ -2997,7 +3189,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function goHome() { if (window.__swReload) { location.reload(); return; } renderHome(); show("home"); }
   function renderHome() {
     const p = S.placement;
-    renderGreet();
+    renderGreet(); renderVocPanel();
     const sn = $("storeNote");
     if (store.mode === "local" && store.reason === "standalone") {
       const old = !S.lastBackup || Date.now() - S.lastBackup > 7 * DAY;
@@ -3189,6 +3381,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("s-sfx").setAttribute("aria-checked", S.settings.sfx !== false);
     [...$("s-kb").children].forEach(b => b.setAttribute("aria-pressed", b.dataset.v === S.settings.kb));
     [...$("s-sess").children].forEach(b => b.setAttribute("aria-pressed", +b.dataset.v === sessMin()));
+    [...$("s-vocn").children].forEach(b => b.setAttribute("aria-pressed", +b.dataset.v === (S.settings.vocabNew || 20)));
     $("importConfirm").hidden = true;
     $("storeStatus").textContent = store.mode === "local" && store.reason === "standalone" ? "Прогресс хранится в этом браузере на этом устройстве." + (S.lastBackup ? " Последняя копия: " + new Date(S.lastBackup).toLocaleDateString("ru-RU") + "." : " Копий пока не было.") + " Чтобы перенести прогресс на другое устройство, сохраните копию и загрузите её там." : store.mode === "db" ? "Прогресс сохраняется в вашем аккаунте Claude и одинаков на телефоне и компьютере. Он виден только вам." : store.mode === "local" ? "Прогресс сохраняется только в этом браузере на этом устройстве." : "Прогресс сейчас не сохраняется.";
     $("aiStatus").textContent = sampleFn ? "Кнопки «Почему так?» и «Мой ответ тоже верный?» появляются после ответа на задание. При первом нажатии Claude попросит разрешение." : "Объяснения от Claude недоступны в этом просмотре. Откройте приложение в Claude, войдя в свой аккаунт.";
@@ -3297,6 +3490,16 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("s-sfx").onclick = () => { S.settings.sfx = S.settings.sfx === false; save(); renderSettings(); if (S.settings.sfx) sfx("ok"); };
     $("s-translit").onclick = () => { S.settings.translit = !S.settings.translit; save(); renderSettings(); };
     [...$("s-kb").children].forEach(b => b.onclick = () => { S.settings.kb = b.dataset.v; save(); applyKbMode(); renderSettings(); });
+    [...$("s-vocn").children].forEach(b => b.onclick = () => { S.settings.vocabNew = +b.dataset.v; save(); renderSettings(); });
+    $("vcQuit").onclick = () => vocFinish(true);
+    $("vcShow").onclick = vocReveal;
+    $("vcFlip").onclick = () => { if (VS && !VS.shown) vocReveal(); };
+    [...$("vcRate").children].forEach(b => b.onclick = () => vocRate(+b.dataset.g));
+    document.addEventListener("keydown", e => {
+      if ($("v-vocab").hidden || !VS) return;
+      if (!VS.shown && (e.key === " " || e.key === "Enter")) { e.preventDefault(); vocReveal(); }
+      else if (VS.shown && "1234".includes(e.key)) vocRate(+e.key);
+    });
     [...$("s-sess").children].forEach(b => b.onclick = () => { S.settings.session = +b.dataset.v; save(); renderSettings(); });
     $("pzGo").onclick = () => { if (!R) return goHome(); lastAct = Date.now(); show("run"); renderItem(); };
     $("pzStop").onclick = () => { const r = leaveRun(); goHome(); toast(r && r.mode === "lesson" ? "Урок сохранён: завтра продолжите с того же места" : "До завтра!"); };
@@ -3351,6 +3554,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         (pf.writing || []).forEach(w => PRACTICE.writing.push(w));
       }
       buildLex(lexFile);
+      if (C.vocab) { try { buildVocab(await (await fetch("content/" + C.vocab)).json()); } catch (_) {} }
       buildCloze();
     } catch (e) { document.querySelector(".wrap").textContent = "Не удалось загрузить материалы курса. Обновите страницу."; return; }
     renderHome(); show("home");
