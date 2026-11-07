@@ -342,6 +342,15 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
 .rate .r3 { background: var(--good); box-shadow: 0 3px 0 color-mix(in srgb, var(--good) 62%, #000); }
 .rate .r4 { background: var(--accent); }
 .chip.new { background: var(--warn-soft); color: var(--hot); font-weight: 500; }
+/* Root families */
+.fam { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+.fam:first-child { border-top: 0; padding-top: 0; }
+.fam > button { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; background: none; border: 0; padding: 0; text-align: left; color: var(--ink); }
+.fam .rt { font-family: var(--font-he); font-size: 1.5rem; direction: rtl; }
+.fam .fw { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: baseline; }
+.fam .fw .he { font-size: 1.25rem; }
+.patlist { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: baseline; }
+.patlist .he { font-size: 1.3rem; letter-spacing: 1px; }
 /* Hoopoe mascot */
 .bird { flex: none; display: block; }
 .bird.hop { animation: hop .55s cubic-bezier(.3,1.5,.5,1); }
@@ -460,6 +469,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         <button class="btn secondary" id="b-dialogs">Разговор</button>
         <button class="btn secondary" id="b-writing">Письмо</button>
       </div>
+      <div class="nav"><button class="btn secondary" id="b-rootfam">Корни и модели</button></div>
       <div class="nav nav3"><button class="btn secondary" id="b-nonik">Без огласовок</button><button class="btn secondary" id="b-cursive">Прописные буквы</button><button class="btn secondary" id="b-games">Игры</button></div>
       <p class="small muted" id="practiceNote"></p>
     </div>
@@ -692,6 +702,18 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     </div>
     <div class="panel" id="erTopicsWrap" hidden><h2>Где ошибок больше всего</h2><div class="res" id="erTopics"></div></div>
     <div class="panel"><h2>Последние ошибки</h2><div class="mist" id="erList"></div></div>
+  </section>
+
+  <!-- ROOT FAMILIES -->
+  <section id="v-roots" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Корни и модели слов</h1>
+    <div class="panel">
+      <p>Почти каждое слово иврита это корень (обычно три согласные: смысл) плюс модель (гласные и приставки: какое это слово). Зная корень и модель, можно понять слово, которого вы ещё не видели.</p>
+      <div class="actions"><button class="btn" id="rfGo">Тренировка (12 заданий)</button></div>
+    </div>
+    <div class="panel"><h2>Модели</h2><p class="small muted" id="rfPatNote"></p><div class="patlist" id="rfPats"></div></div>
+    <div class="panel"><h2>Семьи корней</h2><div id="rfList"></div></div>
   </section>
 
   <!-- CURSIVE -->
@@ -1198,7 +1220,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function dkey(t) { const d = new Date(t || Date.now()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   let toastT = null;
   function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3400); }
-  const VIEWS = ["home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab"];
+  const VIEWS = ["home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab", "roots"];
   function show(view) { for (const v of VIEWS) $("v-" + v).hidden = v !== view; if ($("sheet")) $("sheet").hidden = true; window.scrollTo(0, 0); }
   function rich(el, text) {
     // [[hebrew]] → styled span; everything else plain text
@@ -2230,6 +2252,79 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         actions: [{ label: "Ещё раз", fn: () => cursiveRun(kind) }, { label: "Прописные буквы", fn: openCursive }] }); },
       onQuit: () => openCursive() });
   }
+  /* ================= root families and word patterns ================= */
+  // Data: content/rootfam.json (build/build_roots.py). Exercises are generated: root of a word, root + pattern -> word,
+  // meaning from root and pattern, the odd word out. Skill card k:rootfam, graded once per session.
+  let RF = null;
+  const rfPat = (w) => RF.patterns[w.p] || ["", ""];
+  function rfNote(f, w) {
+    const [tpl, label] = rfPat(w);
+    const meta = f.letters[0] && "סצשז".includes(f.letters[0]) && w.p === "hitpael" ? " После ס/צ/שׁ буква ת приставки меняется местами с первой буквой корня." : "";
+    return "[[!" + w.he + "]] (" + w.tr + "): " + w.ru + ". Корень [[" + f.root + "]]" + (tpl ? ", модель [[!" + tpl + "]]: " + label + "." : ".") + meta;
+  }
+  function openRoots() {
+    if (!RF) { toast("Раздел ещё загружается"); return; }
+    rich($("rfPatNote"), "Модель записана условным корнем [[ק־ט־ל]]: на место букв [[ק]], [[ט]], [[ל]] встают буквы настоящего корня.");
+    const pl = $("rfPats"); pl.textContent = "";
+    for (const [id, [tpl, label]] of Object.entries(RF.patterns)) {
+      if (!tpl) continue;
+      const ex = RF.families.flatMap(f => f.words).filter(w => w.p === id).slice(0, 2).map(w => w.he).join(", ");
+      pl.appendChild(rich(el("span", "he"), "[[!" + tpl + "]]"));
+      pl.appendChild(rich(el("span", "small"), label + (ex ? ": [[!" + ex + "]]" : "")));
+    }
+    const list = $("rfList"); list.textContent = "";
+    for (const f of RF.families) {
+      const d = el("div", "fam"), b = el("button"); b.type = "button";
+      b.appendChild(el("span", "rt", f.root)); b.appendChild(el("span", "small muted", f.ru + " · " + f.words.length + " сл."));
+      const fw = el("div", "fw"); fw.hidden = true;
+      for (const w of f.words) {
+        const h = el("span", "he", w.he); h.dir = "rtl"; fw.appendChild(h);
+        fw.appendChild(el("span", "small", w.tr + ": " + w.ru + (rfPat(w)[0] ? " · " + rfPat(w)[1] : "")));
+      }
+      b.onclick = () => { fw.hidden = !fw.hidden; };
+      d.append(b, fw); list.appendChild(d);
+    }
+    show("roots");
+  }
+  function rootsItems() {
+    const F = RF.families, items = [], mk = (ex) => items.push({ ex: Object.assign({ k: "rootfam", type: "choice", answer: 0 }, ex), cardId: "k:rootfam" });
+    const otherRoots = (f) => shuffle(F.filter(x => x !== f)).slice(0, 3).map(x => x.root);
+    for (const f of F) {
+      const ws = f.words;
+      for (const w of ws) {
+        mk({ id: "rf:root:" + w.he, prompt: "Какой корень у слова [[" + w.he + "]]?", options: [f.root].concat(otherRoots(f)), note: rfNote(f, w) });
+        const same = ws.filter(x => x !== w && x.ru !== w.ru);
+        if (same.length >= 3) mk({ id: "rf:mean:" + w.he, prompt: "Корень [[" + f.root + "]]: " + f.ru + ". Что значит [[" + w.he + "]]?", options: [w.ru].concat(shuffle(same).slice(0, 3).map(x => x.ru)), note: rfNote(f, w) });
+        if (w.p !== "other" && w.p !== "segol") {
+          const alt = ws.filter(x => x !== w && x.p !== w.p && bare(x.he) !== bare(w.he));
+          if (alt.length >= 3) {
+            const [tpl, label] = rfPat(w);
+            mk({ id: "rf:build:" + w.he, prompt: "Корень [[" + f.root + "]] (" + f.ru + ") + модель [[!" + tpl + "]] (" + label + "). Какое слово получится?", options: [w.he].concat(shuffle(alt).slice(0, 3).map(x => x.he)), note: rfNote(f, w) });
+          }
+        }
+      }
+      if (ws.length >= 3) {
+        const of = pick(F.filter(x => x !== f)), out = pick(of.words);
+        mk({ id: "rf:odd:" + f.root, prompt: "Какое слово не из семьи корня [[" + f.root + "]] (" + f.ru + ")?", options: [out.he].concat(shuffle(ws).slice(0, 3).map(x => x.he)), note: "[[!" + out.he + "]] от корня [[" + of.root + "]] (" + of.ru + "). Остальные: " + ws.map(x => "[[!" + x.he + "]]").join(", ") + "." });
+      }
+    }
+    return items;
+  }
+  function rootsRun() {
+    if (!RF) { toast("Раздел ещё загружается"); return; }
+    IDX.skillName.rootfam = "Корни и модели";
+    // one task per word at most, varied kinds
+    const all = shuffle(rootsItems()), used = new Set(), items = [];
+    for (const it of all) { const key = it.ex.id.split(":").slice(2).join(":"); if (used.has(key)) continue; used.add(key); items.push(it); if (items.length >= 12) break; }
+    run({ mode: "lesson", items, requeue: true, grade: false,
+      onDone: (results) => { const acc = results.filter(r => r.ok).length / Math.max(1, results.length);
+        reviewCard("k:rootfam", acc >= 0.85 ? 3 : acc >= 0.6 ? 2 : 1); save();
+        summary({ eyebrow: "Корни и модели", title: "Тренировка закончена", results,
+          text: "Корень даёт смысл, модель даёт тип слова. Загляните в список семей: там все слова с объяснением моделей.",
+          actions: [{ label: "Ещё раз", fn: rootsRun }, { label: "Семьи корней", fn: openRoots }, { label: "На главную", fn: goHome }] }); },
+      onQuit: () => openRoots() });
+  }
+
   /* ================= reading without nikud ================= */
   // Two kinds of items, both «choose the reading»:
   //  1) a homograph in a sentence: the context decides (סֵפֶר / סַפָּר, אֹכֶל / אוֹכֵל, דּוֹד / דּוּד …);
@@ -3568,6 +3663,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("b-errors").onclick = openErrors;
     $("b-cursive").onclick = openCursive;
     $("b-nonik").onclick = nonikRun;
+    $("b-rootfam").onclick = openRoots;
+    $("rfGo").onclick = rootsRun;
     $("cuLetters").onclick = () => cursiveRun("letters");
     $("cuRead").onclick = () => cursiveRun("words");
     $("cuWrite").onclick = startHandwrite;
@@ -3666,6 +3763,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         (pf.writing || []).forEach(w => PRACTICE.writing.push(w));
       }
       buildLex(lexFile);
+      if (C.rootfam) { try { RF = await (await fetch("content/" + C.rootfam)).json(); } catch (_) {} }
       if (C.vocab) { try { buildVocab(await (await fetch("content/" + C.vocab)).json()); } catch (_) {} }
       buildCloze();
     } catch (e) { document.querySelector(".wrap").textContent = "Не удалось загрузить материалы курса. Обновите страницу."; return; }
