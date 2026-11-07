@@ -460,7 +460,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         <button class="btn secondary" id="b-dialogs">Разговор</button>
         <button class="btn secondary" id="b-writing">Письмо</button>
       </div>
-      <div class="nav"><button class="btn secondary" id="b-cursive">Прописные буквы</button><button class="btn secondary" id="b-games">Игры</button></div>
+      <div class="nav nav3"><button class="btn secondary" id="b-nonik">Без огласовок</button><button class="btn secondary" id="b-cursive">Прописные буквы</button><button class="btn secondary" id="b-games">Игры</button></div>
       <p class="small muted" id="practiceNote"></p>
     </div>
 
@@ -1205,7 +1205,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     el.textContent = "";
     String(text).split(/(\[\[[^\]]+\]\])/).forEach(part => {
       const m = part.match(/^\[\[([^\]]+)\]\]$/);
-      if (m) { const s = document.createElement("span"); s.className = "he"; s.textContent = shown(m[1]); if (m[1].length <= 12) s.style.whiteSpace = "nowrap"; el.appendChild(s); }
+      if (m) { const keep = m[1][0] === "!", t = keep ? m[1].slice(1) : m[1]; const s = document.createElement("span"); s.className = "he"; s.textContent = keep ? t : shown(t); if (t.length <= 12) s.style.whiteSpace = "nowrap"; el.appendChild(s); }
       else if (part) appendMixed(el, shown(part));
     });
     return el;
@@ -2230,6 +2230,117 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         actions: [{ label: "Ещё раз", fn: () => cursiveRun(kind) }, { label: "Прописные буквы", fn: openCursive }] }); },
       onQuit: () => openCursive() });
   }
+  /* ================= reading without nikud ================= */
+  // Two kinds of items, both «choose the reading»:
+  //  1) a homograph in a sentence: the context decides (סֵפֶר / סַפָּר, אֹכֶל / אוֹכֵל, דּוֹד / דּוּד …);
+  //  2) a learned word in full spelling: tell the real reading from near-misses with other vowels / ב-в, כ-х, פ-ф.
+  // Skill card k:nonik, graded once per session from accuracy (like cursive).
+  const NONIK_CTX = [
+    ["אני קורא ספר מעניין.", "ספר", "אֲנִי קוֹרֵא סֵפֶר מְעַנְיֵן.", ["се́фер (книга)", "сапа́р (парикмахер)", "сфар (окраина, граница)"]],
+    ["הספר גזר לי את השיער קצר מדי.", "ספר", "הַסַּפָּר גָּזַר לִי אֶת הַשֵּׂעָר קָצָר מִדַּי.", ["сапа́р (парикмахер)", "се́фер (книга)", "сфар (окраина, граница)"]],
+    ["מה מספר הטלפון שלך?", "מספר", "מָה מִסְפַּר הַטֶּלֶפוֹן שֶׁלְּךָ?", ["миспа́р (номер, число)", "месапе́р (рассказывает)", "ми-се́фер (из книги)"]],
+    ["סבא מספר לנו סיפור.", "מספר", "סַבָּא מְסַפֵּר לָנוּ סִפּוּר.", ["месапе́р (рассказывает)", "миспа́р (номер, число)", "ми-се́фер (из книги)"]],
+    ["צריך שמן זית לסלט.", "שמן", "צָרִיךְ שֶׁמֶן זַיִת לַסָּלָט.", ["ше́мен (масло)", "шаме́н (толстый)"]],
+    ["החתול שלנו שמן מאוד.", "שמן", "הֶחָתוּל שֶׁלָּנוּ שָׁמֵן מְאוֹד.", ["шаме́н (толстый)", "ше́мен (масло)"]],
+    ["בוקר טוב! מה שלומך?", "בוקר", "בֹּקֶר טוֹב! מַה שְּׁלוֹמֵךְ?", ["бо́кер (утро)", "боке́р (ковбой)"]],
+    ["הבוקר רכב על סוס לבן.", "בוקר", "הַבּוֹקֵר רָכַב עַל סוּס לָבָן.", ["боке́р (ковбой)", "бо́кер (утро)"]],
+    ["המורה שלי, רותי, נחמדה מאוד.", "מורה", "הַמּוֹרָה שֶׁלִּי, רוּתִי, נֶחְמָדָה מְאוֹד.", ["мора́ (учительница)", "море́ (учитель)"]],
+    ["המורה שלי, דני, נחמד מאוד.", "מורה", "הַמּוֹרֶה שֶׁלִּי, דָּנִי, נֶחְמָד מְאוֹד.", ["море́ (учитель)", "мора́ (учительница)"]],
+    ["הדוד שלי גר בחיפה.", "דוד", "הַדּוֹד שֶׁלִּי גָּר בְּחֵיפָה.", ["дод (дядя)", "дуд (бойлер)"]],
+    ["תדליק את הדוד, אין מים חמים.", "דוד", "תַּדְלִיק אֶת הַדּוּד, אֵין מַיִם חַמִּים.", ["дуд (бойлер)", "дод (дядя)"]],
+    ["האוכל במסעדה הזאת טעים.", "אוכל", "הָאֹכֶל בַּמִּסְעָדָה הַזֹּאת טָעִים.", ["о́хель (еда)", "охе́ль (ест)"]],
+    ["הוא אוכל ארוחת בוקר בשבע.", "אוכל", "הוּא אוֹכֵל אֲרוּחַת בֹּקֶר בְּשֶׁבַע.", ["охе́ль (ест)", "о́хель (еда)"]],
+    ["הבית שלנו קרוב לים.", "בית", "הַבַּיִת שֶׁלָּנוּ קָרוֹב לַיָּם.", ["ба́ит (дом)", "бейт (дом чего-то, в сочетании)"]],
+    ["הילדים הולכים לבית ספר.", "בית", "הַיְּלָדִים הוֹלְכִים לְבֵית סֵפֶר.", ["бейт (дом чего-то, в сочетании)", "ба́ит (дом)"]],
+    ["הטלפון שלי ישן מאוד.", "ישן", "הַטֶּלֶפוֹן שֶׁלִּי יָשָׁן מְאוֹד.", ["яша́н (старый)", "яше́н (спит)"]],
+    ["התינוק ישן עכשיו, תדבר בשקט.", "ישן", "הַתִּינוֹק יָשֵׁן עַכְשָׁו, תְּדַבֵּר בְּשֶׁקֶט.", ["яше́н (спит)", "яша́н (старый)"]],
+    ["אני קונה לבן ולחם.", "לבן", "אֲנִי קוֹנֶה לֶבֶּן וְלֶחֶם.", ["ле́бен (лебен, кисломолочный)", "лава́н (белый)"]],
+    ["הקיר בחדר לבן.", "לבן", "הַקִּיר בַּחֶדֶר לָבָן.", ["лава́н (белый)", "ле́бен (лебен, кисломолочный)"]],
+    ["ירושלים היא הבירה של ישראל.", "בירה", "יְרוּשָׁלַיִם הִיא הַבִּירָה שֶׁל יִשְׂרָאֵל.", ["бира́ (столица)", "би́ра (пиво)"]],
+    ["בקיץ אני שותה בירה קרה.", "בירה", "בַּקַּיִץ אֲנִי שׁוֹתָה בִּירָה קָרָה.", ["би́ра (пиво)", "бира́ (столица)"]],
+    ["חלק מהאנשים לא באו.", "חלק", "חֵלֶק מֵהָאֲנָשִׁים לֹא בָּאוּ.", ["хе́лек (часть)", "хала́к (гладкий)"]],
+    ["אם יהיה גשם, נישאר בבית.", "אם", "אִם יִהְיֶה גֶּשֶׁם, נִשָּׁאֵר בַּבַּיִת.", ["им (если)", "эм (мать)"]],
+    ["את רוצה קפה או תה?", "את", "אַתְּ רוֹצָה קָפֶה אוֹ תֵּה?", ["ат (ты, ж. р.)", "эт (частица перед определённым дополнением)"]],
+    ["אני רואה את הים מהחלון.", "את", "אֲנִי רוֹאֶה אֶת הַיָּם מֵהַחַלּוֹן.", ["эт (частица перед определённым дополнением)", "ат (ты, ж. р.)"]],
+    ["אני הולכת לשוק עם חברה.", "עם", "אֲנִי הוֹלֶכֶת לַשּׁוּק עִם חֲבֵרָה.", ["им (с)", "ам (народ)"]],
+    ["העם בחר בממשלה חדשה.", "עם", "הָעָם בָּחַר בַּמֶּמְשָׁלָה חֲדָשָׁה.", ["ам (народ)", "им (с)"]],
+    ["מה השם שלך?", "שם", "מַה הַשֵּׁם שֶׁלְּךָ?", ["шем (имя)", "шам (там)"]],
+    ["המפתחות נמצאים שם, על השולחן.", "שם", "הַמַּפְתְּחוֹת נִמְצָאִים שָׁם, עַל הַשֻּׁלְחָן.", ["шам (там)", "шем (имя)"]],
+    ["אני גרה פה כבר שנתיים.", "פה", "אֲנִי גָּרָה פֹּה כְּבָר שְׁנָתַיִם.", ["по (здесь)", "пе (рот)"]],
+    ["הרופא אמר: תפתח את הפה.", "פה", "הָרוֹפֵא אָמַר: תִּפְתַּח אֶת הַפֶּה.", ["пе (рот)", "по (здесь)"]],
+    ["ישנו במלון ליד הים.", "מלון", "יָשַׁנּוּ בְּמָלוֹן לְיַד הַיָּם.", ["мало́н (гостиница)", "мело́н (дыня)"]],
+    ["בקיץ אוכלים מלון מתוק.", "מלון", "בַּקַּיִץ אוֹכְלִים מֵלוֹן מָתוֹק.", ["мело́н (дыня)", "мало́н (гостиница)"]],
+    ["כואבת לי העין השמאלית.", "עין", "כּוֹאֶבֶת לִי הָעַיִן הַשְּׂמָאלִית.", ["а́ин (глаз)", "эйн (источник, в названиях)"]],
+    ["אני אוהבת לטייל בעין גדי.", "עין", "אֲנִי אוֹהֶבֶת לְטַיֵּל בְּעֵין גֶּדִי.", ["эйн (источник, в названиях)", "а́ин (глаз)"]],
+    ["כמה זה עולה? זה זול מאוד.", "עולה", "כַּמָּה זֶה עוֹלֶה? זֶה זוֹל מְאוֹד.", ["оле́ (стоит; поднимается)", "ола́ (стоит, о ж. р.)"]],
+    ["הוא עולה חדש מרוסיה.", "עולה", "הוּא עוֹלֶה חָדָשׁ מֵרוּסְיָה.", ["оле́ (репатриант)", "ола́ (репатриантка)"]],
+    ["היא עולה חדשה מאוקראינה.", "עולה", "הִיא עוֹלָה חֲדָשָׁה מֵאוּקְרַאִינָה.", ["ола́ (репатриантка)", "оле́ (репатриант)"]]
+  ];
+  const TRV = "аеиоуэ";
+  const NONIK_SKIP = ["שרותים", "פרות", "תאטרון", "מוזאון", "להנות", "איפשהו"];   // full spelling adds a yod or drops a vav here (שירותים, פירות, תיאטרון, מוזיאון, ליהנות, איפשהו)
+  function trVariants(tr) {
+    // near-miss readings: one vowel changed, or б/в к/х п/ф swapped
+    // (plain text has no dagesh). Stress is never moved: it would not change what the letters say.
+    const base = tr.normalize("NFC"), chars = [...base], out = new Set();
+    const swaps = { "б": "в", "в": "б", "к": "х", "х": "к", "п": "ф", "ф": "п" };
+    // о/у (both written ו) and и/е (both can be י) never replace each other: a distractor must contradict the letters
+    const grp = (v) => "оу".includes(v) ? "оу" : "иеэ".includes(v) ? "иеэ" : v;
+    const vi = chars.map((c, i) => TRV.includes(c) ? i : -1).filter(i => i >= 0);
+    const ci = chars.map((c, i) => swaps[c] ? i : -1).filter(i => i >= 0);
+    for (let tries = 0; tries < 60 && out.size < 6; tries++) {
+      const c = chars.slice();
+      if ((Math.random() < 0.65 || !ci.length) && vi.length) { const i = pick(vi); c[i] = pick([..."аеиоу"].filter(v => !grp(c[i]).includes(v))); }
+      else if (ci.length) { const i = pick(ci); c[i] = swaps[c[i]]; }
+      else continue;
+      const v = c.join(""); if (v !== base) out.add(v);
+    }
+    return shuffle([...out]).slice(0, 3);
+  }
+  function nonikWords() {
+    // full spelling is generated by plene(); skip words where real full spelling adds letters plene() cannot know:
+    // hirik without yod, consonantal vav/yod inside the word (doubled in full spelling)
+    const HIRIK = "\u05B4", seen = new Set(), out = [];
+    const ids = Object.keys(S.cards).filter(id => id.startsWith("w:") || id.startsWith("v:"));
+    for (const id of ids) {
+      const w = id[0] === "v" ? VOC.byId[id.slice(2)] : getWord(id.slice(2));
+      if (!w || !w.tr || !w.he || !/^[\u05D0-\u05EA]+$/.test(bare(w.he)) || NONIK_SKIP.includes(bare(w.he))) continue;
+      const he = w.he, ch = [...he];
+      let bad = false;
+      for (let i = 0; i < ch.length; i++) {
+        let j = i + 1, m = ""; while (j < ch.length && isMark(ch[j])) { m += ch[j]; j++; }
+        if (ch[i] === HIRIK && ch[j] !== "י") bad = true;                                   // hirik without yod: full spelling may add one
+        if (ch[i] === "י" && i > 0 && m) bad = true;                                          // yod as a consonant: doubled in full spelling
+        if (ch[i] === "ו" && i > 0 && m && !/^(\u05B9|\u05BC)$/.test(m)) bad = true;        // vav as a consonant: doubled
+        if (ch[i] === "\u05B9" && (ch[j] === "א" || (ch[j] === "ה" && j === ch.length - 1))) bad = true;   // רֹאשׁ, פֹּה: no vav added
+      }
+      if (bad) continue;
+      const full = bare(plene(he) || he); if (full.length < 3 || seen.has(full)) continue;
+      // words with no vowel letters inside are the classic homographs (ספר, שמן, עבר …): only in sentences, not here
+      if (!/[וי]/.test(full.slice(1)) && full.length < 5) continue;
+      if (NONIK_CTX.some(c => c[1] === full)) continue;
+      seen.add(full); out.push({ w, full });
+    }
+    return out;
+  }
+  function nonikRun() {
+    IDX.skillName.nonik = "Чтение без огласовок";
+    const ctx = shuffle(NONIK_CTX).slice(0, 6).map((c, n) => ({ ex: { id: "nk:c:" + n + ":" + c[1], k: "nonik", type: "choice",
+      prompt: "Как читается слово [[" + c[1] + "]] в этом предложении?", he: c[0], options: c[3], answer: 0, note: "С огласовками: [[!" + c[2] + "]]" }, cardId: "k:nonik" }));
+    const ws = shuffle(nonikWords()).slice(0, 8).map(({ w, full }) => {
+      const alts = trVariants(w.tr); if (alts.length < 2) return null;
+      return { ex: { id: "nk:w:" + w.id, k: "nonik", type: "choice", prompt: "Как читается это слово?", he: full, options: [w.tr].concat(alts), answer: 0,
+        note: "[[!" + w.he + "]]: " + w.ru }, cardId: "k:nonik" };
+    }).filter(Boolean);
+    const items = interleave(ctx.concat(ws));
+    run({ mode: "lesson", items, requeue: true, grade: false,
+      onDone: (results) => { const acc = results.filter(r => r.ok).length / Math.max(1, results.length);
+        reviewCard("k:nonik", acc >= 0.85 ? 3 : acc >= 0.6 ? 2 : 1); save();
+        summary({ eyebrow: "Чтение без огласовок", title: "Тренировка закончена", results,
+          text: "Без огласовок слово узнают по контексту и по модели слова. Чем больше слов знаете, тем больше заданий на чтение будет здесь.",
+          actions: [{ label: "Ещё раз", fn: nonikRun }, { label: "На главную", fn: goHome }] }); },
+      onQuit: () => goHome() });
+  }
+
   let HW = null;
   function startHandwrite() {
     const ws = shuffle(cursiveWords()).slice(0, 8);
@@ -3456,6 +3567,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("b-mywords").onclick = openMyWords;
     $("b-errors").onclick = openErrors;
     $("b-cursive").onclick = openCursive;
+    $("b-nonik").onclick = nonikRun;
     $("cuLetters").onclick = () => cursiveRun("letters");
     $("cuRead").onclick = () => cursiveRun("words");
     $("cuWrite").onclick = startHandwrite;
