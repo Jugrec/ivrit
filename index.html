@@ -334,6 +334,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
 .vcard .vex { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; width: 100%; display: flex; flex-direction: column; gap: 4px; }
 .vcard .vex .he { font-family: var(--font-he); font-size: 1.25rem; direction: rtl; }
 .vcard .hint { font-size: 0.85rem; color: var(--muted); }
+.vcard .cz-he { font-family: var(--font-he); font-size: 1.7rem; line-height: 1.5; direction: rtl; }
+.vcard .cz-gap { display: inline-block; min-width: 3.2em; border-bottom: 2px solid var(--accent); }
+.vcard .cz-hit { color: var(--good); font-weight: 600; }
+.vcard .cz-res { font-weight: 600; } .vcard .cz-res.ok { color: var(--good); } .vcard .cz-res.no { color: var(--bad); } .vcard .cz-res.mid { color: var(--accent); }
+#vcType { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+#vcType[hidden] { display: none; }
 .rate { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .rate button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; font-size: 0.95rem; color: #fff; }
 .rate button small { font-size: 0.72rem; opacity: .9; font-weight: 400; }
@@ -580,6 +586,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <div class="inner"><div class="panel face front" id="vcFront"></div><div class="panel face back" id="vcBack"></div></div>
     </div>
     <div class="dock" id="vcDock">
+      <div id="vcType" hidden><input id="vcAns" class="answer" type="text" dir="rtl" lang="he" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="слово на иврите" aria-label="Пропущенное слово"><div id="vcKb"></div></div>
       <button class="btn" id="vcShow">Показать ответ</button>
       <div class="rate" id="vcRate" hidden>
         <button class="btn r1" data-g="1">Снова<small></small></button>
@@ -990,7 +997,20 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     VOC.topics = v.topics;
     for (const t of v.topics) for (const w of t.words) { w.topic = t.title; VOC.list.push(w); VOC.byId[w.id] = w; lexAdd(w.he, w.ru, { base: w.he }, 1); }
   }
-  const isVoc = (id) => (id.startsWith("v:") || id.startsWith("r:")) && !!VOC.byId[id.slice(2)];
+  const isVoc = (id) => /^[vrc]:/.test(id) && !!VOC.byId[id.slice(2)];
+  // c:<id> — cloze: type the word into its example sentence (made together with the reverse card)
+  function vocAddLater(id, now) {
+    const w = VOC.byId[id.slice(2)];
+    if (!S.cards["r:" + w.id]) S.cards["r:" + w.id] = { s: W[2], d: clampD(W[4]), reps: 0, lapses: 0, last: now, due: now + DAY };
+    if (w.cz && !S.cards["c:" + w.id]) S.cards["c:" + w.id] = { s: W[2], d: clampD(W[4]), reps: 0, lapses: 0, last: now, due: now + 2 * DAY };
+  }
+  function vocBackfill() {   // words that got their reverse card before cloze cards existed
+    const now = Date.now(); let ch = false;
+    for (const id of Object.keys(S.cards)) if (id.startsWith("r:") && isVoc(id) && VOC.byId[id.slice(2)].cz && !S.cards["c:" + id.slice(2)]) {
+      S.cards["c:" + id.slice(2)] = { s: W[2], d: clampD(W[4]), reps: 0, lapses: 0, last: now, due: now }; ch = true;
+    }
+    if (ch) save();
+  }
   const vocDue = () => Object.keys(S.cards).filter(id => isVoc(id) && S.cards[id].due <= Date.now());
   function vocToday() { const d = dkey(); if (!S.vocab || S.vocab.d !== d) S.vocab = { d, n: 0, extra: 0 }; return S.vocab; }
   function vocLimit(dueN) { const lim = S.settings.vocabNew || 20; return (dueN > 200 ? Math.min(5, lim) : dueN > 120 ? Math.ceil(lim / 2) : lim) + (vocToday().extra || 0); }
@@ -1000,6 +1020,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function renderVocPanel() {
     const p = $("vocPanel"); p.hidden = !VOC.list.length || S.placement.status !== "done";
     if (p.hidden) return;
+    vocBackfill();
     const due = vocDue().length, nw = Math.min(vocNewLeft(due), vocNextNew(1000).length), next = vocNextNew(1)[0];
     $("vocTopic").textContent = next ? "Тема: " + next.topic : "";
     const info = $("vocInfo"); info.textContent = "";
@@ -1029,11 +1050,13 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("vcCount").textContent = (VS.pos + 1) + " / " + VS.q.length;
     $("vcBar").style.width = (VS.pos / VS.q.length * 100) + "%";
     $("vcTopic").textContent = w.topic; $("vcNew").hidden = !it.isNew;
-    $("vcDir").textContent = rev ? "перевод → иврит" : "иврит → перевод";
+    $("vcDir").textContent = it.kind === "c" ? "слово в предложении" : rev ? "перевод → иврит" : "иврит → перевод";
+    $("vcType").hidden = it.kind !== "c";
     const fl = $("vcFlip"); fl.classList.add("noanim"); fl.classList.remove("on"); void fl.offsetWidth; fl.classList.remove("noanim");
     const F = $("vcFront"), B = $("vcBack"); F.textContent = ""; B.textContent = "";
     const heEl = (cls) => { const e = el("div", cls, shown(w.he)); e.dir = "rtl"; return e; };
     const gramEl = () => w.gram ? rich(el("div", "gram"), w.gram.replace(HEBRUN_ALL, m => "[[" + shown(m) + "]]")) : null;
+    if (it.kind === "c") return czRender(it, w, F, B);
     if (rev) {
       F.appendChild(el("div", "big-ru", w.ru));
       if (w.gram && /^(м|ж)\./.test(w.gram)) F.appendChild(el("div", "gram", w.gram.split(/[,;]/)[0]));
@@ -1049,6 +1072,44 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     if (w.ex) { const ex = el("div", "vex"); const h = el("div", "he", shown(w.ex)); h.dir = "rtl"; ex.appendChild(h); ex.appendChild(el("div", "small muted", w.exru)); B.appendChild(ex); }
     $("vcShow").hidden = false; $("vcRate").hidden = true;
     $("vcShow").textContent = it.isNew ? "Показать перевод" : "Показать ответ";
+  }
+  // the example sentence with the gap (front) or with the answer marked (back)
+  function czSentence(w, filled) {
+    const c = w.cz, n = c.n || 1, toks = w.ex.split(" "), box = el("div", "cz-he"); box.dir = "rtl";
+    toks.forEach((t, i) => {
+      if (i > c.i && i < c.i + n) return;
+      if (i) box.appendChild(document.createTextNode(" "));
+      if (i !== c.i) { box.appendChild(document.createTextNode(shown(t))); return; }
+      const last = toks[c.i + n - 1], lead = (t.match(/^[^\u05D0-\u05EA]*/) || [""])[0], tail = (last.match(/[^\u05D0-\u05EA\u0591-\u05C7]*$/) || [""])[0];
+      box.appendChild(document.createTextNode(lead + shown(c.pre)));
+      box.appendChild(filled ? el("span", "cz-hit", shown(c.ans)) : el("span", "cz-gap", "\u00A0"));
+      box.appendChild(document.createTextNode(tail));
+    });
+    return box;
+  }
+  function czRender(it, w, F, B) {
+    F.appendChild(el("div", "hint", "Вставьте слово в предложение"));
+    F.appendChild(czSentence(w, false));
+    F.appendChild(el("div", "small muted", w.exru));
+    F.appendChild(el("div", "gram", "Слово: " + w.ru));
+    B.appendChild(czSentence(w, true));
+    B.appendChild(el("div", "small muted", w.exru));
+    const a = $("vcAns"); a.value = ""; a.disabled = false;
+    a.setAttribute("inputmode", S.settings.kb === "app" ? "none" : "text");
+    $("vcKb").hidden = S.settings.kb !== "app";
+    if (!$("vcKb").firstChild) $("vcKb").appendChild(makeKb(() => $("vcAns")));
+    $("vcShow").hidden = false; $("vcRate").hidden = true; $("vcShow").textContent = "Проверить";
+    if (S.settings.kb !== "app") setTimeout(() => { try { a.focus({ preventScroll: true }); } catch (_) {} }, 50);
+  }
+  // auto-grade: right 3 («хорошо»), a clear typo or the dictionary form 2 («трудно»), wrong 1 («снова»)
+  function czCheck(w) {
+    const g = norm($("vcAns").value), acc = w.cz.acc, key = s => norm(s).replace(/[^\u05D0-\u05EA ]/g, "");
+    if (!g) return null;
+    if (acc.includes(g)) return { G: 3, msg: "Верно!" };
+    const t = acc.find(c => isTypo(g, c));
+    if (t) return { G: 2, msg: "Засчитано, но есть опечатка: правильно [[" + t + "]]." };
+    if (key(w.he) === g && acc[0] !== g) return { G: 2, msg: "Это словарная форма. В предложении нужна форма [[" + acc[0] + "]]." };
+    return { G: 1, msg: "Правильно: [[" + acc[0] + "]]." };
   }
   function fmtIvl(ms) {
     const m = ms / MIN;
@@ -1069,10 +1130,23 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     return G === 1 ? MIN : due - now;
   }
   function vocReveal() {
-    if (!VS || VS.shown) return;
+    if (!VS) return;
+    const it = VS.q[VS.pos];
+    if (it.kind === "c") {
+      if (VS.shown) return vocRate(VS.czG);
+      const r = czCheck(it.w);
+      if (!r) { toast("Наберите слово"); return; }
+      VS.shown = true; VS.czG = r.G; $("vcAns").disabled = true; $("vcAns").blur();
+      const B = $("vcBack"), line = rich(el("div", "cz-res " + ["", "no", "mid", "ok"][r.G]), r.msg); $("vcKb").hidden = true;
+      B.insertBefore(line, B.firstChild);
+      if (r.G === 1) B.appendChild(rich(el("div", "small muted"), "Ваш ответ: [[" + $("vcAns").value.replace(/[\[\]]/g, "") + "]]"));
+      sfx(r.G === 1 ? "bad" : "ok");
+      $("vcFlip").classList.add("on"); $("vcShow").textContent = "Дальше";
+      return;
+    }
+    if (VS.shown) return;
     VS.shown = true; $("vcFlip").classList.add("on");
     $("vcShow").hidden = true; $("vcRate").hidden = false;
-    const it = VS.q[VS.pos];
     [...$("vcRate").children].forEach(b => { b.querySelector("small").textContent = fmtIvl(vocPlan(it, +b.dataset.g)); });
   }
   function vocRate(G) {
@@ -1096,10 +1170,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     }
     if (G >= 2 && typeof S.xp === "number") S.xp++;
     // the reverse card appears once the word has been known for a few days
-    if (it.kind === "v" && G >= 3 && !it.isNew && (S.cards[it.id].reps || 0) >= 2 && S.cards[it.id].due - now >= 3 * DAY && !S.cards["r:" + it.id.slice(2)]) {
-      S.cards["r:" + it.id.slice(2)] = { s: W[2], d: clampD(W[4]), reps: 0, lapses: 0, last: now, due: now + DAY };
-    }
-    if (G === 1) sfx("bad"); else if (G >= 3) sfx("ok");
+    if (it.kind === "v" && G >= 3 && !it.isNew && (S.cards[it.id].reps || 0) >= 2 && S.cards[it.id].due - now >= 3 * DAY) vocAddLater(it.id, now);
+    if (it.kind !== "c") { if (G === 1) sfx("bad"); else if (G >= 3) sfx("ok"); }
     actLog(); save();
     VS.pos++;
     if (VS.pos >= VS.q.length) return vocFinish(false);
@@ -3728,10 +3800,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     [...$("s-vocn").children].forEach(b => b.onclick = () => { S.settings.vocabNew = +b.dataset.v; save(); renderSettings(); });
     $("vcQuit").onclick = () => vocFinish(true);
     $("vcShow").onclick = vocReveal;
-    $("vcFlip").onclick = () => { if (VS && !VS.shown) vocReveal(); };
+    $("vcFlip").onclick = () => { if (VS && !VS.shown && VS.q[VS.pos].kind !== "c") vocReveal(); };
+    $("vcAns").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); vocReveal(); } else e.stopPropagation(); });
     [...$("vcRate").children].forEach(b => b.onclick = () => vocRate(+b.dataset.g));
     document.addEventListener("keydown", e => {
       if ($("v-vocab").hidden || !VS) return;
+      if (VS.q[VS.pos].kind === "c") { if (VS.shown && e.key === "Enter") { e.preventDefault(); vocReveal(); } return; }
       if (!VS.shown && (e.key === " " || e.key === "Enter")) { e.preventDefault(); vocReveal(); }
       else if (VS.shown && "1234".includes(e.key)) vocRate(+e.key);
     });
