@@ -668,5 +668,6 @@
   }
  ],
  "vocab": "vocab.json",
- "rootfam": "rootfam.json"
+ "rootfam": "rootfam.json",
+ "stories": "stories.json"
 }

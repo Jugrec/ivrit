@@ -771,6 +771,11 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
     <h1>Чтение</h1>
     <p class="muted small">Тексты из уже знакомых слов. Нажмите на любое слово, чтобы увидеть перевод и разбор по частям. Лучше читать понемногу каждый день.</p>
+    <div class="panel" id="stPanel" hidden>
+      <h2 id="stTitle">Сериал</h2>
+      <p class="small muted">Короткие истории с одними и теми же героями. Около 95% слов вам уже знакомы, новые есть в списке под текстом. Нажмите на слово, чтобы увидеть перевод; любое слово можно добавить в свои карточки.</p>
+      <div class="list" id="stList"></div>
+    </div>
     <div class="panel"><h2>Тексты курса</h2><div class="list" id="txList"></div></div>
     <div class="panel" id="genPanel">
       <h2>Новый текст от Claude</h2>
@@ -983,7 +988,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function buildVocab(v) {
     if (!v || !v.topics) return;
     VOC.topics = v.topics;
-    for (const t of v.topics) for (const w of t.words) { w.topic = t.title; VOC.list.push(w); VOC.byId[w.id] = w; }
+    for (const t of v.topics) for (const w of t.words) { w.topic = t.title; VOC.list.push(w); VOC.byId[w.id] = w; lexAdd(w.he, w.ru, { base: w.he }, 1); }
   }
   const isVoc = (id) => (id.startsWith("v:") || id.startsWith("r:")) && !!VOC.byId[id.slice(2)];
   const vocDue = () => Object.keys(S.cards).filter(id => isVoc(id) && S.cards[id].due <= Date.now());
@@ -2949,6 +2954,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       b.onclick = () => openText(t, false);
       list.appendChild(b);
     }
+    renderStories();
     const anyDone = Object.keys(S.lessons).length > 0;
     $("genGo").disabled = !sampleFn || !anyDone;
     $("genNote").textContent = !sampleFn ? "Недоступно в этом просмотре: откройте приложение в Claude, войдя в аккаунт." : !anyDone ? "Станет доступно после первого урока: Claude пишет только из слов, которые вы уже прошли." : "Claude напишет короткий рассказ только из слов, которые вы уже прошли. Можно указать тему.";
@@ -2966,6 +2972,21 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     show("texts");
   }
 
+  let STORIES = null;
+  function renderStories() {
+    const p = $("stPanel"); p.hidden = !STORIES; if (!STORIES) return;
+    $("stTitle").textContent = "Сериал «" + STORIES.title + "»";
+    const list = $("stList"); list.textContent = "";
+    STORIES.episodes.forEach((t, i) => {
+      const prev = STORIES.episodes[i - 1], open = !prev || !!(S.read || {})[prev.id], read = !!(S.read || {})[t.id];
+      const b = el("button", "li"); b.type = "button"; b.disabled = !open;
+      b.appendChild(el("span", "num", read ? "✓" : String(i + 1)));
+      const d = el("div"); d.appendChild(el("div", "t", t.title.replace(/^\d+\.\s*/, ""))); d.appendChild(el("div", "d", (open ? "Уровень: " + t.level : "Откроется после вопросов к прошлой серии") + (t.nikud === "off" ? ", без огласовок" : ""))); b.appendChild(d);
+      b.appendChild(el("span", "chip " + (read ? "done" : open ? "next" : ""), read ? "Прочитана" : open ? "Читать" : "Закрыта"));
+      b.onclick = () => openText(t, false);
+      list.appendChild(b);
+    });
+  }
   let TX = null;
   function openText(t, generated, nk) {
     // texts of level Bet are shown without nikud (in full spelling), with a toggle
@@ -2984,6 +3005,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       const hs = el("div", "hs");
       const parts = s.split(/(\s+)/);
       const words = parts.filter(p => p.trim());
+      // hand-written full spelling (stories): same words, used instead of the automatic plene() when nikud is hidden
+      const plainW = !nk && t.plain && t.plain[si] ? t.plain[si].split(/\s+/).filter(Boolean) : null;
       let wi = 0;
       parts.forEach(p => {
         if (!p.trim()) { hs.appendChild(document.createTextNode(p)); return; }
@@ -2991,7 +3014,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         const lead = m ? m[1] : "", core = m ? m[2] : p, tail = m ? m[3] : "";
         if (lead) hs.appendChild(document.createTextNode(lead));
         if (core) {
-          const idx = wi; const sp = el("span", "wtap", disp(core));
+          const idx = wi; const pw = plainW && plainW.length === words.length ? plainW[wi].replace(/^[^א-ת]+|[^א-ת]+$/g, "") : null;
+          const sp = el("span", "wtap", pw || disp(core));
           sp.onclick = () => tapWord(sp, words.map(w => w.replace(/[^ְ-ת\s]/gu, "")), idx, s);
           hs.appendChild(sp);
         }
@@ -3020,7 +3044,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function tapWord(span, words, i, sentence) {
     document.querySelectorAll(".wtap.on").forEach(x => x.classList.remove("on"));
     span.classList.add("on");
-    const r = lookup(words, i, TX && TX.t.gloss);
+    const r = lookup(words, i, TX && (TX.t.gloss || []).concat(TX.t.kf || []));
     SH = { word: span.textContent, sentence, r };
     $("shWord").textContent = span.textContent;
     $("shAi").hidden = true; $("shAi").textContent = "";
@@ -3075,7 +3099,9 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     run({ mode: "reading", items: t.questions.map(ex => ({ ex })), requeue: false, label: () => "Вопросы к тексту",
       onDone: (results) => {
         S.read = S.read || {}; S.read[t.id] = Date.now(); actLog(); save();
-        summary({ eyebrow: "Текст: " + t.title, title: "Вопросы к тексту", results, actions: [{ label: "К текстам", fn: openTexts }, { label: "На главную", fn: goHome }] });
+        const ei = STORIES ? STORIES.episodes.indexOf(t) : -1, nx = ei >= 0 ? STORIES.episodes[ei + 1] : null;
+        summary({ eyebrow: (ei >= 0 ? "Сериал: " : "Текст: ") + t.title, title: "Вопросы к тексту", results,
+          actions: (nx ? [{ label: "Следующая серия", fn: () => openText(nx, false) }] : []).concat([{ label: "К текстам", fn: openTexts }, { label: "На главную", fn: goHome }]) });
       },
       onQuit: () => openText(t, gen) });
   }
@@ -3763,6 +3789,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         (pf.writing || []).forEach(w => PRACTICE.writing.push(w));
       }
       buildLex(lexFile);
+      if (C.stories) { try { STORIES = await (await fetch("content/" + C.stories)).json(); IDX.skillName.story = "Понимание текста"; } catch (_) {} }
       if (C.rootfam) { try { RF = await (await fetch("content/" + C.rootfam)).json(); } catch (_) {} }
       if (C.vocab) { try { buildVocab(await (await fetch("content/" + C.vocab)).json()); } catch (_) {} }
       buildCloze();
