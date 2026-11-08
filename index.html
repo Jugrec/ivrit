@@ -101,6 +101,18 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .nav .btn { width: 100%; }
 .nav.nav3 { grid-template-columns: repeat(3, 1fr); }
 .chgroup h2 { margin-bottom: 8px; }
+.sklegend { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.sklegend span { font-size: 0.8rem; padding: 3px 9px; border-radius: 999px; }
+.skgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.skcell { text-align: start; border: 1px solid transparent; border-radius: 10px; padding: 9px 10px; font: inherit; font-size: 0.86rem; line-height: 1.3; cursor: pointer; min-height: 52px; color: var(--ink); }
+.skcell small { display: block; margin-top: 3px; color: var(--muted); font-size: 0.74rem; }
+details.skfold { padding: 12px 18px; gap: 0; }
+.skfold summary { cursor: pointer; color: var(--muted); }
+details.skfold[open] summary { margin-bottom: 10px; }
+.sk-new { background: var(--key); color: var(--muted); }
+.sk-weak { background: color-mix(in srgb, var(--bad) 18%, var(--surface)); border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
+.sk-mid { background: color-mix(in srgb, var(--hot) 18%, var(--surface)); border-color: color-mix(in srgb, var(--hot) 40%, transparent); }
+.sk-good { background: var(--good-soft); border-color: color-mix(in srgb, var(--good) 40%, transparent); }
 .wrsample { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); }
 .wrsample .he { font-family: var(--font-he); font-size: 1.15rem; direction: rtl; }
 #diaryList details { border-top: 1px solid var(--line); padding: 8px 0; }
@@ -467,6 +479,13 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <div class="actions" id="vocActions"></div>
     </div>
 
+    <div class="panel" id="weakPanel" hidden>
+      <span class="eyebrow">Раз в неделю</span>
+      <h2>Тренировка слабых тем</h2>
+      <p class="muted small" id="weakText"></p>
+      <div class="actions"><button class="btn" id="weakGo">Тренировать (15 заданий)</button><button class="btn secondary" id="weakMap">Карта навыков</button></div>
+    </div>
+
     <div class="panel" id="placementCard" hidden>
       <span class="eyebrow">Входной тест</span>
       <h2>Определим, с какого модуля начать</h2>
@@ -488,7 +507,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
 
     <div id="unitPanels" class="view"></div>
 
-    <div class="nav nav3">
+    <div class="nav">
+      <button class="btn secondary" id="b-skills">Карта навыков</button>
       <button class="btn secondary" id="b-stats">Статистика</button>
       <button class="btn secondary" id="b-errors">Ошибки</button>
       <button class="btn secondary" id="b-mywords">Мои слова</button>
@@ -727,6 +747,19 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     </div>
     <div class="panel"><h2>Модели</h2><p class="small muted" id="rfPatNote"></p><div class="patlist" id="rfPats"></div></div>
     <div class="panel"><h2>Семьи корней</h2><div id="rfList"></div></div>
+  </section>
+
+  <!-- SKILL MAP -->
+  <section id="v-skills" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Карта навыков</h1>
+    <div class="panel">
+      <p class="small muted">Цвет показывает, насколько прочно держится тема: по точности ответов и по тому, как давно и успешно она повторялась. Нажмите на тему, чтобы потренировать только её.</p>
+      <div class="sklegend"><span class="sk-new">не начато</span><span class="sk-weak">слабо</span><span class="sk-mid">закрепляется</span><span class="sk-good">надёжно</span></div>
+      <p class="small" id="skSum"></p>
+      <div class="actions"><button class="btn" id="skWeakGo">Тренировка слабых тем (15 заданий)</button></div>
+    </div>
+    <div id="skGrid"></div>
   </section>
 
   <!-- CHAINS -->
@@ -1313,7 +1346,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function dkey(t) { const d = new Date(t || Date.now()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   let toastT = null;
   function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3400); }
-  const VIEWS = ["chains", "home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab", "roots"];
+  const VIEWS = ["skills", "chains", "home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab", "roots"];
   function show(view) { for (const v of VIEWS) $("v-" + v).hidden = v !== view; if ($("sheet")) $("sheet").hidden = true; window.scrollTo(0, 0); }
   function rich(el, text) {
     // [[hebrew]] → styled span; everything else plain text
@@ -2204,14 +2237,65 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     return Object.entries(S.skillStats).filter(([k, v]) => v[1] >= 2 && IDX.skills[k] && IDX.skills[k].length)
       .map(([k, v]) => ({ k, acc: v[0] / v[1], n: v[1] })).sort((a, b) => a.acc - b.acc);
   }
-  function startWeak() {
-    const ws = weakSkills().filter(w => w.acc < 0.9).slice(0, 3);
-    if (!ws.length) { toast("Слабых мест пока нет"); return; }
+  /* ---- skill map: state of every grammar topic from its k: card and its answer accuracy ---- */
+  function skillState(k) {
+    const c = S.cards["k:" + k], st = S.skillStats[k];
+    const acc = st && st[1] >= 3 ? st[0] / st[1] : null;
+    if (!c) return { k, cls: "new", score: 2, acc };
+    const R = retr(Math.max(0, (Date.now() - c.last) / DAY), c.s);
+    const cls = (R < 0.85 || (acc !== null && acc < 0.7) || (c.lapses >= 3 && c.s < 7)) ? "weak" : (c.s >= 21 && R >= 0.9 && (acc === null || acc >= 0.85)) ? "good" : "mid";
+    return { k, cls, R, acc, s: c.s, due: c.due, score: R * (acc === null ? 0.85 : acc) };
+  }
+  const mapSkills = () => [...new Set(UNITS.flatMap(u => Object.keys(u.skills || {})))].filter(k => IDX.skills[k] && IDX.skills[k].length);
+  const skPlain = (k) => "«" + (IDX.skillName[k] || k).replace(/\[\[!?|\]\]/g, "") + "»";
+  function weakest(n) {
+    const st = mapSkills().map(skillState).filter(x => x.cls === "weak" || x.cls === "mid");
+    return st.sort((a, b) => (a.cls === "weak" ? 0 : 1) - (b.cls === "weak" ? 0 : 1) || a.score - b.score).slice(0, n);
+  }
+  function trainSkills(ks, per, title) {
     const items = [];
-    for (const w of ws) { const used = new Set(); for (let i = 0; i < 4; i++) { const ex = skillEx(w.k, null); if (ex && !used.has(ex.id)) { used.add(ex.id); items.push({ ex, cardId: "k:" + w.k }); remember(ex.id); } } }
+    for (const k of ks) { const used = new Set(); for (let i = 0; i < per * 3 && used.size < per; i++) { const ex = skillEx(k, null); if (ex && !used.has(ex.id)) { used.add(ex.id); items.push({ ex, cardId: "k:" + k }); remember(ex.id); } } }
+    if (!items.length) { toast("Заданий по этой теме пока нет"); return; }
     run({ mode: "review", items: interleave(items), requeue: true, grade: true,
-      onDone: (results) => summary({ eyebrow: "Слабые места", title: "Тренировка закончена", results, actions: [{ label: "На главную", fn: goHome }, { label: "Статистика", fn: openStats }] }),
-      onQuit: () => goHome() });
+      onDone: (results) => summary({ eyebrow: title, title: "Тренировка закончена", results,
+        text: "Темы: " + ks.map(skPlain).join(", ") + ".",
+        actions: [{ label: "Карта навыков", fn: openSkills }, { label: "На главную", fn: goHome }] }),
+      onQuit: () => openSkills() });
+  }
+  function startWeak() {
+    const ws = weakest(3);
+    if (!ws.length) { toast("Слабых тем сейчас нет"); return; }
+    S.weakAt = Date.now(); save();
+    trainSkills(ws.map(w => w.k), 5, "Слабые темы");
+  }
+  const weakDue = () => mapSkills().filter(k => S.cards["k:" + k]).length >= 5 && (!S.weakAt || Date.now() - S.weakAt > 7 * DAY) && weakest(1).length > 0;
+  function openSkills() {
+    const grid = $("skGrid"); grid.textContent = "";
+    const cnt = { new: 0, weak: 0, mid: 0, good: 0 }, seen = new Set();
+    for (const u of UNITS) {
+      const ks = Object.keys(u.skills || {}).filter(k => IDX.skills[k] && IDX.skills[k].length && !seen.has(k));
+      if (!ks.length) continue;
+      ks.forEach(k => seen.add(k));
+      const started = ks.some(k => S.cards["k:" + k]);
+      const head = (u.module ? "Модуль " + u.module + ". " : "") + (u.title || "");
+      // modules not started yet stay folded, so the map shows what is being learned
+      const p = started ? el("div", "panel") : el("details", "panel skfold");
+      if (started) p.appendChild(rich(el("h2", ""), head));
+      else p.appendChild(rich(el("summary", ""), head + " · не начато"));
+      const g = el("div", "skgrid");
+      ks.forEach(k => {
+        const st = skillState(k); cnt[st.cls]++;
+        const b = rich(el("button", "skcell sk-" + st.cls), IDX.skillName[k] || k); b.type = "button";
+        const sub = st.cls === "new" ? "ещё не встречалась" : (st.acc !== null ? "точность " + Math.round(st.acc * 100) + "%" : "мало ответов") + (st.cls === "weak" ? ", пора повторить" : "");
+        b.appendChild(el("small", "", sub));
+        b.onclick = () => trainSkills([k], 8, "Тренировка темы");
+        g.appendChild(b);
+      });
+      p.appendChild(g); grid.appendChild(p);
+    }
+    $("skSum").textContent = "Надёжно: " + cnt.good + " · закрепляется: " + cnt.mid + " · слабо: " + cnt.weak + " · не начато: " + cnt.new + ".";
+    $("skWeakGo").disabled = !weakest(1).length;
+    show("skills");
   }
 
   /* ================= error journal ================= */
@@ -3583,6 +3667,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function renderHome() {
     const p = S.placement;
     renderGreet(); renderVocPanel();
+    $("weakPanel").hidden = !weakDue();
+    if (!$("weakPanel").hidden) $("weakText").textContent = "Темы, которые держатся хуже всего: " + weakest(3).map(w => skPlain(w.k)).join(", ") + ". Короткая тренировка на 10 минут вернёт их.";
     const sn = $("storeNote");
     if (store.mode === "local" && store.reason === "standalone") {
       const old = !S.lastBackup || Date.now() - S.lastBackup > 7 * DAY;
@@ -3731,7 +3817,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const box = $("stWeak"); box.textContent = "";
     ws.slice(0, 6).forEach(w => box.appendChild(resRow(IDX.skillName[w.k], Math.round(w.acc * 100), Math.round(w.acc * 100) + "% · " + w.n, w.acc < 0.8)));
     $("stWeakNote").textContent = ws.length ? "Темы с самой низкой точностью ответов." : "Появятся после нескольких уроков.";
-    $("stWeakGo").hidden = !ws.some(w => w.acc < 0.9);
+    $("stWeakGo").hidden = !weakest(1).length;
     const tb = $("stTypes"); tb.textContent = "";
     for (const [t, v] of Object.entries(S.typeStats)) tb.appendChild(resRow(TYPE_NAMES[t] || t, Math.round(v[0] / v[1] * 100), Math.round(v[0] / v[1] * 100) + "% · " + v[1], v[0] / v[1] < 0.8));
     if (!tb.children.length) tb.appendChild(el("p", "small muted", "Пока нет ответов."));
@@ -3863,6 +3949,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("hwNo").onclick = () => rateHw(false);
     $("erGo").onclick = startErrors;
     $("stWeakGo").onclick = startWeak;
+    $("b-skills").onclick = openSkills; $("skWeakGo").onclick = startWeak; $("weakGo").onclick = startWeak; $("weakMap").onclick = openSkills;
     $("cwAdd").onclick = addCustom;
     $("lsNext").onclick = lessonNext;
     $("lsTestOut").onclick = testOut;
