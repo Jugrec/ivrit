@@ -100,6 +100,12 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .nav .btn { width: 100%; }
 .nav.nav3 { grid-template-columns: repeat(3, 1fr); }
+.chgroup h2 { margin-bottom: 8px; }
+.wrsample { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); }
+.wrsample .he { font-family: var(--font-he); font-size: 1.15rem; direction: rtl; }
+#diaryList details { border-top: 1px solid var(--line); padding: 8px 0; }
+#diaryList summary { cursor: pointer; color: var(--muted); }
+#diaryList .he { font-family: var(--font-he); font-size: 1.1rem; direction: rtl; white-space: pre-wrap; margin-top: 6px; }
 .nav.nav3 .btn { padding-inline: 6px; }
 .wrtext { font-family: var(--font-he); direction: rtl; text-align: right; font-size: 1.35rem; line-height: 1.7; white-space: pre-wrap; }
 textarea.answer { min-height: 130px; resize: vertical; line-height: 1.6; }
@@ -475,7 +481,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         <button class="btn secondary" id="b-dialogs">Разговор</button>
         <button class="btn secondary" id="b-writing">Письмо</button>
       </div>
-      <div class="nav"><button class="btn secondary" id="b-rootfam">Корни и модели</button></div>
+      <div class="nav"><button class="btn secondary" id="b-rootfam">Корни и модели</button><button class="btn secondary" id="b-chains">Строим фразы</button></div>
       <div class="nav nav3"><button class="btn secondary" id="b-nonik">Без огласовок</button><button class="btn secondary" id="b-cursive">Прописные буквы</button><button class="btn secondary" id="b-games">Игры</button></div>
       <p class="small muted" id="practiceNote"></p>
     </div>
@@ -723,6 +729,14 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     <div class="panel"><h2>Семьи корней</h2><div id="rfList"></div></div>
   </section>
 
+  <!-- CHAINS -->
+  <section id="v-chains" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Строим фразы</h1>
+    <div class="panel"><p>Фраза растёт шаг за шагом: к ней добавляется слово, меняется время, лицо или число. Пишите каждый раз всю фразу целиком. Так трудная грамматика (будущее время, hифъиль, предлоги с окончаниями, числа, смихут) становится привычной.</p></div>
+    <div id="chList"></div>
+  </section>
+
   <!-- CURSIVE -->
   <section id="v-cursive" class="view" hidden>
     <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
@@ -805,6 +819,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     <h1>Письмо</h1>
     <p class="muted small">Короткий текст на иврите на тему урока. Claude исправит ошибки, объяснит их и покажет, как написал бы носитель. Пишите сами, без переводчика: ошибки здесь полезны.</p>
     <div class="panel"><div class="list" id="wrList"></div></div>
+    <div class="panel" id="diaryPast" hidden><h2>Мой дневник</h2><div id="diaryList"></div></div>
   </section>
 
   <!-- WRITING EDITOR -->
@@ -814,6 +829,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     <div class="panel">
       <p id="wrTask"></p>
       <p class="small muted" id="wrUse"></p>
+      <div id="wrSample" hidden><button class="btn ghost small" id="wrSampleBtn" type="button">Показать образец</button><div class="wrsample" id="wrSampleText" hidden></div></div>
       <textarea id="wrIn" class="answer" dir="rtl" lang="he" spellcheck="false" aria-label="Ваш текст на иврите"></textarea>
       <div id="kbWrite"></div>
       <div class="row"><button class="btn grow" id="wrCheck">Проверить</button><button class="btn secondary" id="wrKb" aria-label="Клавиатура">⌨</button></div>
@@ -1297,7 +1313,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function dkey(t) { const d = new Date(t || Date.now()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   let toastT = null;
   function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3400); }
-  const VIEWS = ["home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab", "roots"];
+  const VIEWS = ["chains", "home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab", "roots"];
   function show(view) { for (const v of VIEWS) $("v-" + v).hidden = v !== view; if ($("sheet")) $("sheet").hidden = true; window.scrollTo(0, 0); }
   function rich(el, text) {
     // [[hebrew]] → styled span; everything else plain text
@@ -3355,11 +3371,80 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     }
   }
 
+  /* ================= «Строим фразы» ================= */
+  // content/chains.json (build/build_chains.py): 20 chains of 5 steps, the phrase grows step by step; typed answers,
+  // accept lists include variants and the full spelling. Skill card k:chains; S.chains[id] = best % of a chain.
+  let CHN = null;
+  const chainDone = (c) => (S.chains || {})[c.id] != null;
+  function openChains() {
+    if (!CHN) { toast("Раздел ещё загружается"); return; }
+    const box = $("chList"); box.textContent = "";
+    const groups = {};
+    CHN.chains.forEach(c => { const g = c.topic.split(":")[0]; (groups[g] = groups[g] || []).push(c); });
+    for (const [g, cs] of Object.entries(groups)) {
+      const p = el("div", "panel chgroup"); p.appendChild(el("h2", "", g));
+      const list = el("div", "list");
+      cs.forEach(c => {
+        const b = el("button", "li"); b.type = "button";
+        const best = (S.chains || {})[c.id];
+        b.appendChild(el("span", "num", best != null ? "✓" : "•"));
+        const d = el("div"); d.appendChild(el("div", "t", c.title)); d.appendChild(rich(el("div", "d"), c.topic.split(":").slice(1).join(":").trim() + " · " + c.steps.length + " шагов")); b.appendChild(d);
+        b.appendChild(el("span", "chip " + (best != null ? "" : "next"), best != null ? best + "%" : "Начать"));
+        b.onclick = () => chainRun(c);
+        list.appendChild(b);
+      });
+      p.appendChild(list); box.appendChild(p);
+    }
+    show("chains");
+  }
+  function chainRun(c) {
+    IDX.skillName.chains = "Строим фразы";
+    const n = c.steps.length;
+    const items = c.steps.map((s, i) => ({ ex: { id: "ch:" + c.id + ":" + i, k: "chains", type: "type", he: i ? c.steps[i - 1].he : undefined,
+      prompt: (i ? "Шаг " + (i + 1) + " из " + n + ". Измените фразу: " : "Шаг 1 из " + n + ". Скажите на иврите: ") + "«" + s.ru + "»", accept: s.accept }, cardId: "k:chains" }));
+    run({ mode: "lesson", items, requeue: false, grade: false,
+      onDone: (results) => {
+        const ok = results.filter(r => r.ok).length, pct = Math.round(ok / Math.max(1, results.length) * 100);
+        S.chains = S.chains || {}; S.chains[c.id] = Math.max(S.chains[c.id] || 0, pct);
+        reviewCard("k:chains", pct >= 85 ? 3 : pct >= 60 ? 2 : 1); save();
+        const nxt = CHN.chains.find(x => !chainDone(x));
+        summary({ eyebrow: "Строим фразы", title: c.title, results,
+          text: "Готовая фраза: " + shown(c.steps[n - 1].he) + " (" + c.steps[n - 1].ru + ")",
+          actions: (nxt ? [{ label: "Следующая цепочка", fn: () => chainRun(nxt) }] : []).concat([{ label: "Ещё раз", fn: () => chainRun(c) }, { label: "Все цепочки", fn: openChains }]) });
+      },
+      onQuit: () => openChains() });
+  }
+
+  /* ================= diary ================= */
+  // 3 sentences a day, kept in S.diary[date]; in Claude it is checked like any writing task, on the site: self-check + samples.
+  function diaryTheme() { const t = (CHN && CHN.diary) || []; if (!t.length) return null; const day = Math.floor(Date.now() / DAY); return t[day % t.length]; }
+  function diaryTask() {
+    const th = diaryTheme();
+    return { id: "diary", diary: true, title: "Дневник", task: "Напишите 3 предложения о сегодняшнем дне." + (th ? " Тема дня: " + th.t.toLowerCase() + " (можно писать и о другом)." : ""),
+      use: "прошедшее время, [[הַיּוֹם]], [[אַחַר כָּךְ]], [[בָּעֶרֶב]], [[מָחָר]] и будущее время", theme: th };
+  }
+  function diarySave(text) { S.diary = S.diary || {}; S.diary[dkey()] = text; }
+  function renderDiaryPast() {
+    const ent = Object.entries(S.diary || {}).sort((a, b) => b[0] < a[0] ? -1 : 1).slice(0, 30);
+    $("diaryPast").hidden = !ent.length; const box = $("diaryList"); box.textContent = "";
+    ent.forEach(([d, t]) => { const x = el("details"); x.appendChild(el("summary", "", d.split("-").reverse().join("."))); x.appendChild(el("div", "he", t)); box.appendChild(x); });
+  }
+
   /* ================= writing ================= */
   let WR = null;
   function openWriting() {
     const list = $("wrList"); list.textContent = "";
     if (!sampleFn) list.appendChild(el("p", "small muted", STANDALONE ? "Здесь текст можно написать и сохранить. Автоматическая проверка есть только в версии внутри Claude: перечитайте текст по подсказкам или покажите его учителю." : "Проверка письма доступна, когда приложение открыто в Claude с входом в аккаунт."));
+    if (CHN && CHN.diary) {
+      const dw = diaryTask(), done = !!(S.diary || {})[dkey()];
+      const b = el("button", "li"); b.type = "button";
+      b.appendChild(el("span", "num", done ? "✓" : "•"));
+      const d = el("div"); d.appendChild(el("div", "t", "Дневник: 3 предложения в день")); d.appendChild(el("div", "d", dw.theme ? "Тема дня: " + dw.theme.t : dw.task)); b.appendChild(d);
+      b.appendChild(el("span", "chip " + (done ? "" : "next"), done ? "Сегодня ✓" : "Писать"));
+      b.onclick = () => openWrite(dw);
+      list.appendChild(b);
+    }
+    renderDiaryPast();
     for (const w of PRACTICE.writing) {
       const open = !w.after || !!S.lessons[w.after];
       const n = (S.wr || {})[w.id] || 0;
@@ -3376,6 +3461,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     WR = { w };
     $("wrTitle").textContent = w.title; $("wrTask").textContent = w.task;
     rich($("wrUse"), "Постарайтесь использовать: " + w.use + ".");
+    $("wrSample").hidden = !(w.theme); $("wrSampleText").hidden = true; $("wrSampleText").textContent = "";
+    if (w.theme) w.theme.he.forEach((h, i) => { const e = el("div", "he", shown(h)); e.dir = "rtl"; $("wrSampleText").appendChild(e); $("wrSampleText").appendChild(el("div", "small muted", w.theme.ru[i])); });
     $("wrIn").value = (S.wrDraft || {})[w.id] || ""; $("wrResult").hidden = true; $("wrCheck").disabled = false;
     $("wrCheck").textContent = sampleFn ? "Проверить" : "Сохранить";
     const app = S.settings.kb === "app"; $("kbWrite").hidden = !app; $("wrIn").setAttribute("inputmode", app ? "none" : "text");
@@ -3385,9 +3472,10 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function saveWritingOffline(text) {
     S.wr = S.wr || {}; S.wr[WR.w.id] = (S.wr[WR.w.id] || 0) + 1;
     S.wrDraft = S.wrDraft || {}; S.wrDraft[WR.w.id] = text;
+    if (WR.w.diary) { diarySave(text); delete S.wrDraft.diary; }
     actLog(); save();
     const box = $("wrResult"); box.hidden = false; box.textContent = "";
-    box.appendChild(el("h2", "", "Текст сохранён"));
+    box.appendChild(el("h2", "", WR.w.diary ? "Запись сохранена в дневник" : "Текст сохранён"));
     box.appendChild(el("p", "small muted", "Проверьте себя по списку:"));
     ["Род и число: прилагательное и глагол согласованы с существительным?", "Артикль: у существительного и прилагательного вместе, в смихуте только у второго слова?", "Предлоги: לְ, בְּ, אֶת, עִם, עַל на своих местах?", "Время глагола: прошедшее, настоящее или будущее выбрано верно?", "Использованы слова из подсказки?", "Прочитайте текст вслух: звучит ли он естественно?"]
       .forEach(t => box.appendChild(rich(el("p", "small"), "• " + t)));
@@ -3409,6 +3497,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       const r = await sampleFn.json(prompt, { modelTier: "default" });
       S.wr = S.wr || {}; S.wr[WR.w.id] = (S.wr[WR.w.id] || 0) + 1;
       if (S.wrDraft) delete S.wrDraft[WR.w.id];
+      if (WR.w.diary) diarySave(r.corrected ? text + "\n\nИсправлено:\n" + String(r.corrected) : text);
       actLog(); save();
       box.textContent = "";
       box.appendChild(el("h2", "", "Проверка"));
@@ -3762,6 +3851,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("b-cursive").onclick = openCursive;
     $("b-nonik").onclick = nonikRun;
     $("b-rootfam").onclick = openRoots;
+    $("b-chains").onclick = openChains;
+    $("wrSampleBtn").onclick = () => { $("wrSampleText").hidden = !$("wrSampleText").hidden; };
     $("rfGo").onclick = rootsRun;
     $("cuLetters").onclick = () => cursiveRun("letters");
     $("cuRead").onclick = () => cursiveRun("words");
@@ -3865,6 +3956,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       buildLex(lexFile);
       if (C.stories) { try { STORIES = await (await fetch("content/" + C.stories)).json(); IDX.skillName.story = "Понимание текста"; } catch (_) {} }
       if (C.rootfam) { try { RF = await (await fetch("content/" + C.rootfam)).json(); } catch (_) {} }
+      if (C.chains) { try { CHN = await (await fetch("content/" + C.chains)).json(); } catch (_) {} }
       if (C.vocab) { try { buildVocab(await (await fetch("content/" + C.vocab)).json()); } catch (_) {} }
       buildCloze();
     } catch (e) { document.querySelector(".wrap").textContent = "Не удалось загрузить материалы курса. Обновите страницу."; return; }
