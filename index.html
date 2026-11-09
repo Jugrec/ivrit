@@ -101,6 +101,15 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .nav .btn { width: 100%; }
 .nav.nav3 { grid-template-columns: repeat(3, 1fr); }
 .chgroup h2 { margin-bottom: 8px; }
+#leechList details { border-top: 1px solid var(--line); padding: 10px 0; }
+#leechList summary { cursor: pointer; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; list-style: none; }
+#leechList summary::-webkit-details-marker { display: none; }
+#leechList summary .he { font-size: 1.35rem; }
+.lc { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.lc .box { padding: 10px 12px; border-radius: 10px; background: var(--key); }
+.lc .box .lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+.lc .sent { font-family: var(--font-he); font-size: 1.2rem; direction: rtl; }
+.lc .hit { color: var(--accent); font-weight: 600; }
 .sklegend { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .sklegend span { font-size: 0.8rem; padding: 3px 9px; border-radius: 999px; }
 .skgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -817,6 +826,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <div class="field"><label for="cwTr">Произношение кириллицей (необязательно)</label><input id="cwTr" type="text" autocomplete="off"></div>
       <button class="btn" id="cwAdd">Добавить в повторение</button>
     </div>
+    <div class="panel" id="leechPanel" hidden>
+      <div class="row" style="justify-content:space-between"><h2>Трудные слова</h2><span class="small muted" id="leechCount"></span></div>
+      <p class="small muted">Слова, которые забывались 4 раза и больше. Обычное повторение с ними не справляется, поэтому здесь их можно разобрать: пример в контексте, похожее слово, с которым легко спутать, и подсказка для запоминания.</p>
+      <button class="btn" id="leechGo">Тренировать трудные слова</button>
+      <div class="list" id="leechList"></div>
+    </div>
     <div class="panel"><div class="row" style="justify-content:space-between"><h2>Мой список</h2><span class="small muted" id="cwCount"></span></div><div class="list" id="cwList"></div></div>
   </section>
 
@@ -1345,7 +1360,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   function dkey(t) { const d = new Date(t || Date.now()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   let toastT = null;
-  function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3400); }
+  function toast(msg, ms) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, ms || 3400); }
   const VIEWS = ["skills", "chains", "home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab", "roots"];
   function show(view) { for (const v of VIEWS) $("v-" + v).hidden = v !== view; if ($("sheet")) $("sheet").hidden = true; window.scrollTo(0, 0); }
   function rich(el, text) {
@@ -1395,6 +1410,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       const sf = W[11] * Math.pow(c.d, -W[12]) * (Math.pow(c.s + 1, W[13]) - 1) * Math.exp(W[14] * (1 - R));
       c.s = Math.max(0.1, Math.min(sf, c.s));
       c.lapses = (c.lapses || 0) + 1;
+      if (c.lapses === LEECH && /^[wvrc]:/.test(id)) setTimeout(() => leechNotice(id), 900);
     } else {
       const f = Math.exp(W[8]) * (11 - c.d) * Math.pow(c.s, -W[9]) * (Math.exp(W[10] * (1 - R)) - 1) * (G === 2 ? W[15] : 1) * (G === 4 ? W[16] : 1);
       c.s = c.s * (f + 1);
@@ -3825,7 +3841,137 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   }
 
   /* ================= my words ================= */
-  function openMyWords() { renderMyWords(); show("mywords"); }
+  function openMyWords() { renderMyWords(); renderLeeches(); show("mywords"); }
+
+  /* ================= leeches: words forgotten 4+ times ================= */
+  const LEECH = 4;
+  // memory hooks for words that are often hard; key = lexKey of the word
+  const MNEM_LIST = [   // only words that exist as course or «Слова дня» cards
+    "שֻׁלְחָן (шульха́н): шулер сидит за столом.",
+    "כִּסֵּא (кисэ́): киса сидит на стуле.",
+    "חַלּוֹן (хало́н): из окна тянет холодом.",
+    "מַפְתֵּחַ (мафтэ́ах) от корня פ־ת־ח «открывать»: то, чем открывают.",
+    "רְחוֹב (рехо́в) от того же корня, что רָחָב «широкий»: широкое место в городе.",
+    "אֶתְמוֹל (этмо́ль): «это моль была вчера».",
+    "מָחָר (маха́р): махнём туда завтра.",
+    "עַכְשָׁו (ахша́в): «ах, сейчас же!»",
+    "כְּבָר (кева́р): суп уже сварился.",
+    "מַהֵר (махе́р): мах рукой, и быстро.",
+    "אוּלַי (ула́й): может быть, у лая собаки есть причина.",
+    "לִפְעָמִים (лифъами́м) от פַּעַם «раз»: «по разам», иногда.",
+    "אַף פַּעַם (аф па́ам): אַף «ни» + פַּעַם «раз», то есть ни разу, никогда.",
+    "עִיר (ир): Ир-кутск, город.",
+    "לֶחֶם (ле́хем): Бейт-Лехем (Вифлеем) значит «дом хлеба».",
+    "בַּיִת (ба́ит): от этого слова название буквы ב «бет», она похожа на домик.",
+    "עַיִן (а́ин): так называется буква ע, когда-то она изображала глаз.",
+    "רֹאשׁ (рош): Рош ха-Шана, «голова года».",
+    "שֵׁן (шен): буква ש «шин» с тремя зубцами похожа на зубы.",
+    "חַם (хам): хам горячится.",
+    "קַר (кар): «кар!» кричит замёрзшая ворона.",
+  ];
+  // matched by the pointed form, so homographs (פֹּה «здесь» / פֶּה «рот») never get the wrong hint
+  const pkey = (x) => String(x).normalize("NFC").replace(/[^\u05D0-\u05EA\u05B0-\u05BC\u05C1\u05C2\u05C7 ]/g, "").trim();
+  let MNEM = null;
+  const mnemFor = (he) => { if (!MNEM) { MNEM = {}; MNEM_LIST.forEach(m => { MNEM[pkey(m.split(" (")[0])] = m; }); } return MNEM[pkey(he)]; };
+  function leechWord(id) {
+    if (id.startsWith("w:")) { const w = getWord(id.slice(2)); return w ? { key: "w:" + w.id, w, kind: "course" } : null; }
+    const w = VOC.byId[id.slice(2)]; return w ? { key: "v:" + w.id, w, kind: "voc" } : null;
+  }
+  function leeches() {
+    const by = {};
+    for (const [id, c] of Object.entries(S.cards)) {
+      if (!/^[wvrc]:/.test(id) || (c.lapses || 0) < LEECH) continue;
+      const lw = leechWord(id); if (!lw) continue;
+      const cur = by[lw.key];
+      if (!cur || c.lapses > cur.lapses) by[lw.key] = Object.assign(lw, { lapses: c.lapses, card: id });
+    }
+    return Object.values(by).sort((a, b) => b.lapses - a.lapses);
+  }
+  function leechNotice(id) {
+    const lw = leechWord(id); if (!lw) return;
+    toast("Слово " + NIKUD_OFF(lw.w.he) + " забыто уже " + LEECH + " раза. Оно в разделе «Мои слова → Трудные слова»", 4500);
+  }
+  const NIKUD_OFF = (s) => String(s).replace(/[\u0591-\u05C7]/g, "");
+  // similar words the learner may confuse it with: same letters, or one letter apart (confusable letters first)
+  let SIMIDX = null;
+  function similarWords(w) {
+    if (!SIMIDX) {
+      SIMIDX = [];
+      const seen = new Set();
+      const add = (x) => { const k = lexKey(x.he); if (k.length < 2 || seen.has(x.he)) return; seen.add(x.he); SIMIDX.push({ he: x.he, ru: x.ru, tr: x.tr || "", k }); };
+      Object.values(IDX.words).forEach(add); VOC.list.forEach(add);
+    }
+    const k = lexKey(w.he), out = [];
+    for (const x of SIMIDX) {
+      if (x.he === w.he || x.ru === w.ru || Math.abs(x.k.length - k.length) > 1) continue;
+      let score = null;
+      if (x.k === k) score = 0;
+      else if (x.k.length === k.length) {
+        const diff = [...k].map((ch, i) => [ch, x.k[i]]).filter(([a, b]) => a !== b);
+        if (diff.length === 1) score = CONFUSE.some(([a, b]) => (a === diff[0][0] && b === diff[0][1]) || (b === diff[0][0] && a === diff[0][1])) ? 1 : 2;
+        else if (diff.length === 2 && diff[0][0] === diff[1][1] && diff[0][1] === diff[1][0] && k.length > 3) score = 2;   // two letters swapped
+      } else if (k.length >= 4 && x.k.length >= 4) {
+        const [a, b] = k.length > x.k.length ? [k, x.k] : [x.k, k];
+        for (let i = 0; i < a.length; i++) if (a.slice(0, i) + a.slice(i + 1) === b) { score = 3; break; }
+      }
+      if (score !== null && (k.length > 2 || score <= 1)) out.push([score, x]);   // short words: only same letters or confusable ones
+    }
+    return out.sort((a, b) => a[0] - b[0]).slice(0, 2).map(x => x[1]);
+  }
+  function leechContext(lw) {
+    if (lw.kind === "voc") return lw.w.ex ? { he: lw.w.ex, ru: lw.w.exru, hit: lw.w.cz ? lw.w.cz.i : -1, n: lw.w.cz ? (lw.w.cz.n || 1) : 1 } : null;
+    const list = CLOZE[lw.w.id]; if (!list || !list.length) return null;
+    const c = list[0], toks = c.s.split(" "), hit = toks.findIndex(t => lexKey(t) === lexKey(c.token));
+    return { he: c.s, ru: c.ru, hit, n: 1 };
+  }
+  function renderLeeches() {
+    const L = leeches(), box = $("leechList"); box.textContent = "";
+    $("leechPanel").hidden = !L.length; $("leechCount").textContent = L.length || "";
+    L.forEach(lw => {
+      const w = lw.w, det = el("details"), sum = el("summary");
+      const left = el("div"); left.appendChild(el("span", "he", shown(w.he))); left.appendChild(el("div", "small muted", w.ru + (w.tr ? " · " + w.tr : "")));
+      sum.appendChild(left); sum.appendChild(el("span", "chip", "забыто " + lw.lapses + " р.")); det.appendChild(sum);
+      const lc = el("div", "lc");
+      const ctx = leechContext(lw);
+      if (ctx) {
+        const b = el("div", "box"); b.appendChild(el("div", "lbl", "В контексте"));
+        const s = el("div", "sent"); s.dir = "rtl";
+        ctx.he.split(" ").forEach((t, i) => { if (i) s.appendChild(document.createTextNode(" ")); s.appendChild(i >= ctx.hit && i < ctx.hit + ctx.n && ctx.hit >= 0 ? el("span", "hit", shown(t)) : document.createTextNode(shown(t))); });
+        b.appendChild(s); b.appendChild(el("div", "small muted", ctx.ru)); lc.appendChild(b);
+      }
+      const sim = similarWords(w);
+      if (sim.length) {
+        const b = el("div", "box"); b.appendChild(el("div", "lbl", "Не путать"));
+        sim.forEach(x => { const r = el("div"); r.appendChild(el("span", "he", shown(x.he))); r.appendChild(document.createTextNode(" " + (x.tr ? x.tr + ", " : "") + x.ru)); b.appendChild(r); });
+        lc.appendChild(b);
+      }
+      const m = mnemFor(w.he);
+      if (m) { const b = el("div", "box"); b.appendChild(el("div", "lbl", "Подсказка для памяти")); b.appendChild(rich(el("div"), m.replace(/^([^(]+?) \(/, "[[$1]] ("))); lc.appendChild(b); }
+      else { const b = el("div", "box"); b.appendChild(el("div", "lbl", "Совет")); b.appendChild(el("div", "small", "Придумайте свою связь: созвучное русское слово, картинку или ситуацию. Скажите слово вслух и составьте с ним одно своё предложение.")); lc.appendChild(b); }
+      det.appendChild(lc); box.appendChild(det);
+    });
+  }
+  function leechEx(lw) {
+    const w = lw.w;
+    if (lw.kind === "course") { const out = [wordRec(w), wordProd(w)]; const cz = wordCloze(w); if (cz) out.push(cz); return out; }
+    const others = shuffle(VOC.list.filter(x => x.ru !== w.ru && x.id !== w.id)).slice(0, 3).map(x => x.ru);
+    const out = [{ id: "lrec:" + w.id, type: "choice", prompt: "Что значит это слово?", he: w.he, options: [w.ru].concat(others), answer: 0 },
+                 { id: "lprod:" + w.id, type: "type", prompt: "Как сказать на иврите: «" + w.ru + "»?", accept: [w.he].concat(w.cz && w.cz.n == null && lexKey(w.cz.ans) === lexKey(w.he) ? w.cz.acc : []) }];
+    if (w.cz) { const toks = w.ex.split(" "), n = w.cz.n || 1;
+      out.push({ id: "lcz:" + w.id, type: "gap", prompt: "Вставьте слово «" + w.ru + "» в нужной форме. Перевод: " + w.exru,
+        he: toks.slice(0, w.cz.i).concat([w.cz.pre + "___"]).concat(toks.slice(w.cz.i + n)).join(" "), accept: [w.cz.ans].concat(w.cz.acc) }); }
+    return out;
+  }
+  function startLeeches() {
+    const L = leeches().slice(0, 8); if (!L.length) return;
+    const rounds = L.map(leechEx), items = [];
+    for (let r = 0; r < 3; r++) shuffle(rounds.filter(x => x[r]).map(x => x[r])).forEach(ex => items.push({ ex }));
+    run({ mode: "review", items, requeue: true, grade: false,
+      onDone: (results) => summary({ eyebrow: "Трудные слова", title: "Тренировка закончена", results,
+        text: "Каждое слово было трижды: узнать, вспомнить и вставить в предложение. В обычном повторении они тоже остаются.",
+        actions: [{ label: "Ещё раз", fn: startLeeches }, { label: "Мои слова", fn: openMyWords }, { label: "На главную", fn: goHome }] }),
+      onQuit: () => openMyWords() });
+  }
   function renderMyWords() {
     const list = $("cwList"); list.textContent = "";
     $("cwCount").textContent = S.custom.length ? S.custom.length + "" : "";
@@ -3949,7 +4095,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("hwNo").onclick = () => rateHw(false);
     $("erGo").onclick = startErrors;
     $("stWeakGo").onclick = startWeak;
-    $("b-skills").onclick = openSkills; $("skWeakGo").onclick = startWeak; $("weakGo").onclick = startWeak; $("weakMap").onclick = openSkills;
+    $("b-skills").onclick = openSkills; $("leechGo").onclick = startLeeches; $("skWeakGo").onclick = startWeak; $("weakGo").onclick = startWeak; $("weakMap").onclick = openSkills;
     $("cwAdd").onclick = addCustom;
     $("lsNext").onclick = lessonNext;
     $("lsTestOut").onclick = testOut;
