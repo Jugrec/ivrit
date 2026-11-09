@@ -792,7 +792,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   <section id="v-sits" class="view" hidden>
     <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
     <h1>Ситуации</h1>
-    <div class="panel"><p>Готовые фразы для жизни в Израиле: врач, банк, аренда, звонок, магазин, транспорт, знакомство, работа. В каждой ситуации два коротких диалога: собеседник говорит, вы выбираете подходящий ответ. Фразы можно добавить в «Слова дня», тогда они пойдут в карточки в первую очередь.</p></div>
+    <div class="panel"><p>Готовые фразы для жизни в Израиле: врач, банк, аренда, звонок, магазин, транспорт, знакомство, работа. В каждой ситуации четыре коротких диалога: собеседник говорит, вы выбираете подходящий ответ. Реплики и варианты ответов каждый раз немного другие. Фразы можно добавить в «Слова дня», тогда они пойдут в карточки в первую очередь.</p></div>
     <div id="sitList"></div>
   </section>
 
@@ -3573,34 +3573,48 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         b.onclick = () => sitRun(st, i); list.appendChild(b);
       });
       p.appendChild(list);
+      const rnd = el("button", "btn small", "Случайный диалог"); rnd.type = "button"; rnd.onclick = () => sitRun(st, sitPick(st));
       const words = (VOC.topics.find(t => t.id === st.id) || { words: [] }).words;
       const left = words.filter(w => !S.cards["v:" + w.id]);
       const queued = left.length && left.every(w => (S.vocPrio || []).includes(w.id));
       const add = el("button", "btn secondary small", !words.length ? "" : !left.length ? "Фразы уже в «Словах дня»" : queued ? "Фразы стоят первыми в «Словах дня»" : "Добавить фразы в «Слова дня» (" + left.length + ")");
       add.type = "button"; add.disabled = !left.length || queued; add.hidden = !words.length;
       add.onclick = () => { S.vocPrio = (S.vocPrio || []).filter(id => !S.cards["v:" + id]).concat(left.map(w => w.id).filter(id => !(S.vocPrio || []).includes(id))); save(); toast("Фразы пойдут первыми в «Словах дня»"); openSits(); };
-      const act = el("div", "actions"); act.appendChild(add); p.appendChild(act);
+      const act = el("div", "actions"); act.appendChild(rnd); act.appendChild(add); p.appendChild(act);
       box.appendChild(p);
     });
     show("sits");
   }
+  // every run is a little different: a random wording of each line, a random right reply, two wrong replies
+  // (traps with an explanation first), and, when a turn has few traps, a phrase from another situation
+  function sitTurnEx(st, di, t, ti) {
+    const strip = (x) => x.replace(/[.?!,]+$/, "");
+    const line = pick(t.lines), right = pick(t.opts.filter(o => o.ok));
+    const wrongAll = t.opts.filter(o => !o.ok), traps = shuffle(wrongAll.filter(o => o.why)), plain = shuffle(wrongAll.filter(o => !o.why));
+    let wrong = traps.slice(0, 1).concat(shuffle(traps.slice(1).concat(plain))).slice(0, 2);
+    if (wrong.length < 2) {
+      const others = SIT.situations.filter(x => x.id !== st.id).flatMap(x => x.phrases.map(f => ({ he: f.he, ru: f.ru, why: "Это фраза из ситуации «" + x.title + "»." })));
+      wrong = wrong.concat(shuffle(others).slice(0, 2 - wrong.length));
+    }
+    const note = "«" + strip(line.ru) + "». Ответ: «" + strip(right.ru) + "»." + wrong.filter(o => o.why).map(o => " Почему не подходит [[" + strip(o.he) + "]]: " + o.why).join("");
+    return { id: "sd:" + st.id + ":" + di + ":" + ti, type: "choice", prompt: t.who + " говорит. Что вы ответите?", he: line.he, say: line.he,
+      options: [right.he].concat(wrong.map(o => o.he)), answer: 0, note, _line: line, _right: right };
+  }
+  function sitPick(st) {   // the dialogue not done yet, or the one done worst
+    const sc = st.dialogs.map((d, i) => [(S.sits || {})[st.id + ":" + i], i]);
+    const fresh = sc.filter(x => x[0] == null);
+    return fresh.length ? pick(fresh)[1] : sc.sort((a, b) => a[0] - b[0])[0][1];
+  }
   function sitRun(st, di) {
     const d = st.dialogs[di];
-    const items = d.turns.map((t, ti) => {
-      const right = t.opts.find(o => o.ok), whys = t.opts.filter(o => !o.ok && o.why);
-      const strip = (x) => x.replace(/[.?!,]+$/, "");
-      const note = "«" + strip(t.ru) + "». Ответ: «" + strip(right.ru) + "»." + whys.map(o => " Почему не подходит [[" + strip(o.he) + "]]: " + o.why).join("");
-      return { ex: { id: "sd:" + st.id + ":" + di + ":" + ti, type: "choice", prompt: t.who + " говорит. Что вы ответите?", he: t.he, say: t.he,
-        options: [right.he].concat(t.opts.filter(o => !o.ok).map(o => o.he)), answer: 0, note } };
-    });
-    run({ mode: "lesson", items, requeue: false, grade: false,
+    const items = d.turns.map((t, ti) => ({ ex: sitTurnEx(st, di, t, ti) }));
+    run({ mode: "lesson", items, requeue: false, grade: false, label: () => st.title + " · " + d.title,
       onDone: (results) => {
         const ok = results.filter(r => r.ok).length, pct = Math.round(ok / Math.max(1, results.length) * 100);
         S.sits = S.sits || {}; S.sits[st.id + ":" + di] = Math.max(S.sits[st.id + ":" + di] || 0, pct); save();
-        const nxt = di + 1 < st.dialogs.length ? () => sitRun(st, di + 1) : null;
         summary({ eyebrow: "Ситуации · " + st.title, title: d.title, results,
-          text: "Весь диалог: " + d.turns.map(t => t.who + ": " + t.ru + " Вы: " + t.opts.find(o => o.ok).ru).join(" "),
-          actions: (nxt ? [{ label: "Следующий диалог", fn: nxt }] : []).concat([{ label: "Ещё раз", fn: () => sitRun(st, di) }, { label: "Все ситуации", fn: openSits }]) });
+          text: "Весь диалог: " + items.map((it, i) => d.turns[i].who + ": " + it.ex._line.ru + " Вы: " + it.ex._right.ru).join(" "),
+          actions: [{ label: "Другой диалог", fn: () => sitRun(st, sitPick(st)) }, { label: "Ещё раз (с другими репликами)", fn: () => sitRun(st, di) }, { label: "Все ситуации", fn: openSits }] });
       },
       onQuit: () => openSits() });
   }
