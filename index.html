@@ -101,6 +101,12 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .nav .btn { width: 100%; }
 .nav.nav3 { grid-template-columns: repeat(3, 1fr); }
 .chgroup h2 { margin-bottom: 8px; }
+.qctx { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; max-height: 40vh; overflow: auto; }
+.qctx summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; }
+.qctx .t { font-family: var(--font-he); font-weight: 600; font-size: 1.15rem; direction: rtl; text-align: center; margin: 6px 0; }
+.qctx p { font-family: var(--font-he); font-size: 1.12rem; line-height: 1.6; direction: rtl; margin: 0 0 6px; }
+.exparts { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.exparts div { display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 6px; }
 .sitph details { margin: 6px 0 10px; }
 .sitph summary { cursor: pointer; color: var(--muted); }
 .sitph .row2 { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 6px 0; border-top: 1px solid var(--line); }
@@ -582,6 +588,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     <div class="progress"><i id="qbar"></i></div>
     <div class="qcard" id="qcard">
     <div class="eyebrow" id="qmod"></div>
+    <details class="qctx" id="qctx" hidden><summary>Текст</summary><div id="qctxBody"></div></details>
     <p class="prompt" id="qprompt"></p>
     <div class="word" id="qword" hidden></div>
     <div id="qlisten" hidden style="align-self:center"><button class="btn secondary" id="b-say">▶ Прослушать</button></div>
@@ -772,6 +779,11 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <div class="sklegend"><span class="sk-new">не начато</span><span class="sk-weak">слабо</span><span class="sk-mid">закрепляется</span><span class="sk-good">надёжно</span></div>
       <p class="small" id="skSum"></p>
       <div class="actions"><button class="btn" id="skWeakGo">Тренировка слабых тем (15 заданий)</button></div>
+    </div>
+    <div class="panel" id="examPanel" hidden>
+      <h2>Контрольные</h2>
+      <p class="small muted">В формате экзамена ульпана: понимание текста, грамматика, словарь и сочинение. Проходной балл 70%. Лучше проходить после итогового повторения уровня, но можно и раньше.</p>
+      <div class="list" id="examList"></div>
     </div>
     <div id="skGrid"></div>
   </section>
@@ -1572,6 +1584,13 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     rich($("qmod"), R.label ? R.label(item) : (cur.k ? IDX.skillName[cur.k] || "" : (cur.word ? "Слова" : "")));
     const useAlt = cur.type === "listen" && !heVoice && cur.alt;
     rich($("qprompt"), useAlt ? cur.alt.prompt : cur.prompt);
+    const cx = $("qctx"); cx.hidden = !cur.ctx;
+    if (cur.ctx && cx.dataset.for !== cur.ctx.key) {   // reading text of an exam: stays open above its questions
+      cx.dataset.for = cur.ctx.key; const b = $("qctxBody"); b.textContent = "";
+      if (cur.ctx.title) b.appendChild(el("div", "t", shown(cur.ctx.title)));
+      cur.ctx.lines.forEach(l => { const pp = el("p", "", shown(l)); pp.dir = "rtl"; b.appendChild(pp); });
+      cx.open = true;
+    }
     const qw = $("qword"); qw.hidden = !cur.he || cur.type === "listen"; qw.classList.toggle("sent", !!(cur.he && cur.he.length > 12));
     qw.classList.toggle("cursive", cur.script === "cursive");
     if (cur.he) {
@@ -2329,6 +2348,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     }
     $("skSum").textContent = "Надёжно: " + cnt.good + " · закрепляется: " + cnt.mid + " · слабо: " + cnt.weak + " · не начато: " + cnt.new + ".";
     $("skWeakGo").disabled = !weakest(1).length;
+    renderExams();
     show("skills");
   }
 
@@ -3489,6 +3509,48 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     }
   }
 
+  /* ================= exams (ulpan format) ================= */
+  // content/exams.json (build/build_exams.py): text (choice + true/false), grammar (gaps + choice), vocabulary; then the essay
+  // (checked by Claude in Claude, saved on the site). Weights: text 35, grammar 45, vocabulary 20; pass 70. S.exams[id] = {best, last, d}.
+  let EXM = null;
+  const EXW = { text: 35, grammar: 45, vocab: 20 };
+  function renderExams() {
+    const P = $("examPanel"); P.hidden = !EXM; if (!EXM) return;
+    const list = $("examList"); list.textContent = "";
+    EXM.exams.forEach(e => {
+      const r = (S.exams || {})[e.id], ready = !!S.lessons[e.after];
+      const b = el("button", "li"); b.type = "button";
+      b.appendChild(el("span", "num", r ? (r.best >= 70 ? "✓" : "•") : "•"));
+      const d = el("div"); d.appendChild(el("div", "t", e.title));
+      d.appendChild(el("div", "d", r ? "Лучший результат " + r.best + "%, последний " + r.last + "% (" + r.d.split("-").reverse().join(".") + ")" : ready ? "Итоговое повторение пройдено, можно писать" : "Откроется полностью после итогового повторения уровня"));
+      b.appendChild(d);
+      b.appendChild(el("span", "chip " + (r ? "" : "next"), r ? (r.best >= 70 ? "сдано" : "ещё раз") : "Начать"));
+      b.onclick = () => examRun(e); list.appendChild(b);
+    });
+  }
+  function examRun(e) {
+    const items = [];
+    e.parts.forEach(pt => {
+      const ctx = pt.text ? { key: e.id + ":" + pt.id, title: pt.textTitle, lines: pt.text } : null;
+      pt.items.forEach((it, i) => items.push({ part: pt.id, partTitle: pt.title, ex: Object.assign({ id: "ex:" + e.id + ":" + pt.id + ":" + i, ctx }, it) }));
+    });
+    $("qctx").dataset.for = "";
+    run({ mode: "lesson", items, requeue: false, grade: false, label: (it) => e.title + " · " + it.partTitle,
+      onDone: (results) => {
+        const byPart = {};
+        results.forEach((r, i) => { const pid = items[i] ? items[i].part : null; if (!pid) return; byPart[pid] = byPart[pid] || [0, 0]; byPart[pid][1]++; if (r.ok) byPart[pid][0]++; });
+        let total = 0; const lines = [];
+        e.parts.forEach(pt => { const [ok, n] = byPart[pt.id] || [0, 1]; const pc = ok / n; total += pc * (EXW[pt.id] || 0); lines.push(pt.title + ": " + ok + " из " + n); });
+        total = Math.round(total);
+        S.exams = S.exams || {}; const prev = S.exams[e.id];
+        S.exams[e.id] = { best: Math.max(prev ? prev.best : 0, total), last: total, d: dkey() }; save();
+        summary({ eyebrow: e.title, title: total >= 70 ? "Сдано: " + total + "%" : "Пока " + total + "%, нужно 70%", results,
+          text: lines.join(" · ") + ". Осталось сочинение: оно проверяется отдельно.",
+          actions: [{ label: "Написать сочинение", fn: () => openWrite(Object.assign({ id: "exam_" + e.id }, e.writing)) }, { label: "Карта навыков", fn: openSkills }, { label: "На главную", fn: goHome }] });
+      },
+      onQuit: () => openSkills() });
+  }
+
   /* ================= «Ситуации» ================= */
   // content/situations.json (build/build_situations.py): 8 situations × 15 phrases (also a «Слова дня» topic sit_*) + 2 dialogues
   // of 3 turns: the other person speaks, the learner picks the right reply. Results in S.sits["<topic>:<n>"] = best %.
@@ -4261,6 +4323,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       buildLex(lexFile);
       if (C.stories) { try { STORIES = await (await fetch("content/" + C.stories)).json(); IDX.skillName.story = "Понимание текста"; } catch (_) {} }
       if (C.rootfam) { try { RF = await (await fetch("content/" + C.rootfam)).json(); } catch (_) {} }
+      if (C.exams) { try { EXM = await (await fetch("content/" + C.exams)).json(); } catch (_) {} }
       if (C.situations) { try { SIT = await (await fetch("content/" + C.situations)).json(); } catch (_) {} }
       if (C.chains) { try { CHN = await (await fetch("content/" + C.chains)).json(); } catch (_) {} }
       if (C.vocab) { try { buildVocab(await (await fetch("content/" + C.vocab)).json()); } catch (_) {} }

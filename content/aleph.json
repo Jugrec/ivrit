@@ -671,5 +671,6 @@
  "rootfam": "rootfam.json",
  "stories": "stories.json",
  "chains": "chains.json",
- "situations": "situations.json"
+ "situations": "situations.json",
+ "exams": "exams.json"
 }
