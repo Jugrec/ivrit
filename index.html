@@ -101,6 +101,11 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .nav .btn { width: 100%; }
 .nav.nav3 { grid-template-columns: repeat(3, 1fr); }
 .chgroup h2 { margin-bottom: 8px; }
+.sitph details { margin: 6px 0 10px; }
+.sitph summary { cursor: pointer; color: var(--muted); }
+.sitph .row2 { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 6px 0; border-top: 1px solid var(--line); }
+.sitph .row2 .he { font-family: var(--font-he); font-size: 1.15rem; direction: rtl; text-align: right; }
+.sitph .row2 .ru { font-size: 0.86rem; } .sitph .row2 .tr { font-size: 0.8rem; color: var(--muted); }
 #leechList details { border-top: 1px solid var(--line); padding: 10px 0; }
 #leechList summary { cursor: pointer; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; list-style: none; }
 #leechList summary::-webkit-details-marker { display: none; }
@@ -509,7 +514,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         <button class="btn secondary" id="b-dialogs">Разговор</button>
         <button class="btn secondary" id="b-writing">Письмо</button>
       </div>
-      <div class="nav"><button class="btn secondary" id="b-rootfam">Корни и модели</button><button class="btn secondary" id="b-chains">Строим фразы</button></div>
+      <div class="nav nav3"><button class="btn secondary" id="b-rootfam">Корни и модели</button><button class="btn secondary" id="b-chains">Строим фразы</button><button class="btn secondary" id="b-sits">Ситуации</button></div>
       <div class="nav nav3"><button class="btn secondary" id="b-nonik">Без огласовок</button><button class="btn secondary" id="b-cursive">Прописные буквы</button><button class="btn secondary" id="b-games">Игры</button></div>
       <p class="small muted" id="practiceNote"></p>
     </div>
@@ -769,6 +774,14 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <div class="actions"><button class="btn" id="skWeakGo">Тренировка слабых тем (15 заданий)</button></div>
     </div>
     <div id="skGrid"></div>
+  </section>
+
+  <!-- SITUATIONS -->
+  <section id="v-sits" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Ситуации</h1>
+    <div class="panel"><p>Готовые фразы для жизни в Израиле: врач, банк, аренда, звонок, магазин, транспорт, знакомство, работа. В каждой ситуации два коротких диалога: собеседник говорит, вы выбираете подходящий ответ. Фразы можно добавить в «Слова дня», тогда они пойдут в карточки в первую очередь.</p></div>
+    <div id="sitList"></div>
   </section>
 
   <!-- CHAINS -->
@@ -1079,7 +1092,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function vocToday() { const d = dkey(); if (!S.vocab || S.vocab.d !== d) S.vocab = { d, n: 0, extra: 0 }; return S.vocab; }
   function vocLimit(dueN) { const lim = S.settings.vocabNew || 20; return (dueN > 200 ? Math.min(5, lim) : dueN > 120 ? Math.ceil(lim / 2) : lim) + (vocToday().extra || 0); }
   const vocNewLeft = (dueN) => Math.max(0, vocLimit(dueN) - vocToday().n);
-  function vocNextNew(k) { const out = []; for (const w of VOC.list) { if (out.length >= k) break; if (!S.cards["v:" + w.id]) out.push(w); } return out; }
+  function vocNextNew(k) {   // words the learner asked for first (S.vocPrio, e.g. phrases of a situation), then the topics in order
+    const out = [], seen = new Set();
+    for (const id of S.vocPrio || []) { const w = VOC.byId[id]; if (out.length >= k) break; if (w && !S.cards["v:" + id]) { out.push(w); seen.add(id); } }
+    for (const w of VOC.list) { if (out.length >= k) break; if (!S.cards["v:" + w.id] && !seen.has(w.id)) out.push(w); }
+    return out;
+  }
   const vocKnown = () => Object.keys(S.cards).filter(id => id.startsWith("v:") && isVoc(id)).length;
   function renderVocPanel() {
     const p = $("vocPanel"); p.hidden = !VOC.list.length || S.placement.status !== "done";
@@ -1361,7 +1379,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function dkey(t) { const d = new Date(t || Date.now()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   let toastT = null;
   function toast(msg, ms) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, ms || 3400); }
-  const VIEWS = ["skills", "chains", "home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab", "roots"];
+  const VIEWS = ["sits", "skills", "chains", "home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab", "roots"];
   function show(view) { for (const v of VIEWS) $("v-" + v).hidden = v !== view; if ($("sheet")) $("sheet").hidden = true; window.scrollTo(0, 0); }
   function rich(el, text) {
     // [[hebrew]] → styled span; everything else plain text
@@ -3471,6 +3489,60 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     }
   }
 
+  /* ================= «Ситуации» ================= */
+  // content/situations.json (build/build_situations.py): 8 situations × 15 phrases (also a «Слова дня» topic sit_*) + 2 dialogues
+  // of 3 turns: the other person speaks, the learner picks the right reply. Results in S.sits["<topic>:<n>"] = best %.
+  let SIT = null;
+  function openSits() {
+    if (!SIT) { toast("Раздел ещё загружается"); return; }
+    const box = $("sitList"); box.textContent = "";
+    SIT.situations.forEach(st => {
+      const p = el("div", "panel sitph"); p.appendChild(el("h2", "", st.title));
+      const det = el("details"); det.appendChild(el("summary", "", "Фразы (" + st.phrases.length + ")"));
+      st.phrases.forEach(f => { const r = el("div", "row2"); r.appendChild(el("div", "ru", f.ru)); const h = el("div", "he", shown(f.he)); h.dir = "rtl"; r.appendChild(h); r.appendChild(el("div", "tr", "")); r.appendChild(el("div", "tr", f.tr)); det.appendChild(r); });
+      p.appendChild(det);
+      const list = el("div", "list");
+      st.dialogs.forEach((d, i) => {
+        const best = (S.sits || {})[st.id + ":" + i];
+        const b = el("button", "li"); b.type = "button";
+        b.appendChild(el("span", "num", best != null ? "✓" : String(i + 1)));
+        const t = el("div"); t.appendChild(el("div", "t", "Диалог: " + d.title)); t.appendChild(el("div", "d", d.turns.length + " реплики")); b.appendChild(t);
+        b.appendChild(el("span", "chip " + (best != null ? "" : "next"), best != null ? best + "%" : "Начать"));
+        b.onclick = () => sitRun(st, i); list.appendChild(b);
+      });
+      p.appendChild(list);
+      const words = (VOC.topics.find(t => t.id === st.id) || { words: [] }).words;
+      const left = words.filter(w => !S.cards["v:" + w.id]);
+      const queued = left.length && left.every(w => (S.vocPrio || []).includes(w.id));
+      const add = el("button", "btn secondary small", !words.length ? "" : !left.length ? "Фразы уже в «Словах дня»" : queued ? "Фразы стоят первыми в «Словах дня»" : "Добавить фразы в «Слова дня» (" + left.length + ")");
+      add.type = "button"; add.disabled = !left.length || queued; add.hidden = !words.length;
+      add.onclick = () => { S.vocPrio = (S.vocPrio || []).filter(id => !S.cards["v:" + id]).concat(left.map(w => w.id).filter(id => !(S.vocPrio || []).includes(id))); save(); toast("Фразы пойдут первыми в «Словах дня»"); openSits(); };
+      const act = el("div", "actions"); act.appendChild(add); p.appendChild(act);
+      box.appendChild(p);
+    });
+    show("sits");
+  }
+  function sitRun(st, di) {
+    const d = st.dialogs[di];
+    const items = d.turns.map((t, ti) => {
+      const right = t.opts.find(o => o.ok), whys = t.opts.filter(o => !o.ok && o.why);
+      const strip = (x) => x.replace(/[.?!,]+$/, "");
+      const note = "«" + strip(t.ru) + "». Ответ: «" + strip(right.ru) + "»." + whys.map(o => " Почему не подходит [[" + strip(o.he) + "]]: " + o.why).join("");
+      return { ex: { id: "sd:" + st.id + ":" + di + ":" + ti, type: "choice", prompt: t.who + " говорит. Что вы ответите?", he: t.he, say: t.he,
+        options: [right.he].concat(t.opts.filter(o => !o.ok).map(o => o.he)), answer: 0, note } };
+    });
+    run({ mode: "lesson", items, requeue: false, grade: false,
+      onDone: (results) => {
+        const ok = results.filter(r => r.ok).length, pct = Math.round(ok / Math.max(1, results.length) * 100);
+        S.sits = S.sits || {}; S.sits[st.id + ":" + di] = Math.max(S.sits[st.id + ":" + di] || 0, pct); save();
+        const nxt = di + 1 < st.dialogs.length ? () => sitRun(st, di + 1) : null;
+        summary({ eyebrow: "Ситуации · " + st.title, title: d.title, results,
+          text: "Весь диалог: " + d.turns.map(t => t.who + ": " + t.ru + " Вы: " + t.opts.find(o => o.ok).ru).join(" "),
+          actions: (nxt ? [{ label: "Следующий диалог", fn: nxt }] : []).concat([{ label: "Ещё раз", fn: () => sitRun(st, di) }, { label: "Все ситуации", fn: openSits }]) });
+      },
+      onQuit: () => openSits() });
+  }
+
   /* ================= «Строим фразы» ================= */
   // content/chains.json (build/build_chains.py): 20 chains of 5 steps, the phrase grows step by step; typed answers,
   // accept lists include variants and the full spelling. Skill card k:chains; S.chains[id] = best % of a chain.
@@ -4083,7 +4155,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("b-cursive").onclick = openCursive;
     $("b-nonik").onclick = nonikRun;
     $("b-rootfam").onclick = openRoots;
-    $("b-chains").onclick = openChains;
+    $("b-chains").onclick = openChains; $("b-sits").onclick = openSits;
     $("wrSampleBtn").onclick = () => { $("wrSampleText").hidden = !$("wrSampleText").hidden; };
     $("rfGo").onclick = rootsRun;
     $("cuLetters").onclick = () => cursiveRun("letters");
@@ -4189,6 +4261,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       buildLex(lexFile);
       if (C.stories) { try { STORIES = await (await fetch("content/" + C.stories)).json(); IDX.skillName.story = "Понимание текста"; } catch (_) {} }
       if (C.rootfam) { try { RF = await (await fetch("content/" + C.rootfam)).json(); } catch (_) {} }
+      if (C.situations) { try { SIT = await (await fetch("content/" + C.situations)).json(); } catch (_) {} }
       if (C.chains) { try { CHN = await (await fetch("content/" + C.chains)).json(); } catch (_) {} }
       if (C.vocab) { try { buildVocab(await (await fetch("content/" + C.vocab)).json()); } catch (_) {} }
       buildCloze();

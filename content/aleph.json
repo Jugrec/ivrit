@@ -670,5 +670,6 @@
  "vocab": "vocab.json",
  "rootfam": "rootfam.json",
  "stories": "stories.json",
- "chains": "chains.json"
+ "chains": "chains.json",
+ "situations": "situations.json"
 }
