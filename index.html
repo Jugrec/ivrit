@@ -101,6 +101,15 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .nav .btn { width: 100%; }
 .nav.nav3 { grid-template-columns: repeat(3, 1fr); }
 .chgroup h2 { margin-bottom: 8px; }
+.sp-ru { font-size: 1.05rem; margin-top: 8px; }
+#spSrc { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+#spSrc .chip { border: 0; font: inherit; font-size: 0.82rem; padding: 6px 12px; cursor: pointer; white-space: normal; }
+#spSrc .chip.on { background: var(--accent); color: #fff; }
+.sp-he { font-family: var(--font-he); font-size: 1.9rem; line-height: 1.5; text-align: center; margin: 10px 0 4px; }
+.sp-he .w-ok { color: var(--good); } .sp-he .w-no { color: var(--bad); text-decoration: underline dotted; }
+.sp-mic { font-size: 1.1rem; } .sp-mic.on { background: var(--bad); }
+.sp-res { padding: 10px 12px; border-radius: 10px; background: var(--key); }
+.sp-res .heard { font-family: var(--font-he); font-size: 1.15rem; direction: rtl; }
 .qctx { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; max-height: 40vh; overflow: auto; }
 .qctx summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; }
 .qctx .t { font-family: var(--font-he); font-weight: 600; font-size: 1.15rem; direction: rtl; text-align: center; margin: 6px 0; }
@@ -520,7 +529,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         <button class="btn secondary" id="b-dialogs">Разговор</button>
         <button class="btn secondary" id="b-writing">Письмо</button>
       </div>
-      <div class="nav nav3"><button class="btn secondary" id="b-rootfam">Корни и модели</button><button class="btn secondary" id="b-chains">Строим фразы</button><button class="btn secondary" id="b-sits">Ситуации</button></div>
+      <div class="nav"><button class="btn secondary" id="b-rootfam">Корни и модели</button><button class="btn secondary" id="b-chains">Строим фразы</button><button class="btn secondary" id="b-sits">Ситуации</button><button class="btn secondary" id="b-speak">Говорим вслух</button></div>
       <div class="nav nav3"><button class="btn secondary" id="b-nonik">Без огласовок</button><button class="btn secondary" id="b-cursive">Прописные буквы</button><button class="btn secondary" id="b-games">Игры</button></div>
       <p class="small muted" id="practiceNote"></p>
     </div>
@@ -786,6 +795,27 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <div class="list" id="examList"></div>
     </div>
     <div id="skGrid"></div>
+  </section>
+
+  <!-- SPEAKING -->
+  <section id="v-speak" class="view" hidden>
+    <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
+    <h1>Говорим вслух</h1>
+    <div class="panel" id="spIntro">
+      <p>Прочитайте фразу вслух, телефон распознает речь и покажет, какие слова он услышал. Сначала можно послушать, как она звучит.</p>
+      <p class="small muted" id="spNote"></p>
+      <div class="chips" id="spSrc"></div>
+      <div class="actions"><button class="btn" id="spGo">Начать (10 фраз)</button></div>
+    </div>
+    <div class="panel" id="spCard" hidden>
+      <div class="row" style="justify-content:space-between"><span class="eyebrow" id="spCount"></span><button class="btn ghost small" id="spStop" type="button">Закончить</button></div>
+      <div class="sp-ru" id="spRu"></div>
+      <div class="sp-he" id="spHe" dir="rtl"></div>
+      <div class="small muted" id="spTr"></div>
+      <div class="actions sp-actions"><button class="btn secondary" id="spListen" type="button">▶ Послушать</button><button class="btn sp-mic" id="spMic" type="button">🎤 Сказать</button></div>
+      <div id="spRes" class="sp-res" hidden></div>
+      <div class="actions"><button class="btn secondary" id="spSkip" type="button">Пропустить</button><button class="btn" id="spNext" type="button" hidden>Дальше</button></div>
+    </div>
   </section>
 
   <!-- SITUATIONS -->
@@ -1391,7 +1421,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function dkey(t) { const d = new Date(t || Date.now()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   let toastT = null;
   function toast(msg, ms) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, ms || 3400); }
-  const VIEWS = ["sits", "skills", "chains", "home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab", "roots"];
+  const VIEWS = ["speak", "sits", "skills", "chains", "home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab", "roots"];
   function show(view) { for (const v of VIEWS) $("v-" + v).hidden = v !== view; if ($("sheet")) $("sheet").hidden = true; window.scrollTo(0, 0); }
   function rich(el, text) {
     // [[hebrew]] → styled span; everything else plain text
@@ -3551,6 +3581,114 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       onQuit: () => openSkills() });
   }
 
+  /* ================= speaking: read aloud, the browser recognises Hebrew (he-IL) ================= */
+  // Web Speech API (Chrome on Android, Safari on iPhone with Siri on). Words are compared without nikud and without the
+  // vowel letters ו/י (recognition returns full spelling), one wrong letter allowed in long words. S.speak[key] = best %.
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let SP = null, spRec = null, spSrcSel = "sits";
+  const spSkel = (w) => norm(w).replace(/[^\u05D0-\u05EA]/g, "").replace(/[ךםןףץ]/g, c => ({ "ך": "כ", "ם": "מ", "ן": "נ", "ף": "פ", "ץ": "צ" })[c]).replace(/(?!^)[וי]/g, "");
+  function spSources() {
+    const out = { sits: [], words: [], chains: [] };
+    if (SIT) SIT.situations.forEach(st => st.phrases.forEach(f => out.sits.push({ key: "s:" + lexKey(f.he), he: f.he, ru: f.ru, tr: f.tr })));
+    VOC.list.forEach(w => { const c = S.cards["v:" + w.id]; if (c && c.reps) out.words.push({ key: "w:" + w.id, he: w.ex && w.ex.split(" ").length <= 8 ? w.ex : w.he, ru: w.ex && w.ex.split(" ").length <= 8 ? w.exru : w.ru, tr: w.ex && w.ex.split(" ").length <= 8 ? "" : w.tr }); });
+    if (CHN) CHN.chains.forEach(c => c.steps.forEach((st, i) => { if (i >= 2) out.chains.push({ key: "c:" + c.id + i, he: st.he, ru: st.ru, tr: "" }); }));
+    return out;
+  }
+  function openSpeak() {
+    const src = spSources(), names = { sits: "Фразы из ситуаций", words: "Выученные слова дня", chains: "Предложения из «Строим фразы»" };
+    const box = $("spSrc"); box.textContent = "";
+    for (const k of ["sits", "words", "chains"]) {
+      const b = el("button", "chip" + (k === spSrcSel ? " on" : ""), names[k] + " (" + src[k].length + ")"); b.type = "button"; b.disabled = !src[k].length;
+      b.onclick = () => { spSrcSel = k; openSpeak(); }; box.appendChild(b);
+    }
+    $("spNote").textContent = !SR ? "Этот браузер не умеет распознавать речь. Откройте сайт в Chrome на Android или в Safari на iPhone (с включённой Siri)."
+      : STANDALONE ? "При первом нажатии на «Сказать» телефон спросит разрешение на микрофон." : "В приложении Claude микрофон может быть недоступен. Тогда откройте сайт на телефоне.";
+    $("spGo").disabled = !SR || !src[spSrcSel].length;
+    $("spIntro").hidden = false; $("spCard").hidden = true;
+    show("speak");
+  }
+  function spStart() {
+    const pool = spSources()[spSrcSel], best = S.speak || {};
+    const q = shuffle(pool).sort((a, b) => (best[a.key] || 0) - (best[b.key] || 0)).slice(0, 10);
+    SP = { q, pos: 0, scores: [] };
+    $("spIntro").hidden = true; $("spCard").hidden = false; spShow();
+  }
+  function spShow() {
+    const it = SP.q[SP.pos];
+    $("spCount").textContent = (SP.pos + 1) + " из " + SP.q.length;
+    $("spRu").textContent = it.ru; $("spTr").textContent = it.tr || "";
+    const he = $("spHe"); he.textContent = "";
+    it.he.split(" ").forEach((w, i) => { if (i) he.appendChild(document.createTextNode(" ")); he.appendChild(el("span", "", shown(w))); });
+    $("spListen").hidden = !heVoice; $("spRes").hidden = true; $("spNext").hidden = true; $("spSkip").hidden = false;
+    $("spMic").textContent = "🎤 Сказать"; $("spMic").disabled = false; SP.tries = 0;
+  }
+  // which target words were heard: each target word matches one recognised word (same skeleton, or 1 letter off when long)
+  function spMatch(target, heard) {
+    const hw = heard.split(/\s+/).map(spSkel).filter(Boolean), used = new Set();
+    return target.split(" ").map(w => {
+      const k = spSkel(w); if (!k) return true;
+      let j = hw.findIndex((h, i) => !used.has(i) && h === k);
+      if (j < 0 && k.length >= 4) j = hw.findIndex((h, i) => !used.has(i) && Math.abs(h.length - k.length) <= 1 && lev(h, k) <= 1);
+      if (j >= 0) { used.add(j); return true; }
+      return false;
+    });
+  }
+  function lev(a, b) {
+    const d = Array.from({ length: a.length + 1 }, (_, i) => [i].concat(Array(b.length).fill(0)));
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    return d[a.length][b.length];
+  }
+  function spListen() {
+    if (!SR || spRec) return;
+    const it = SP.q[SP.pos];
+    let done = false;
+    try { spRec = new SR(); } catch (_) { toast("Распознавание речи недоступно"); return; }
+    spRec.lang = "he-IL"; spRec.interimResults = false; spRec.maxAlternatives = 5;
+    $("spMic").classList.add("on"); $("spMic").textContent = "Слушаю…";
+    const finish = (alts, err) => {
+      if (done) return; done = true;
+      $("spMic").classList.remove("on"); $("spMic").textContent = "🎤 Ещё раз"; spRec = null;
+      if (err) { spResult(null, err); return; }
+      if (!alts || !alts.length) { spResult(null, "no-speech"); return; }
+      let best = null;
+      for (const a of alts) { const m = spMatch(it.he, a); const sc = m.filter(Boolean).length / m.length; if (!best || sc > best.sc) best = { a, m, sc }; }
+      spResult(best);
+    };
+    spRec.onresult = (e) => finish([...e.results[0]].map(r => r.transcript));
+    spRec.onerror = (e) => finish(null, e.error);
+    spRec.onend = () => finish(null);
+    try { spRec.start(); } catch (_) { finish(null, "start"); }
+  }
+  function spResult(r, err) {
+    const box = $("spRes"); box.hidden = false; box.textContent = "";
+    SP.tries++;
+    if (!r) {
+      box.appendChild(el("div", "", err === "not-allowed" || err === "service-not-allowed" ? "Нет доступа к микрофону. Разрешите его в настройках браузера для этого сайта."
+        : err === "network" ? "Нет связи с сервисом распознавания. Проверьте интернет." : err === "language-not-supported" ? "Этот телефон не распознаёт иврит. В Chrome: Настройки → Голосовой ввод → добавьте иврит."
+        : "Не расслышал. Нажмите «Сказать» и прочитайте фразу целиком."));
+      return;
+    }
+    const spans = $("spHe").querySelectorAll("span");
+    r.m.forEach((ok, i) => { if (spans[i]) spans[i].className = ok ? "w-ok" : "w-no"; });
+    const pct = Math.round(r.sc * 100), it = SP.q[SP.pos];
+    box.appendChild(el("div", "", pct === 100 ? "Отлично, все слова распознаны!" : pct >= 70 ? "Почти! Красным отмечены слова, которые телефон не узнал." : "Пока не получилось. Послушайте и попробуйте ещё раз."));
+    const h = el("div", "small muted", "Телефон услышал: "); h.appendChild(el("span", "heard", r.a)); box.appendChild(h);
+    S.speak = S.speak || {}; S.speak[it.key] = Math.max(S.speak[it.key] || 0, pct); save();
+    SP.cur = Math.max(SP.cur || 0, pct);
+    if (pct >= 70 || SP.tries >= 3) { $("spNext").hidden = false; $("spSkip").hidden = true; sfx(pct >= 70 ? "ok" : "bad"); }
+  }
+  function spNext(skip) {
+    if (spRec) { try { spRec.abort(); } catch (_) {} spRec = null; }
+    SP.scores.push(skip ? 0 : (SP.cur || 0)); SP.cur = 0; SP.pos++;
+    if (SP.pos < SP.q.length) { spShow(); return; }
+    const good = SP.scores.filter(x => x >= 70).length;
+    actLog(); save();
+    $("spCard").hidden = true; $("spIntro").hidden = false;
+    toast("Готово: " + good + " из " + SP.q.length + " фраз прозвучали понятно");
+    openSpeak();
+  }
+
   /* ================= «Ситуации» ================= */
   // content/situations.json (build/build_situations.py): 8 situations × 15 phrases (also a «Слова дня» topic sit_*) + 2 dialogues
   // of 3 turns: the other person speaks, the learner picks the right reply. Results in S.sits["<topic>:<n>"] = best %.
@@ -4232,6 +4370,9 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("b-nonik").onclick = nonikRun;
     $("b-rootfam").onclick = openRoots;
     $("b-chains").onclick = openChains; $("b-sits").onclick = openSits;
+    $("b-speak").onclick = openSpeak; $("spGo").onclick = spStart; $("spMic").onclick = spListen;
+    $("spListen").onclick = () => { const it = SP && SP.q[SP.pos]; if (it) speak(it.he); };
+    $("spNext").onclick = () => spNext(false); $("spSkip").onclick = () => spNext(true); $("spStop").onclick = () => { if (spRec) { try { spRec.abort(); } catch (_) {} spRec = null; } openSpeak(); };
     $("wrSampleBtn").onclick = () => { $("wrSampleText").hidden = !$("wrSampleText").hidden; };
     $("rfGo").onclick = rootsRun;
     $("cuLetters").onclick = () => cursiveRun("letters");
