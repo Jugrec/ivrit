@@ -907,6 +907,11 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       <p class="small muted">Короткие истории с одними и теми же героями. Около 95% слов вам уже знакомы, новые есть в списке под текстом. Нажмите на слово, чтобы увидеть перевод; любое слово можно добавить в свои карточки.</p>
       <div class="list" id="stList"></div>
     </div>
+    <div class="panel" id="ttPanel" hidden>
+      <h2>Тексты из слов дня</h2>
+      <p class="small muted">По короткому тексту на каждую тему «Слов дня»: выученные слова встречаются снова, уже в связной речи. Текст открывается после нужного урока, когда выучено больше половины его слов.</p>
+      <div class="list" id="ttList"></div>
+    </div>
     <div class="panel"><h2>Тексты курса</h2><div class="list" id="txList"></div></div>
     <div class="panel" id="genPanel">
       <h2>Новый текст от Claude</h2>
@@ -2200,7 +2205,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     run(Object.assign(lessonRunCfg(lesson, unit, hard), { items }));
   }
   function completeLesson(lesson, unit, results, testedOut) {
-    if (!S.lessons[lesson.id]) addXp(10);
+    if (!S.lessons[lesson.id]) { addXp(10); lessonTopics(lesson.id); }
     S.lessons[lesson.id] = Date.now();
     if (S.resume && S.resume.id === lesson.id) S.resume = null;
     if (results.length) S.lastLessonAcc = results.filter(r => r.ok).length / results.length;
@@ -3219,7 +3224,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       b.onclick = () => openText(t, false);
       list.appendChild(b);
     }
-    renderStories();
+    renderStories(); renderTT();
     const anyDone = Object.keys(S.lessons).length > 0;
     $("genGo").disabled = !sampleFn || !anyDone;
     $("genNote").textContent = !sampleFn ? "Недоступно в этом просмотре: откройте приложение в Claude, войдя в аккаунт." : !anyDone ? "Станет доступно после первого урока: Claude пишет только из слов, которые вы уже прошли." : "Claude напишет короткий рассказ только из слов, которые вы уже прошли. Можно указать тему.";
@@ -3235,6 +3240,45 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       row.appendChild(x); gl.appendChild(row);
     });
     show("texts");
+  }
+
+  /* texts made of the words of the day: open after their lesson and once most of their topic words are learned */
+  let TT = null;
+  const plural = (n, one, few, many) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many; };
+  const ttLearned = (t) => t.words.filter(id => S.cards["v:" + id]).length;
+  const ttNeed = (t) => Math.ceil(t.words.length * 0.6);
+  const ttOpen = (t) => unlocked(t.after) && ttLearned(t) >= ttNeed(t);
+  const ttTopic = (t) => (VOC.byId[t.words[0]] || {}).topic || "";
+  function renderTT() {
+    const p = $("ttPanel"); p.hidden = !TT || !VOC.list.length; if (p.hidden) return;
+    const list = $("ttList"); list.textContent = "";
+    const rows = TT.map(t => ({ t, open: ttOpen(t), read: !!(S.read || {})[t.id], lv: unlocked(t.after), left: ttNeed(t) - ttLearned(t) }))
+      .sort((a, b) => (b.open - a.open) || (b.lv - a.lv) || (a.read - b.read) || (a.left - b.left));
+    for (const { t, open, read, lv, left } of rows) {
+      const b = el("button", "li"); b.type = "button";
+      b.appendChild(el("span", "num", read ? "✓" : open ? "•" : "🔒"));
+      const d = el("div"); d.appendChild(el("div", "t", t.title));
+      d.appendChild(el("div", "d", "Тема: " + ttTopic(t) + ". " + (open ? "Слов темы в тексте: " + t.words.length + "." : !lv ? "Откроется после урока " + lessonName(t.after) + "." : "Выучите ещё " + left + " " + plural(left, "слово", "слова", "слов") + " этой темы (нажмите, чтобы они пошли первыми).")));
+      b.appendChild(d);
+      b.appendChild(el("span", "chip " + (read ? "done" : open ? "next" : ""), read ? "Прочитан" : open ? "Читать" : "позже"));
+      if (open) b.onclick = () => openText(t, false);
+      else if (lv) b.onclick = () => { ttQueue(t); renderTT(); };
+      else { b.disabled = true; b.classList.add("locked"); }
+      list.appendChild(b);
+    }
+  }
+  function ttQueue(t) {   // the text's words go first in the words of the day
+    const add = t.words.filter(id => !S.cards["v:" + id]);
+    S.vocPrio = (S.vocPrio || []).filter(id => !S.cards["v:" + id] && !add.includes(id)).concat(add); save();
+    toast("Слова темы «" + ttTopic(t) + "» пойдут первыми в «Словах дня»");
+  }
+  // a lesson on the same theme brings its topic of the words of the day forward
+  const LESSON_TOPIC = { m4l3: ["city"], m4l4: ["home"], m5l1: ["describe"], m5l2: ["clothes"], m6l1: ["verbs"], m7l4: ["leisure"], m8l1: ["people"],
+    m10l4: ["time"], m15l1: ["people"], m15l2: ["city", "shopping"], m15l3: ["time"], m16l2: ["work"], m23l1: ["work", "study"], m23l2: ["body", "transport"], m23l3: ["home", "soc"] };
+  function lessonTopics(lid) {
+    const tps = LESSON_TOPIC[lid]; if (!tps || !VOC.list.length) return;
+    const add = VOC.list.filter(w => tps.includes(w.id.split(":")[0]) && !S.cards["v:" + w.id]).map(w => w.id);
+    if (add.length) S.vocPrio = (S.vocPrio || []).filter(id => !add.includes(id)).concat(add);
   }
 
   let STORIES = null;
@@ -4014,10 +4058,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     if (ut) st.push(ut);
     const rd = S.read || {};
     let tx = null;
-    if (!ur && STORIES) STORIES.episodes.some((t, i) => { const pr = STORIES.episodes[i - 1]; if (!rd[t.id] && unlocked(t.after) && (!pr || rd[pr.id])) { tx = { id: t.id, t: "Сериал: " + t.title.replace(/^\d+\.\s*/, ""), story: true }; return true; } return false; });
+    const tt = TT && TT.find(t => ttOpen(t) && !rd[t.id]);
+    if (!ur && tt) tx = { id: tt.id, t: "Текст из слов дня: " + tt.title, tt: true };
+    if (!ur && !tx && STORIES) STORIES.episodes.some((t, i) => { const pr = STORIES.episodes[i - 1]; if (!rd[t.id] && unlocked(t.after) && (!pr || rd[pr.id])) { tx = { id: t.id, t: "Сериал: " + t.title.replace(/^\d+\.\s*/, ""), story: true }; return true; } return false; });
     if (!ur && !tx) { const t = textsForUnit().find(t => (!t.after || S.lessons[t.after]) && !rd[t.id]); if (t) tx = { id: t.id, t: "Текст: " + t.title }; }
     if (ur) st.push(ur);
-    else if (tx) st.push({ k: "read", id: tx.id, story: !!tx.story, t: "Чтение", d: tx.t, m: 6 });
+    else if (tx) st.push({ k: "read", id: tx.id, story: !!tx.story, tt: !!tx.tt, t: "Чтение", d: tx.t, m: 6 });
     const ch = CHN ? CHN.chains.find(c => !chainDone(c) && unlocked(c.after)) : null;
     const dia = CHN && CHN.diary && Object.keys(S.lessons).length && !(S.diary || {})[dkey()];
     if (ch && (!dia || day % 2 === 0)) st.push({ k: "ch", id: ch.id, t: "Свои фразы", d: "«Строим фразы»: " + ch.title, m: 4 });
@@ -4025,7 +4071,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     if (weakDue()) st.push({ k: "weak", t: "Слабые темы", d: weakest(3).map(w => skPlain(w.k)).join(", "), m: 5 });
     if (SR && spSources().chains.length + spSources().sits.length + spSources().words.length) st.push({ k: "sp", t: "Речь", d: "скажите вслух 3 фразы", m: 3, opt: true });
     // fit the learner's session length: drop the least essential steps first (they come back as "one more step")
-    const KEEP = ["rev", "les", "voc", "ut", "ch", "dia", "ur", "read", "weak", "sp"], lim = sessMin() * 1.2;
+    const KEEP = ["rev", "les", "voc", "ch", "dia", "ur", "read", "ut", "weak", "sp"], lim = sessMin() * 1.2;
     while (st.length > 3 && st.reduce((a, x) => a + x.m, 0) > lim) {
       const drop = st.reduce((w, x) => KEEP.indexOf(x.k) > KEEP.indexOf(w.k) ? x : w, st[0]);
       st.splice(st.indexOf(drop), 1);
@@ -4053,7 +4099,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       case "voc": return startVocab();
       case "les": return resumeFor(x.id) ? resumeLesson(x.id) : openLesson(x.id);
       case "ur": case "ut": { const u = UNITS.find(u => u.id === x.id); return x.k === "ur" ? openReading(u) : startUnitTest(u); }
-      case "read": { const t = x.story ? STORIES.episodes.find(e => e.id === x.id) : textsForUnit().find(e => e.id === x.id); return t ? openText(t, false) : openTexts(); }
+      case "read": { const t = x.tt ? TT.find(e => e.id === x.id) : x.story ? STORIES.episodes.find(e => e.id === x.id) : textsForUnit().find(e => e.id === x.id); return t ? openText(t, false) : openTexts(); }
       case "ch": { const c = CHN.chains.find(c => c.id === x.id); return c ? chainRun(c) : openChains(); }
       case "dia": return openWrite(diaryTask());
       case "weak": return startWeak();
@@ -4594,6 +4640,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         (pf.writing || []).forEach(w => PRACTICE.writing.push(w));
       }
       buildLex(lexFile);
+      if (C.ttexts) { try { TT = (await (await fetch("content/" + C.ttexts)).json()).texts; IDX.skillName.story = "Понимание текста"; } catch (_) {} }
       if (C.stories) { try { STORIES = await (await fetch("content/" + C.stories)).json(); IDX.skillName.story = "Понимание текста"; } catch (_) {} }
       if (C.rootfam) { try { RF = await (await fetch("content/" + C.rootfam)).json(); } catch (_) {} }
       if (C.exams) { try { EXM = await (await fetch("content/" + C.exams)).json(); } catch (_) {} }

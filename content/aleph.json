@@ -672,5 +672,6 @@
  "stories": "stories.json",
  "chains": "chains.json",
  "situations": "situations.json",
- "exams": "exams.json"
+ "exams": "exams.json",
+ "ttexts": "ttexts.json"
 }
