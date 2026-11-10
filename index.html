@@ -791,7 +791,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     </div>
     <div class="panel" id="examPanel" hidden>
       <h2>Контрольные</h2>
-      <p class="small muted">В формате экзамена ульпана: понимание текста, грамматика, словарь и сочинение. Проходной балл 70%. Лучше проходить после итогового повторения уровня, но можно и раньше.</p>
+      <p class="small muted">В формате экзамена ульпана: понимание текста, грамматика, словарь и сочинение. Проходной балл 70%. Открываются после итогового повторения уровня.</p>
       <div class="list" id="examList"></div>
     </div>
     <div id="skGrid"></div>
@@ -830,7 +830,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   <section id="v-chains" class="view" hidden>
     <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
     <h1>Строим фразы</h1>
-    <div class="panel"><p>Фраза растёт шаг за шагом: к ней добавляется слово, меняется время, лицо или число. Пишите каждый раз всю фразу целиком. Так трудная грамматика (будущее время, hифъиль, предлоги с окончаниями, числа, смихут) становится привычной.</p></div>
+    <div class="panel"><p>Фраза растёт шаг за шагом: к ней добавляется слово, меняется время, лицо или число. Пишите каждый раз всю фразу целиком. Каждая цепочка открывается, когда в уроках пройдена её грамматика.</p></div>
     <div id="chList"></div>
   </section>
 
@@ -3548,14 +3548,15 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const P = $("examPanel"); P.hidden = !EXM; if (!EXM) return;
     const list = $("examList"); list.textContent = "";
     EXM.exams.forEach(e => {
-      const r = (S.exams || {})[e.id], ready = !!S.lessons[e.after];
+      const r = (S.exams || {})[e.id], ready = unlocked(e.after);
       const b = el("button", "li"); b.type = "button";
-      b.appendChild(el("span", "num", r ? (r.best >= 70 ? "✓" : "•") : "•"));
+      b.appendChild(el("span", "num", r ? (r.best >= 70 ? "✓" : "•") : ready ? "•" : "🔒"));
       const d = el("div"); d.appendChild(el("div", "t", e.title));
-      d.appendChild(el("div", "d", r ? "Лучший результат " + r.best + "%, последний " + r.last + "% (" + r.d.split("-").reverse().join(".") + ")" : ready ? "Итоговое повторение пройдено, можно писать" : "Откроется полностью после итогового повторения уровня"));
+      rich(d.appendChild(el("div", "d")), r ? "Лучший результат " + r.best + "%, последний " + r.last + "% (" + r.d.split("-").reverse().join(".") + ")" : ready ? "Можно писать" : "Откроется после урока " + lessonName(e.after));
       b.appendChild(d);
-      b.appendChild(el("span", "chip " + (r ? "" : "next"), r ? (r.best >= 70 ? "сдано" : "ещё раз") : "Начать"));
-      b.onclick = () => examRun(e); list.appendChild(b);
+      b.appendChild(el("span", "chip " + (r ? "" : ready ? "next" : ""), r ? (r.best >= 70 ? "сдано" : "ещё раз") : ready ? "Начать" : "позже"));
+      if (ready) b.onclick = () => examRun(e); else { b.disabled = true; b.classList.add("locked"); }
+      list.appendChild(b);
     });
   }
   function examRun(e) {
@@ -3591,7 +3592,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const out = { sits: [], words: [], chains: [] };
     if (SIT) SIT.situations.forEach(st => st.phrases.forEach(f => out.sits.push({ key: "s:" + lexKey(f.he), he: f.he, ru: f.ru, tr: f.tr })));
     VOC.list.forEach(w => { const c = S.cards["v:" + w.id]; if (c && c.reps) out.words.push({ key: "w:" + w.id, he: w.ex && w.ex.split(" ").length <= 8 ? w.ex : w.he, ru: w.ex && w.ex.split(" ").length <= 8 ? w.exru : w.ru, tr: w.ex && w.ex.split(" ").length <= 8 ? "" : w.tr }); });
-    if (CHN) CHN.chains.forEach(c => c.steps.forEach((st, i) => { if (i >= 2) out.chains.push({ key: "c:" + c.id + i, he: st.he, ru: st.ru, tr: "" }); }));
+    if (CHN) CHN.chains.filter(c => unlocked(c.after)).forEach(c => c.steps.forEach((st, i) => { if (i >= 2) out.chains.push({ key: "c:" + c.id + i, he: st.he, ru: st.ru, tr: "" }); }));
     return out;
   }
   function openSpeak() {
@@ -3762,6 +3763,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   // accept lists include variants and the full spelling. Skill card k:chains; S.chains[id] = best % of a chain.
   let CHN = null;
   const chainDone = (c) => (S.chains || {})[c.id] != null;
+  // content that needs grammar from a later lesson opens only after that lesson (a chain on the future tense, for one)
+  const unlocked = (after) => !after || !!S.lessons[after];
+  function lessonName(id) {
+    for (const u of UNITS) for (const l of (u.lessons || [])) if (l.id === id) return "«" + String(l.title || id).replace(/\[\[!?|\]\]/g, "") + "»" + (u.module ? " (модуль " + u.module + ")" : "");
+    return id;
+  }
   function openChains() {
     if (!CHN) { toast("Раздел ещё загружается"); return; }
     const box = $("chList"); box.textContent = "";
@@ -3772,11 +3779,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       const list = el("div", "list");
       cs.forEach(c => {
         const b = el("button", "li"); b.type = "button";
-        const best = (S.chains || {})[c.id];
-        b.appendChild(el("span", "num", best != null ? "✓" : "•"));
-        const d = el("div"); d.appendChild(el("div", "t", c.title)); d.appendChild(rich(el("div", "d"), c.topic.split(":").slice(1).join(":").trim() + " · " + c.steps.length + " шагов")); b.appendChild(d);
-        b.appendChild(el("span", "chip " + (best != null ? "" : "next"), best != null ? best + "%" : "Начать"));
-        b.onclick = () => chainRun(c);
+        const best = (S.chains || {})[c.id], open = unlocked(c.after);
+        b.appendChild(el("span", "num", best != null ? "✓" : open ? "•" : "🔒"));
+        const d = el("div"); d.appendChild(el("div", "t", c.title));
+        d.appendChild(rich(el("div", "d"), open ? c.topic.split(":").slice(1).join(":").trim() + " · " + c.steps.length + " шагов" : "Откроется после урока " + lessonName(c.after))); b.appendChild(d);
+        b.appendChild(el("span", "chip " + (best != null ? "" : open ? "next" : ""), best != null ? best + "%" : open ? "Начать" : "позже"));
+        if (open) b.onclick = () => chainRun(c); else { b.disabled = true; b.classList.add("locked"); }
         list.appendChild(b);
       });
       p.appendChild(list); box.appendChild(p);
@@ -3793,7 +3801,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         const ok = results.filter(r => r.ok).length, pct = Math.round(ok / Math.max(1, results.length) * 100);
         S.chains = S.chains || {}; S.chains[c.id] = Math.max(S.chains[c.id] || 0, pct);
         reviewCard("k:chains", pct >= 85 ? 3 : pct >= 60 ? 2 : 1); save();
-        const nxt = CHN.chains.find(x => !chainDone(x));
+        const nxt = CHN.chains.find(x => !chainDone(x) && unlocked(x.after));
         summary({ eyebrow: "Строим фразы", title: c.title, results,
           text: "Готовая фраза: " + shown(c.steps[n - 1].he) + " (" + c.steps[n - 1].ru + ")",
           actions: (nxt ? [{ label: "Следующая цепочка", fn: () => chainRun(nxt) }] : []).concat([{ label: "Ещё раз", fn: () => chainRun(c) }, { label: "Все цепочки", fn: openChains }]) });
@@ -3803,11 +3811,17 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
 
   /* ================= diary ================= */
   // 3 sentences a day, kept in S.diary[date]; in Claude it is checked like any writing task, on the site: self-check + samples.
-  function diaryTheme() { const t = (CHN && CHN.diary) || []; if (!t.length) return null; const day = Math.floor(Date.now() / DAY); return t[day % t.length]; }
+  // the task and the samples follow the course: present tense first, the past after module 11, the future after module 14
+  const diaryLevel = () => S.lessons.m14l1 ? "full" : S.lessons.m11l1 ? "past" : "now";
+  function diaryTheme() { const t = ((CHN && CHN.diary) || {})[diaryLevel()] || []; if (!t.length) return null; const day = Math.floor(Date.now() / DAY); return t[day % t.length]; }
   function diaryTask() {
-    const th = diaryTheme();
-    return { id: "diary", diary: true, title: "Дневник", task: "Напишите 3 предложения о сегодняшнем дне." + (th ? " Тема дня: " + th.t.toLowerCase() + " (можно писать и о другом)." : ""),
-      use: "прошедшее время, [[הַיּוֹם]], [[אַחַר כָּךְ]], [[בָּעֶרֶב]], [[מָחָר]] и будущее время", theme: th };
+    const th = diaryTheme(), lv = diaryLevel(), theme = th ? " Тема дня: " + th.t.toLowerCase() + " (можно писать и о другом)." : "";
+    const T = {
+      now: ["Напишите 3 предложения о своём обычном дне: что вы делаете, какая погода, что вам нравится." + theme, "настоящее время, [[כָּל יוֹם]], [[בַּבֹּקֶר]], [[בָּעֶרֶב]], [[אֲבָל]]"],
+      past: ["Напишите 3 предложения о том, что вы делали сегодня или вчера." + theme, "прошедшее время, [[הַיּוֹם]], [[אֶתְמוֹל]], [[אַחַר כָּךְ]], [[בָּעֶרֶב]]"],
+      full: ["Напишите 3 предложения о сегодняшнем дне и о планах на завтра." + theme, "прошедшее время, [[הַיּוֹם]], [[אַחַר כָּךְ]], [[בָּעֶרֶב]], [[מָחָר]] и будущее время"],
+    }[lv];
+    return { id: "diary", diary: true, title: "Дневник", task: T[0], use: T[1], theme: th };
   }
   function diarySave(text) { S.diary = S.diary || {}; S.diary[dkey()] = text; }
   function renderDiaryPast() {
