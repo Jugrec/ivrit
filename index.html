@@ -3234,10 +3234,11 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("stTitle").textContent = "Сериал «" + STORIES.title + "»";
     const list = $("stList"); list.textContent = "";
     STORIES.episodes.forEach((t, i) => {
-      const prev = STORIES.episodes[i - 1], open = !prev || !!(S.read || {})[prev.id], read = !!(S.read || {})[t.id];
+      const prev = STORIES.episodes[i - 1], read = !!(S.read || {})[t.id];
+      const levelOk = unlocked(t.after), prevOk = !prev || !!(S.read || {})[prev.id], open = levelOk && prevOk;
       const b = el("button", "li"); b.type = "button"; b.disabled = !open;
       b.appendChild(el("span", "num", read ? "✓" : String(i + 1)));
-      const d = el("div"); d.appendChild(el("div", "t", t.title.replace(/^\d+\.\s*/, ""))); d.appendChild(el("div", "d", (open ? "Уровень: " + t.level : "Откроется после вопросов к прошлой серии") + (t.nikud === "off" ? ", без огласовок" : ""))); b.appendChild(d);
+      const d = el("div"); d.appendChild(el("div", "t", t.title.replace(/^\d+\.\s*/, ""))); d.appendChild(el("div", "d", (open ? "Уровень: " + t.level : !levelOk ? "Откроется после урока " + lessonName(t.after) : "Откроется после вопросов к прошлой серии") + (t.nikud === "off" ? ", без огласовок" : ""))); b.appendChild(d);
       b.appendChild(el("span", "chip " + (read ? "done" : open ? "next" : ""), read ? "Прочитана" : open ? "Читать" : "Закрыта"));
       b.onclick = () => openText(t, false);
       list.appendChild(b);
