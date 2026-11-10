@@ -2533,6 +2533,10 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   // meaning from root and pattern, the odd word out. Skill card k:rootfam, graded once per session.
   let RF = null;
   const rfPat = (w) => RF.patterns[w.p] || ["", ""];
+  // the binyan models are written in the past tense («он сделал»), verbal nouns and pual participles come in Bet
+  const RF_AFTER = { pa: "m11l1", piel: "m12l1", hifil: "m12l2", hitpael: "m12l3", nifal: "m12l4", mekatel: "m6l2", ktila: "m19l1", kittul: "m19l2", haktala: "m19l3", mekuttal: "m20l2" };
+  const rfOpen = (w) => unlocked(RF_AFTER[w.p]);
+  const rfFams = () => RF.families.map(f => Object.assign({}, f, { words: f.words.filter(rfOpen), later: f.words.filter(w => !rfOpen(w)).length })).filter(f => f.words.length >= 2);
   function rfNote(f, w) {
     const [tpl, label] = rfPat(w);
     const meta = f.letters[0] && "סצשז".includes(f.letters[0]) && w.p === "hitpael" ? " После ס/צ/שׁ буква ת приставки меняется местами с первой буквой корня." : "";
@@ -2543,15 +2547,19 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     rich($("rfPatNote"), "Модель записана условным корнем [[ק־ט־ל]]: на место букв [[ק]], [[ט]], [[ל]] встают буквы настоящего корня.");
     const pl = $("rfPats"); pl.textContent = "";
     for (const [id, [tpl, label]] of Object.entries(RF.patterns)) {
-      if (!tpl) continue;
+      if (!tpl || !unlocked(RF_AFTER[id])) continue;
       const ex = RF.families.flatMap(f => f.words).filter(w => w.p === id).slice(0, 2).map(w => w.he).join(", ");
       pl.appendChild(rich(el("span", "he"), "[[!" + tpl + "]]"));
       pl.appendChild(rich(el("span", "small"), label + (ex ? ": [[!" + ex + "]]" : "")));
     }
     const list = $("rfList"); list.textContent = "";
-    for (const f of RF.families) {
+    const later = Object.keys(RF_AFTER).filter(id => !unlocked(RF_AFTER[id]) && RF.patterns[id]);
+    const PAST = ["pa", "piel", "hifil", "hitpael", "nifal"];
+    if (later.length) list.appendChild(el("p", "small muted", later.some(id => PAST.includes(id)) ? "Модели глаголов (они записаны в прошедшем времени) появятся здесь после модулей 11-12, имена действия и пуаль в уровне Бет."
+      : later.includes("mekatel") ? "Модель пиэль в настоящем появится после урока 6.2, имена действия и пуаль в уровне Бет." : "Имена действия и пуаль появятся здесь после своих уроков в уровне Бет (модули 19-20)."));
+    for (const f of rfFams()) {
       const d = el("div", "fam"), b = el("button"); b.type = "button";
-      b.appendChild(el("span", "rt", f.root)); b.appendChild(el("span", "small muted", f.ru + " · " + f.words.length + " сл."));
+      b.appendChild(el("span", "rt", f.root)); b.appendChild(el("span", "small muted", f.ru + " · " + f.words.length + " сл." + (f.later ? " (ещё " + f.later + " позже)" : "")));
       const fw = el("div", "fw"); fw.hidden = true;
       for (const w of f.words) {
         const h = el("span", "he", w.he); h.dir = "rtl"; fw.appendChild(h);
@@ -2563,7 +2571,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     show("roots");
   }
   function rootsItems() {
-    const F = RF.families, items = [], mk = (ex) => items.push({ ex: Object.assign({ k: "rootfam", type: "choice", answer: 0 }, ex), cardId: "k:rootfam" });
+    const F = rfFams(), items = [], mk = (ex) => items.push({ ex: Object.assign({ k: "rootfam", type: "choice", answer: 0 }, ex), cardId: "k:rootfam" });
     const otherRoots = (f) => shuffle(F.filter(x => x !== f)).slice(0, 3).map(x => x.root);
     for (const f of F) {
       const ws = f.words;
@@ -2606,6 +2614,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   //  1) a homograph in a sentence: the context decides (סֵפֶר / סַפָּר, אֹכֶל / אוֹכֵל, דּוֹד / דּוּד …);
   //  2) a learned word in full spelling: tell the real reading from near-misses with other vowels / ב-в, כ-х, פ-ф.
   // Skill card k:nonik, graded once per session from accuracy (like cursive).
+  // the lesson after which each sentence below can be read: שֶׁלִּי (m8), past (m11), future (m14, m16), infinitive (m7)…
+  const NONIK_AFTER = ["m5l1", "m11l1", "m8l1", "m8l2", "m7l3", "m8l1", "", "m11l1", "m8l1", "m8l1", "m8l1", "m16l3", "m5l3", "", "m8l1", "", "m8l1", "m16l1", "", "", "m8l1", "", "m11l1", "m14l2", "", "", "", "m11l1", "m8l1", "m6l5", "m13l4", "m14l1", "m11l1", "", "", "m7l1", "", "", ""];
   const NONIK_CTX = [
     ["אני קורא ספר מעניין.", "ספר", "אֲנִי קוֹרֵא סֵפֶר מְעַנְיֵן.", ["се́фер (книга)", "сапа́р (парикмахер)", "сфар (окраина, граница)"]],
     ["הספר גזר לי את השיער קצר מדי.", "ספר", "הַסַּפָּר גָּזַר לִי אֶת הַשֵּׂעָר קָצָר מִדַּי.", ["сапа́р (парикмахер)", "се́фер (книга)", "сфар (окраина, граница)"]],
@@ -2695,7 +2705,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   }
   function nonikRun() {
     IDX.skillName.nonik = "Чтение без огласовок";
-    const ctx = shuffle(NONIK_CTX).slice(0, 6).map((c, n) => ({ ex: { id: "nk:c:" + n + ":" + c[1], k: "nonik", type: "choice",
+    const ctx = shuffle(NONIK_CTX.filter((c, i) => unlocked(NONIK_AFTER[i]))).slice(0, 6).map((c, n) => ({ ex: { id: "nk:c:" + n + ":" + c[1], k: "nonik", type: "choice",
       prompt: "Как читается слово [[" + c[1] + "]] в этом предложении?", he: c[0], options: c[3], answer: 0, note: "С огласовками: [[!" + c[2] + "]]" }, cardId: "k:nonik" }));
     const ws = shuffle(nonikWords()).slice(0, 8).map(({ w, full }) => {
       const alts = trVariants(w.tr); if (alts.length < 2) return null;
