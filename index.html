@@ -153,6 +153,9 @@ textarea.answer { min-height: 130px; resize: vertical; line-height: 1.6; }
 
 /* Lists */
 .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.plan .li { padding: 8px 0; }
+.plan .li.done .t { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.plan .li.cur { font-weight: 600; }
 .li { display: grid; grid-template-columns: 2.6rem 1fr auto; gap: 10px; align-items: center; padding: 11px 0; border-top: 1px solid var(--line); width: 100%; background: none; border-left: 0; border-right: 0; border-bottom: 0; text-align: left; }
 .list > :first-child { border-top: 0; }
 .li > div { min-width: 0; }
@@ -499,6 +502,10 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         <div><b id="tStreak">0</b><span>дней подряд</span></div>
       </div>
       <div class="tline" id="tTimeWrap" hidden><span class="small muted" id="tTime"></span><div class="progress"><i id="tTimeBar"></i></div></div>
+      <div id="planBox" hidden>
+        <p class="small muted" id="planNote"></p>
+        <div class="list plan" id="planList"></div>
+      </div>
       <div class="actions" id="todayActions"></div>
     </div>
 
@@ -2002,7 +2009,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     rich($("smTitle"), title);
     $("smText").textContent = text || (ok + " из " + firsts.length + " верно с первой попытки.");
     const acts = $("smActions"); acts.textContent = "";
-    (actions || [{ label: "На главную", fn: goHome }]).forEach((a, i) => { const b = rich(el("button", "btn" + (i ? " secondary" : "")), a.label); b.onclick = a.fn; acts.appendChild(b); });
+    planActions(actions || [{ label: "На главную", fn: goHome }]).forEach((a, i) => { const b = rich(el("button", "btn" + (i ? " secondary" : "")), a.label); b.onclick = a.fn; acts.appendChild(b); });
     $("smMistWrap").querySelector("h2").textContent = words ? "Слова, которые пришлось повторить" : "Разбор ошибок";
     if (words) {
       const box = $("smMist"); box.textContent = "";
@@ -3678,7 +3685,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const pct = Math.round(r.sc * 100), it = SP.q[SP.pos];
     box.appendChild(el("div", "", pct === 100 ? "Отлично, все слова распознаны!" : pct >= 70 ? "Почти! Красным отмечены слова, которые телефон не узнал." : "Пока не получилось. Послушайте и попробуйте ещё раз."));
     const h = el("div", "small muted", "Телефон услышал: "); h.appendChild(el("span", "heard", r.a)); box.appendChild(h);
-    S.speak = S.speak || {}; S.speak[it.key] = Math.max(S.speak[it.key] || 0, pct); save();
+    S.speak = S.speak || {}; S.speak[it.key] = Math.max(S.speak[it.key] || 0, pct); today().sp = (today().sp || 0) + 1; save();
     SP.cur = Math.max(SP.cur || 0, pct);
     if (pct >= 70 || SP.tries >= 3) { $("spNext").hidden = false; $("spSkip").hidden = true; sfx(pct >= 70 ? "ok" : "bad"); }
   }
@@ -3885,6 +3892,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     box.appendChild(el("p", "small muted", "Проверьте себя по списку:"));
     ["Род и число: прилагательное и глагол согласованы с существительным?", "Артикль: у существительного и прилагательного вместе, в смихуте только у второго слова?", "Предлоги: לְ, בְּ, אֶת, עִם, עַל на своих местах?", "Время глагола: прошедшее, настоящее или будущее выбрано верно?", "Использованы слова из подсказки?", "Прочитайте текст вслух: звучит ли он естественно?"]
       .forEach(t => box.appendChild(rich(el("p", "small"), "• " + t)));
+    planButton(box);
     const cp = el("button", "btn secondary small", "Скопировать текст"); cp.type = "button";
     cp.onclick = async () => { try { await navigator.clipboard.writeText(text); toast("Текст скопирован"); } catch (_) { toast("Не удалось скопировать"); } };
     box.appendChild(cp);
@@ -3985,6 +3993,102 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const pic = $("grBird"); pic.textContent = ""; pic.appendChild(birdEl(done ? "happy" : "calm", 64, false));
     $("greet").hidden = false;
   }
+  /* ================= today's session ================= */
+  // One session a day built from all sections in the order input → practice → output:
+  // review, words of the day, the next lesson, a text at the learner's level, own sentences (a chain or the diary),
+  // weak skills (weekly), speaking. Targets are fixed when the plan is made; a step counts as done when its result
+  // is there, wherever it was done (from the plan or from the section itself).
+  function planBuild() {
+    const st = [], day = Math.floor(Date.now() / DAY);
+    if (dueCards().length && !reviewCapped()) st.push({ k: "rev", t: "Повторение", d: "карточки, у которых подошёл срок", m: 6 });
+    if (VOC.list.length && (vocDue().length || vocNewLeft(vocDue().length) && vocNextNew(1).length)) st.push({ k: "voc", t: "Слова дня", d: "новые слова и повторение", m: 6 });
+    let les = null, ur = null, ut = null;
+    for (const u of UNITS) {
+      if (!unitOpen(u)) continue;
+      const ls = lessonState(u);
+      if (ls.nextL && !les) les = { k: "les", id: ls.nextL.id, t: (u.kind === "module" ? "Урок " + u.module + "." + (ls.ls.indexOf(ls.nextL) + 1) : (u.short || "Тренировка")), d: ls.nextL.title, m: 12 };
+      if (!ls.nextL && u.reading && !(S.units[u.id] || {}).reading && !ur) ur = { k: "ur", id: u.id, t: "Чтение", d: "текст модуля: " + u.reading.title, m: 6 };
+      if (!ls.nextL && u.test && !(S.units[u.id] || {}).passed && !ut) ut = { k: "ut", id: u.id, t: "Контрольный тест модуля " + u.module, d: "проверка пройденного модуля", m: 8 };
+    }
+    if (les) st.push(les);
+    if (ut) st.push(ut);
+    const rd = S.read || {};
+    let tx = null;
+    if (!ur && STORIES) STORIES.episodes.some((t, i) => { const pr = STORIES.episodes[i - 1]; if (!rd[t.id] && unlocked(t.after) && (!pr || rd[pr.id])) { tx = { id: t.id, t: "Сериал: " + t.title.replace(/^\d+\.\s*/, ""), story: true }; return true; } return false; });
+    if (!ur && !tx) { const t = textsForUnit().find(t => (!t.after || S.lessons[t.after]) && !rd[t.id]); if (t) tx = { id: t.id, t: "Текст: " + t.title }; }
+    if (ur) st.push(ur);
+    else if (tx) st.push({ k: "read", id: tx.id, story: !!tx.story, t: "Чтение", d: tx.t, m: 6 });
+    const ch = CHN ? CHN.chains.find(c => !chainDone(c) && unlocked(c.after)) : null;
+    const dia = CHN && CHN.diary && Object.keys(S.lessons).length && !(S.diary || {})[dkey()];
+    if (ch && (!dia || day % 2 === 0)) st.push({ k: "ch", id: ch.id, t: "Свои фразы", d: "«Строим фразы»: " + ch.title, m: 4 });
+    else if (dia) st.push({ k: "dia", t: "Свои фразы", d: "дневник: 3 предложения", m: 5 });
+    if (weakDue()) st.push({ k: "weak", t: "Слабые темы", d: weakest(3).map(w => skPlain(w.k)).join(", "), m: 5 });
+    if (SR && spSources().chains.length + spSources().sits.length + spSources().words.length) st.push({ k: "sp", t: "Речь", d: "скажите вслух 3 фразы", m: 3, opt: true });
+    // fit the learner's session length: drop the least essential steps first (they come back as "one more step")
+    const KEEP = ["rev", "les", "voc", "ut", "ch", "dia", "ur", "read", "weak", "sp"], lim = sessMin() * 1.2;
+    while (st.length > 3 && st.reduce((a, x) => a + x.m, 0) > lim) {
+      const drop = st.reduce((w, x) => KEEP.indexOf(x.k) > KEEP.indexOf(w.k) ? x : w, st[0]);
+      st.splice(st.indexOf(drop), 1);
+    }
+    return { t: Date.now(), steps: st };
+  }
+  function planDone(x, P) {
+    switch (x.k) {
+      case "rev": return !dueCards().length || reviewCapped();
+      case "voc": { const due = vocDue().length; return !due && (!vocNewLeft(0) || !vocNextNew(1).length); }
+      case "les": return !!S.lessons[x.id];
+      case "ur": return !!(S.units[x.id] || {}).reading;
+      case "ut": return !!(S.units[x.id] || {}).passed;
+      case "read": return !!(S.read || {})[x.id];
+      case "ch": return (S.chains || {})[x.id] != null;
+      case "dia": return !!(S.diary || {})[dkey()];
+      case "weak": return !!S.weakAt && S.weakAt >= P.t;
+      case "sp": return (today().sp || 0) >= 3;
+    }
+    return true;
+  }
+  function planGo(x) {
+    switch (x.k) {
+      case "rev": return startReview();
+      case "voc": return startVocab();
+      case "les": return resumeFor(x.id) ? resumeLesson(x.id) : openLesson(x.id);
+      case "ur": case "ut": { const u = UNITS.find(u => u.id === x.id); return x.k === "ur" ? openReading(u) : startUnitTest(u); }
+      case "read": { const t = x.story ? STORIES.episodes.find(e => e.id === x.id) : textsForUnit().find(e => e.id === x.id); return t ? openText(t, false) : openTexts(); }
+      case "ch": { const c = CHN.chains.find(c => c.id === x.id); return c ? chainRun(c) : openChains(); }
+      case "dia": return openWrite(diaryTask());
+      case "weak": return startWeak();
+      case "sp": return openSpeak();
+    }
+  }
+  const plan = () => { const d = today(); return d.plan || null; };
+  const planNext = () => { const P = plan(); return P ? P.steps.find(x => !planDone(x, P)) || null : null; };
+  function planStart() { const d = today(); if (!d.plan) { d.plan = planBuild(); save(); } const n = planNext(); if (n) planGo(n); else goHome(); }
+  // the summary screen of any section offers the next step first while today's session is on
+  function planActions(acts) {
+    const P = plan(); if (!P) return acts;
+    const n = planNext();
+    if (!n) { if (!P.fin) { P.fin = Date.now(); save(); setTimeout(() => toast("Занятие на сегодня выполнено!"), 600); } return acts; }
+    const rest = acts.filter(a => a.fn !== goHome);
+    return [{ label: "Дальше: " + n.t.toLowerCase(), fn: () => planGo(n) }].concat(rest, [{ label: "К плану занятия", fn: goHome }]);
+  }
+  function planButton(box) { const n = plan() && planNext(); if (!n) return; const b = el("button", "btn", "Дальше: " + n.t.toLowerCase()); b.type = "button"; b.onclick = () => planGo(n); box.appendChild(b); }
+  function renderPlan() {
+    const P = plan(), box = $("planBox");
+    box.hidden = !P; if (!P) return;
+    const list = $("planList"); list.textContent = "";
+    const n = planNext(), left = P.steps.filter(x => !planDone(x, P)).reduce((a, x) => a + x.m, 0);
+    $("planNote").textContent = n ? "Занятие на сегодня: осталось около " + left + " мин." : "Занятие на сегодня выполнено. Дальше по желанию.";
+    P.steps.forEach((x, i) => {
+      const dn = planDone(x, P), cur = x === n;
+      const b = el("button", "li" + (dn ? " done" : "") + (cur ? " cur" : "")); b.type = "button";
+      b.appendChild(el("span", "num", dn ? "✓" : String(i + 1)));
+      const d = el("div"); d.appendChild(el("div", "t", x.t + (x.opt ? " (по желанию)" : ""))); d.appendChild(el("div", "d", x.d)); b.appendChild(d);
+      b.appendChild(el("span", "small muted", "≈" + x.m + " мин"));
+      b.onclick = () => planGo(x);
+      list.appendChild(b);
+    });
+  }
+
   function goHome() { if (window.__swReload) { location.reload(); return; } renderHome(); show("home"); }
   function renderHome() {
     const p = S.placement;
@@ -4015,24 +4119,18 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const addBtn = (label, fn, secondary) => { const b = rich(el("button", "btn" + (secondary ? " secondary" : "")), label); b.onclick = fn; acts.appendChild(b); return b; };
     let primaryUsed = false;
     const capped = reviewCapped();
-    if (due && !capped) { addBtn("Повторить (" + due + ")", startReview); primaryUsed = true; }
+    if (due && !capped && p.status !== "done") { addBtn("Повторить (" + due + ")", startReview); primaryUsed = true; }
     const t = today(), tm = Math.floor(t.ms / MIN);
     $("tTimeWrap").hidden = !t.ms;
     $("tTime").textContent = "Занятие сегодня: " + tm + " мин из " + sessMin() + (tm >= sessMin() ? ". Цель выполнена, дальше по желанию." : "");
     $("tTimeBar").style.width = Math.min(100, t.ms / (sessMin() * MIN) * 100) + "%";
+    renderPlan();
     if (p.status === "done") {
-      for (const u of UNITS) {
-        if (!unitOpen(u)) continue;
-        const st = lessonState(u);
-        if (st.nextL) {
-          const z = resumeFor(st.nextL.id), name = (u.kind === "module" ? "Урок " + u.module + "." + (st.ls.indexOf(st.nextL) + 1) : (u.short || "Тренировка")) + ": " + st.nextL.title;
-          if (z) addBtn("Продолжить " + name + " (осталось " + resumeLeft(z) + ")", () => resumeLesson(st.nextL.id), primaryUsed);
-          else addBtn(name, () => openLesson(st.nextL.id), primaryUsed);
-          primaryUsed = true;
-        }
-        else if (u.reading && !(S.units[u.id] || {}).reading) { addBtn("Текст для чтения: " + u.reading.title, () => openReading(u), primaryUsed); primaryUsed = true; }
-        else if (u.test && !(S.units[u.id] || {}).passed) { addBtn("Контрольный тест модуля " + u.module, () => startUnitTest(u), primaryUsed); primaryUsed = true; }
-      }
+      // one session for the day; the sections stay available on their own below and in the menu
+      const P = plan(), n = planNext();
+      if (!P) { const pv = planBuild(); if (pv.steps.length) { addBtn("Начать занятие (≈" + pv.steps.reduce((a, x) => a + x.m, 0) + " мин, шагов: " + pv.steps.length + ")", planStart); primaryUsed = true; $("planBox").hidden = false; $("planNote").textContent = "План: " + pv.steps.map(x => x.t.toLowerCase()).join(" → ") + "."; $("planList").textContent = ""; } }
+      else if (n) { addBtn("Дальше: " + n.t.toLowerCase(), () => planGo(n)); primaryUsed = true; }
+      else { const pv = planBuild(); const fresh = pv.steps.filter(x => !["rev", "voc"].includes(x.k) && !P.steps.some(y => y.k === x.k && y.id === x.id)); if (fresh.length) addBtn("Ещё шаг: " + fresh[0].t.toLowerCase() + " (" + fresh[0].d + ")", () => { P.steps.push(fresh[0]); save(); planGo(fresh[0]); }, true); }
       if (due && capped) addBtn("Повторить ещё (" + due + ")", startReview, true);
       const nErr = activeErrors().length;
       if (nErr >= 3) addBtn("Разобрать ошибки (" + nErr + ")", startErrors, true);
