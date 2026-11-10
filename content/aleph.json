@@ -23,6 +23,7 @@
   "m21.json",
   "m22.json",
   "m23.json",
+  "m24.json",
   "drill1.json",
   "roots1.json"
  ],
@@ -47,7 +48,8 @@
   "m20-practice.json",
   "m21-practice.json",
   "m22-practice.json",
-  "m23-practice.json"
+  "m23-practice.json",
+  "m24-practice.json"
  ],
  "modules": [
   {
@@ -164,6 +166,11 @@
    "n": 23,
    "title": "Итоговое повторение Бет",
    "topics": "Задания вперемешку по уровню Бет, итоговый тест"
+  },
+  {
+   "n": 24,
+   "title": "Гимель: слабые глаголы פ״נ и פ״י",
+   "topics": "Корни на נ и на י во всех биньянах; новости, происшествия, экономика"
   }
  ],
  "placement": [

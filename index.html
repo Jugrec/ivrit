@@ -1440,6 +1440,10 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function rich(el, text) {
     // [[hebrew]] → styled span; everything else plain text
     el.textContent = "";
+    // Russian text is laid out left to right even when it starts with a Hebrew word (otherwise the browser
+    // takes the first letter as the paragraph direction and reverses the order of the parts)
+    if (/[\u0400-\u04FF]/.test(String(text))) { el.dir = "ltr"; el.style.unicodeBidi = "isolate"; }
+    else if (el.dir === "ltr") { el.removeAttribute("dir"); el.style.unicodeBidi = ""; }
     String(text).split(/(\[\[[^\]]+\]\])/).forEach(part => {
       const m = part.match(/^\[\[([^\]]+)\]\]$/);
       if (m) { const keep = m[1][0] === "!", t = keep ? m[1].slice(1) : m[1]; const s = document.createElement("span"); s.className = "he"; s.textContent = keep ? t : shown(t); if (t.length <= 12) s.style.whiteSpace = "nowrap"; el.appendChild(s); }
