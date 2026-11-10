@@ -822,7 +822,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   <section id="v-sits" class="view" hidden>
     <button class="btn ghost" data-home style="align-self:flex-start">← На главную</button>
     <h1>Ситуации</h1>
-    <div class="panel"><p>Готовые фразы для жизни в Израиле: врач, банк, аренда, звонок, магазин, транспорт, знакомство, работа. В каждой ситуации четыре коротких диалога: собеседник говорит, вы выбираете подходящий ответ. Реплики и варианты ответов каждый раз немного другие. Фразы можно добавить в «Слова дня», тогда они пойдут в карточки в первую очередь.</p></div>
+    <div class="panel"><p>Готовые фразы для жизни в Израиле: врач, банк, аренда, звонок, магазин, транспорт, знакомство, работа. Фразы доступны сразу. В каждой ситуации четыре коротких диалога: собеседник говорит, вы выбираете подходящий ответ, реплики каждый раз немного другие. Диалог открывается, когда в уроках пройдена его грамматика. Фразы можно добавить в «Слова дня», тогда они пойдут в карточки в первую очередь.</p></div>
     <div id="sitList"></div>
   </section>
 
@@ -1121,16 +1121,18 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function vocAddLater(id, now) {
     const w = VOC.byId[id.slice(2)];
     if (!S.cards["r:" + w.id]) S.cards["r:" + w.id] = { s: W[2], d: clampD(W[4]), reps: 0, lapses: 0, last: now, due: now + DAY };
-    if (w.cz && !S.cards["c:" + w.id]) S.cards["c:" + w.id] = { s: W[2], d: clampD(W[4]), reps: 0, lapses: 0, last: now, due: now + 2 * DAY };
+    if (w.cz && czOpen(w) && !S.cards["c:" + w.id]) S.cards["c:" + w.id] = { s: W[2], d: clampD(W[4]), reps: 0, lapses: 0, last: now, due: now + 2 * DAY };
   }
-  function vocBackfill() {   // words that got their reverse card before cloze cards existed
+  // a cloze card asks for the form used in the sentence, so it waits for the lesson that teaches that form (cz.after)
+  const czOpen = (w) => !w.cz.after || !!S.lessons[w.cz.after];
+  function vocBackfill() {   // reverse cards whose cloze card was not made yet (made earlier than cloze cards existed, or the lesson was not done)
     const now = Date.now(); let ch = false;
-    for (const id of Object.keys(S.cards)) if (id.startsWith("r:") && isVoc(id) && VOC.byId[id.slice(2)].cz && !S.cards["c:" + id.slice(2)]) {
+    for (const id of Object.keys(S.cards)) if (id.startsWith("r:") && isVoc(id) && VOC.byId[id.slice(2)].cz && czOpen(VOC.byId[id.slice(2)]) && !S.cards["c:" + id.slice(2)]) {
       S.cards["c:" + id.slice(2)] = { s: W[2], d: clampD(W[4]), reps: 0, lapses: 0, last: now, due: now }; ch = true;
     }
     if (ch) save();
   }
-  const vocDue = () => Object.keys(S.cards).filter(id => isVoc(id) && S.cards[id].due <= Date.now());
+  const vocDue = () => Object.keys(S.cards).filter(id => isVoc(id) && S.cards[id].due <= Date.now() && (!id.startsWith("c:") || czOpen(VOC.byId[id.slice(2)])));
   function vocToday() { const d = dkey(); if (!S.vocab || S.vocab.d !== d) S.vocab = { d, n: 0, extra: 0 }; return S.vocab; }
   function vocLimit(dueN) { const lim = S.settings.vocabNew || 20; return (dueN > 200 ? Math.min(5, lim) : dueN > 120 ? Math.ceil(lim / 2) : lim) + (vocToday().extra || 0); }
   const vocNewLeft = (dueN) => Math.max(0, vocLimit(dueN) - vocToday().n);
@@ -3705,15 +3707,18 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       p.appendChild(det);
       const list = el("div", "list");
       st.dialogs.forEach((d, i) => {
-        const best = (S.sits || {})[st.id + ":" + i];
+        const best = (S.sits || {})[st.id + ":" + i], open = unlocked(d.after);
         const b = el("button", "li"); b.type = "button";
-        b.appendChild(el("span", "num", best != null ? "✓" : String(i + 1)));
-        const t = el("div"); t.appendChild(el("div", "t", "Диалог: " + d.title)); t.appendChild(el("div", "d", d.turns.length + " реплики")); b.appendChild(t);
-        b.appendChild(el("span", "chip " + (best != null ? "" : "next"), best != null ? best + "%" : "Начать"));
-        b.onclick = () => sitRun(st, i); list.appendChild(b);
+        b.appendChild(el("span", "num", best != null ? "✓" : open ? String(i + 1) : "🔒"));
+        const t = el("div"); t.appendChild(el("div", "t", "Диалог: " + d.title));
+        rich(t.appendChild(el("div", "d")), open ? d.turns.length + " реплики" : "Откроется после урока " + lessonName(d.after)); b.appendChild(t);
+        b.appendChild(el("span", "chip " + (best != null ? "" : open ? "next" : ""), best != null ? best + "%" : open ? "Начать" : "позже"));
+        if (open) b.onclick = () => sitRun(st, i); else { b.disabled = true; b.classList.add("locked"); }
+        list.appendChild(b);
       });
       p.appendChild(list);
       const rnd = el("button", "btn small", "Случайный диалог"); rnd.type = "button"; rnd.onclick = () => sitRun(st, sitPick(st));
+      rnd.hidden = !st.dialogs.some(d => unlocked(d.after));
       const words = (VOC.topics.find(t => t.id === st.id) || { words: [] }).words;
       const left = words.filter(w => !S.cards["v:" + w.id]);
       const queued = left.length && left.every(w => (S.vocPrio || []).includes(w.id));
@@ -3740,8 +3745,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     return { id: "sd:" + st.id + ":" + di + ":" + ti, type: "choice", prompt: t.who + " говорит. Что вы ответите?", he: line.he, say: line.he,
       options: [right.he].concat(wrong.map(o => o.he)), answer: 0, note, _line: line, _right: right };
   }
-  function sitPick(st) {   // the dialogue not done yet, or the one done worst
-    const sc = st.dialogs.map((d, i) => [(S.sits || {})[st.id + ":" + i], i]);
+  function sitPick(st) {   // among the open dialogues: one not done yet, or the one done worst
+    const sc = st.dialogs.map((d, i) => [(S.sits || {})[st.id + ":" + i], i]).filter(x => unlocked(st.dialogs[x[1]].after));
     const fresh = sc.filter(x => x[0] == null);
     return fresh.length ? pick(fresh)[1] : sc.sort((a, b) => a[0] - b[0])[0][1];
   }
