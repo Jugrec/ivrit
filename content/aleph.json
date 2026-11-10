@@ -673,5 +673,6 @@
  "chains": "chains.json",
  "situations": "situations.json",
  "exams": "exams.json",
- "ttexts": "ttexts.json"
+ "ttexts": "ttexts.json",
+ "outputs": "outputs.json"
 }

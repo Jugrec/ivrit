@@ -2223,6 +2223,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     save();
     const st = lessonState(unit);
     const actions = [];
+    if (outPending(lesson.id)) actions.push({ out: true, label: "Свои фразы по уроку (2-3 мин)", fn: () => openWrite(outTask(lesson.id)) });
     if (st.nextL) actions.push({ label: "Следующий урок: " + st.nextL.title, fn: () => openLesson(st.nextL.id) });
     else if (unit.reading && !(S.units[unit.id] || {}).reading) actions.push({ label: "Текст для чтения: " + unit.reading.title, fn: () => openReading(unit) });
     else if (unit.test) actions.push({ label: "Контрольный тест модуля", fn: () => startUnitTest(unit) });
@@ -3902,6 +3903,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       list.appendChild(b);
     }
     renderDiaryPast();
+    // own sentences of recently finished lessons that are not written yet
+    Object.keys(S.lessons).filter(outPending).sort((x, y) => S.lessons[y] - S.lessons[x]).slice(0, 3).forEach(lid => {
+      const b = el("button", "li"); b.type = "button"; b.appendChild(el("span", "num", "•"));
+      const d = el("div"); d.appendChild(el("div", "t", "Свои фразы: урок " + lessonLabel(lid))); d.appendChild(el("div", "d", OUT[lid].task)); b.appendChild(d);
+      b.appendChild(el("span", "chip next", "Писать")); b.onclick = () => openWrite(outTask(lid)); list.appendChild(b);
+    });
     for (const w of PRACTICE.writing) {
       const open = !w.after || !!S.lessons[w.after];
       const n = (S.wr || {})[w.id] || 0;
@@ -3916,7 +3923,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   }
   function openWrite(w) {
     WR = { w };
-    $("wrTitle").textContent = w.title; $("wrTask").textContent = w.task;
+    $("wrTitle").textContent = w.title; rich($("wrTask"), w.task);
     rich($("wrUse"), "Постарайтесь использовать: " + w.use + ".");
     $("wrSample").hidden = !(w.theme); $("wrSampleText").hidden = true; $("wrSampleText").textContent = "";
     if (w.theme) w.theme.he.forEach((h, i) => { const e = el("div", "he", shown(h)); e.dir = "rtl"; $("wrSampleText").appendChild(e); $("wrSampleText").appendChild(el("div", "small muted", w.theme.ru[i])); });
@@ -3980,7 +3987,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       }
       if (r.tip) { box.appendChild(el("h3", "", "Совет")); box.appendChild(rich(el("p"), r.tip)); }
       const row = el("div", "actions");
-      const again = el("button", "btn", "Другое задание"); again.onclick = openWriting; row.appendChild(again);
+      planButton(row);
+      const again = el("button", "btn" + (plan() && planNext() ? " secondary" : ""), "Другое задание"); again.onclick = openWriting; row.appendChild(again);
       const home = el("button", "btn secondary", "На главную"); home.onclick = goHome; row.appendChild(home);
       box.appendChild(row);
       setTimeout(() => box.scrollIntoView({ block: "start" }), 30);
@@ -4037,6 +4045,23 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const pic = $("grBird"); pic.textContent = ""; pic.appendChild(birdEl(done ? "happy" : "calm", 64, false));
     $("greet").hidden = false;
   }
+  /* ================= own sentences after a lesson ================= */
+  // 2-3 sentences on the lesson's grammar, with three recently learned words of the day to use; the sample opens on request.
+  // A lesson counts as finished in today's session once they are written (the next lesson is never blocked).
+  let OUT = null;
+  const outPending = (lid) => !!(OUT && OUT[lid]) && !(S.wr || {})["out:" + lid];
+  function outWords() {
+    const ids = Object.keys(S.cards).filter(id => id.startsWith("v:") && VOC.byId[id.slice(2)] && !/\s/.test(VOC.byId[id.slice(2)].he))
+      .sort((a, b) => (S.cards[b].last || 0) - (S.cards[a].last || 0)).slice(0, 10);
+    return shuffle(ids).slice(0, 3).map(id => VOC.byId[id.slice(2)]);
+  }
+  function outTask(lid) {
+    const o = OUT[lid], L = IDX.lessons[lid], ws = outWords();
+    return { id: "out:" + lid, title: "Свои фразы: " + (L ? L.lesson.title : ""), task: o.task + " Пишите о себе, своими словами.",
+      use: o.use + (ws.length ? "; слова дня: " + ws.map(w => "[[" + w.he + "]]").join(", ") : ""),
+      theme: { t: L ? L.lesson.title : "", he: o.he, ru: o.ru } };
+  }
+
   /* ================= today's session ================= */
   // One session a day built from all sections in the order input → practice → output:
   // review, words of the day, the next lesson, a text at the learner's level, own sentences (a chain or the diary),
@@ -4082,7 +4107,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     switch (x.k) {
       case "rev": return !dueCards().length || reviewCapped();
       case "voc": { const due = vocDue().length; return !due && (!vocNewLeft(0) || !vocNextNew(1).length); }
-      case "les": return !!S.lessons[x.id];
+      case "les": return !!S.lessons[x.id] && !outPending(x.id);
       case "ur": return !!(S.units[x.id] || {}).reading;
       case "ut": return !!(S.units[x.id] || {}).passed;
       case "read": return !!(S.read || {})[x.id];
@@ -4097,7 +4122,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     switch (x.k) {
       case "rev": return startReview();
       case "voc": return startVocab();
-      case "les": return resumeFor(x.id) ? resumeLesson(x.id) : openLesson(x.id);
+      case "les": return S.lessons[x.id] && outPending(x.id) ? openWrite(outTask(x.id)) : resumeFor(x.id) ? resumeLesson(x.id) : openLesson(x.id);
       case "ur": case "ut": { const u = UNITS.find(u => u.id === x.id); return x.k === "ur" ? openReading(u) : startUnitTest(u); }
       case "read": { const t = x.tt ? TT.find(e => e.id === x.id) : x.story ? STORIES.episodes.find(e => e.id === x.id) : textsForUnit().find(e => e.id === x.id); return t ? openText(t, false) : openTexts(); }
       case "ch": { const c = CHN.chains.find(c => c.id === x.id); return c ? chainRun(c) : openChains(); }
@@ -4115,21 +4140,23 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const n = planNext();
     if (!n) { if (!P.fin) { P.fin = Date.now(); save(); setTimeout(() => toast("Занятие на сегодня выполнено!"), 600); } return acts; }
     const rest = acts.filter(a => a.fn !== goHome);
-    return [{ label: "Дальше: " + n.t.toLowerCase(), fn: () => planGo(n) }].concat(rest, [{ label: "К плану занятия", fn: goHome }]);
+    const outNow = n.k === "les" && S.lessons[n.id];   // the lesson is done, its own sentences are the next step
+    if (rest.some(a => a.out)) return rest.filter(a => a.out).concat(rest.filter(a => !a.out), [{ label: "К плану занятия", fn: goHome }]);
+    return [{ label: "Дальше: " + (outNow ? "свои фразы по уроку" : n.t.toLowerCase()), fn: () => planGo(n) }].concat(rest, [{ label: "К плану занятия", fn: goHome }]);
   }
-  function planButton(box) { const n = plan() && planNext(); if (!n) return; const b = el("button", "btn", "Дальше: " + n.t.toLowerCase()); b.type = "button"; b.onclick = () => planGo(n); box.appendChild(b); }
+  function planButton(box) { const n = plan() && planNext(); if (!n) return; const b = el("button", "btn", "Дальше: " + (n.k === "les" && S.lessons[n.id] ? "свои фразы по уроку" : n.t.toLowerCase())); b.type = "button"; b.onclick = () => planGo(n); box.appendChild(b); }
   function renderPlan() {
     const P = plan(), box = $("planBox");
     box.hidden = !P; if (!P) return;
     const list = $("planList"); list.textContent = "";
-    const n = planNext(), left = P.steps.filter(x => !planDone(x, P)).reduce((a, x) => a + x.m, 0);
+    const n = planNext(), left = P.steps.filter(x => !planDone(x, P)).reduce((a, x) => a + (x.k === "les" && S.lessons[x.id] ? 3 : x.m), 0);
     $("planNote").textContent = n ? "Занятие на сегодня: осталось около " + left + " мин." : "Занятие на сегодня выполнено. Дальше по желанию.";
     P.steps.forEach((x, i) => {
       const dn = planDone(x, P), cur = x === n;
       const b = el("button", "li" + (dn ? " done" : "") + (cur ? " cur" : "")); b.type = "button";
       b.appendChild(el("span", "num", dn ? "✓" : String(i + 1)));
-      const d = el("div"); d.appendChild(el("div", "t", x.t + (x.opt ? " (по желанию)" : ""))); d.appendChild(el("div", "d", x.d)); b.appendChild(d);
-      b.appendChild(el("span", "small muted", "≈" + x.m + " мин"));
+      const d = el("div"); d.appendChild(el("div", "t", x.t + (x.opt ? " (по желанию)" : ""))); d.appendChild(el("div", "d", x.k === "les" && S.lessons[x.id] && !dn ? "урок пройден, осталось: свои фразы" : x.d)); b.appendChild(d);
+      b.appendChild(el("span", "small muted", "≈" + (x.k === "les" && S.lessons[x.id] && !dn ? 3 : x.m) + " мин"));
       b.onclick = () => planGo(x);
       list.appendChild(b);
     });
@@ -4175,7 +4202,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       // one session for the day; the sections stay available on their own below and in the menu
       const P = plan(), n = planNext();
       if (!P) { const pv = planBuild(); if (pv.steps.length) { addBtn("Начать занятие (≈" + pv.steps.reduce((a, x) => a + x.m, 0) + " мин, шагов: " + pv.steps.length + ")", planStart); primaryUsed = true; $("planBox").hidden = false; $("planNote").textContent = "План: " + pv.steps.map(x => x.t.toLowerCase()).join(" → ") + "."; $("planList").textContent = ""; } }
-      else if (n) { addBtn("Дальше: " + n.t.toLowerCase(), () => planGo(n)); primaryUsed = true; }
+      else if (n) { addBtn("Дальше: " + (n.k === "les" && S.lessons[n.id] ? "свои фразы по уроку" : n.t.toLowerCase()), () => planGo(n)); primaryUsed = true; }
       else { const pv = planBuild(); const fresh = pv.steps.filter(x => !["rev", "voc"].includes(x.k) && !P.steps.some(y => y.k === x.k && y.id === x.id)); if (fresh.length) addBtn("Ещё шаг: " + fresh[0].t.toLowerCase() + " (" + fresh[0].d + ")", () => { P.steps.push(fresh[0]); save(); planGo(fresh[0]); }, true); }
       if (due && capped) addBtn("Повторить ещё (" + due + ")", startReview, true);
       const nErr = activeErrors().length;
@@ -4640,6 +4667,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         (pf.writing || []).forEach(w => PRACTICE.writing.push(w));
       }
       buildLex(lexFile);
+      if (C.outputs) { try { OUT = await (await fetch("content/" + C.outputs)).json(); } catch (_) {} }
       if (C.ttexts) { try { TT = (await (await fetch("content/" + C.ttexts)).json()).texts; IDX.skillName.story = "Понимание текста"; } catch (_) {} }
       if (C.stories) { try { STORIES = await (await fetch("content/" + C.stories)).json(); IDX.skillName.story = "Понимание текста"; } catch (_) {} }
       if (C.rootfam) { try { RF = await (await fetch("content/" + C.rootfam)).json(); } catch (_) {} }
