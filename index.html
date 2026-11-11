@@ -4064,13 +4064,13 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   // A lesson counts as finished in today's session once they are written (the next lesson is never blocked).
   let OUT = null;
   const outPending = (lid) => !!(OUT && OUT[lid]) && !(S.wr || {})["out:" + lid];
-  function outWords() {
-    const ids = Object.keys(S.cards).filter(id => id.startsWith("v:") && VOC.byId[id.slice(2)] && !/\s/.test(VOC.byId[id.slice(2)].he))
+  function outWords(tps) {   // learned words of the day from the topics that fit the task; fewer than 2 → no suggestion
+    const ids = Object.keys(S.cards).filter(id => id.startsWith("v:") && VOC.byId[id.slice(2)] && !/\s/.test(VOC.byId[id.slice(2)].he) && (tps || []).includes(id.slice(2).split(":")[0]))
       .sort((a, b) => (S.cards[b].last || 0) - (S.cards[a].last || 0)).slice(0, 10);
-    return shuffle(ids).slice(0, 3).map(id => VOC.byId[id.slice(2)]);
+    return ids.length < 2 ? [] : shuffle(ids).slice(0, 3).map(id => VOC.byId[id.slice(2)]);
   }
   function outTask(lid) {
-    const o = OUT[lid], L = IDX.lessons[lid], ws = outWords();
+    const o = OUT[lid], L = IDX.lessons[lid], ws = outWords(o.topics);
     return { id: "out:" + lid, title: "Свои фразы: " + (L ? L.lesson.title : ""), task: o.task + " Пишите о себе, своими словами.",
       use: o.use + (ws.length ? "; слова дня: " + ws.map(w => "[[" + w.he + "]]").join(", ") : ""),
       theme: { t: L ? L.lesson.title : "", he: o.he, ru: o.ru } };
