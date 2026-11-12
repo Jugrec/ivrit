@@ -4093,9 +4093,13 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       if (!ls.nextL && u.reading && !(S.units[u.id] || {}).reading && !ur) ur = { k: "ur", id: u.id, t: "Чтение", d: "текст модуля: " + u.reading.title, m: 6 };
       if (!ls.nextL && u.test && !(S.units[u.id] || {}).passed && !ut) ut = { k: "ut", id: u.id, t: "Контрольный тест модуля " + u.module, d: "проверка пройденного модуля", m: 8 };
     }
-    if (les) st.push(les);
-    if (ut) st.push(ut);
+    // days alternate: a day with a new lesson (and its own sentences), then a day of consolidation
+    // (module test first, reading, own sentences, weak topics). A missing kind is simply skipped.
     const rd = S.read || {};
+    const consAvail = !!(ut || ur || (TT && TT.some(t => ttOpen(t) && !rd[t.id])) || (STORIES && STORIES.episodes.some(t => !rd[t.id] && unlocked(t.after))));
+    const lessonDay = !!les && (!consAvail || !(S.lesDay >= day - 1));
+    if (lessonDay) { st.push(les); ut = null; ur = null; }
+    else if (ut) st.unshift(ut);   // the test goes first but never blocks the next module
     let tx = null;
     const tt = TT && TT.find(t => ttOpen(t) && !rd[t.id]);
     if (!ur && tt) tx = { id: tt.id, t: "Текст из слов дня: " + tt.title, tt: true };
@@ -4110,7 +4114,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     if (weakDue()) st.push({ k: "weak", t: "Слабые темы", d: weakest(3).map(w => skPlain(w.k)).join(", "), m: 5 });
     if (SR && spSources().chains.length + spSources().sits.length + spSources().words.length) st.push({ k: "sp", t: "Речь", d: "скажите вслух 3 фразы", m: 3, opt: true });
     // fit the learner's session length: drop the least essential steps first (they come back as "one more step")
-    const KEEP = ["rev", "les", "voc", "ch", "dia", "ur", "read", "ut", "weak", "sp"], lim = sessMin() * 1.2;
+    const KEEP = ["rev", "ut", "les", "voc", "ur", "read", "ch", "dia", "weak", "sp"], lim = sessMin() * 1.2 + (lessonDay ? 0 : 6);   // a consolidation day has no lesson, so it may hold a bit more
     while (st.length > 3 && st.reduce((a, x) => a + x.m, 0) > lim) {
       const drop = st.reduce((w, x) => KEEP.indexOf(x.k) > KEEP.indexOf(w.k) ? x : w, st[0]);
       st.splice(st.indexOf(drop), 1);
@@ -4147,7 +4151,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   }
   const plan = () => { const d = today(); return d.plan || null; };
   const planNext = () => { const P = plan(); return P ? P.steps.find(x => !planDone(x, P)) || null : null; };
-  function planStart() { const d = today(); if (!d.plan) { d.plan = planBuild(); save(); } const n = planNext(); if (n) planGo(n); else goHome(); }
+  function planStart() { const d = today(); if (!d.plan) { d.plan = planBuild(); if (d.plan.steps.some(x => x.k === "les")) S.lesDay = Math.floor(Date.now() / DAY); save(); } const n = planNext(); if (n) planGo(n); else goHome(); }
   // the summary screen of any section offers the next step first while today's session is on
   function planActions(acts) {
     const P = plan(); if (!P) return acts;
@@ -4217,7 +4221,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       const P = plan(), n = planNext();
       if (!P) { const pv = planBuild(); if (pv.steps.length) { addBtn("Начать занятие (≈" + pv.steps.reduce((a, x) => a + x.m, 0) + " мин, шагов: " + pv.steps.length + ")", planStart); primaryUsed = true; $("planBox").hidden = false; $("planNote").textContent = "План: " + pv.steps.map(x => x.t.toLowerCase()).join(" → ") + "."; $("planList").textContent = ""; } }
       else if (n) { addBtn("Дальше: " + (n.k === "les" && S.lessons[n.id] ? "свои фразы по уроку" : n.t.toLowerCase()), () => planGo(n)); primaryUsed = true; }
-      else { const pv = planBuild(); const fresh = pv.steps.filter(x => !["rev", "voc"].includes(x.k) && !P.steps.some(y => y.k === x.k && y.id === x.id)); if (fresh.length) addBtn("Ещё шаг: " + fresh[0].t.toLowerCase() + " (" + fresh[0].d + ")", () => { P.steps.push(fresh[0]); save(); planGo(fresh[0]); }, true); }
+      else { const pv = planBuild(); const fresh = pv.steps.filter(x => !["rev", "voc"].includes(x.k) && !P.steps.some(y => y.k === x.k && y.id === x.id)); if (fresh.length) addBtn("Ещё шаг: " + fresh[0].t.toLowerCase() + " (" + fresh[0].d + ")", () => { P.steps.push(fresh[0]); if (fresh[0].k === "les") S.lesDay = Math.floor(Date.now() / DAY); save(); planGo(fresh[0]); }, true); }
       if (due && capped) addBtn("Повторить ещё (" + due + ")", startReview, true);
       const nErr = activeErrors().length;
       if (nErr >= 3) addBtn("Разобрать ошибки (" + nErr + ")", startErrors, true);
