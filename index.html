@@ -1388,7 +1388,9 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     if (!heVoice) return;
     try {
       speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
+      // tested by ear (2026-11-15): the device voice reads sentences right in full spelling without nikud and stumbles on pointed text
+      const plain = /\s/.test(String(text).trim()) ? fullSp(String(text)).replace(NIKUD, "") : text;
+      const u = new SpeechSynthesisUtterance(plain);
       u.lang = heVoice.lang; u.voice = heVoice; u.rate = 0.85;
       speechSynthesis.speak(u);
     } catch (e) { toast("Не удалось воспроизвести звук"); }
