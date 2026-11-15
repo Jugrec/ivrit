@@ -1444,6 +1444,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   function toast(msg, ms) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, ms || 3400); }
   const VIEWS = ["speak", "sits", "skills", "chains", "home", "lesson", "words", "run", "summary", "reading", "results", "stats", "errors", "cursive", "hw", "mywords", "settings", "texts", "text", "dialogs", "chat", "writing", "write", "pause", "game", "games", "vocab", "roots"];
   function show(view) { for (const v of VIEWS) $("v-" + v).hidden = v !== view; if ($("sheet")) $("sheet").hidden = true; window.scrollTo(0, 0); }
+  // plain Russian text with Hebrew words inside: each Hebrew run is isolated, so the browser cannot reorder the brackets and commas around it
+  const bidi = (t) => String(t || "").replace(/[\u0590-\u05FF]+(?: [\u0590-\u05FF]+)*/g, m => "\u2068" + m + "\u2069");
   function rich(el, text) {
     // [[hebrew]] → styled span; everything else plain text
     el.textContent = "";
@@ -2144,7 +2146,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("lsEyebrow").textContent = (unit.kind === "module" ? "Модуль " + unit.module + " · урок " + (i + 1) + " из " + unit.lessons.length : unit.title + " · " + (i + 1) + " из " + unit.lessons.length);
     rich($("lsTitle"), lesson.title);
     const box = $("lsTheory"); box.textContent = "";
-    if (i === 0 && unit.intro) box.appendChild(el("p", "muted", unit.intro));
+    if (i === 0 && unit.intro) box.appendChild(el("p", "muted", bidi(unit.intro)));
     for (const b of lesson.theory) {
       if (b.t === "p") box.appendChild(rich(el("p"), b.text));
       else if (b.t === "rule") box.appendChild(rich(el("div", "rule"), b.text));
@@ -4312,10 +4314,10 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     pnl.appendChild(head);
     if (!unitOpen(u)) {
       const pm = prevModule(u);
-      pnl.appendChild(el("p", "small muted", "Откроется после всех уроков модуля " + pm.module + ". " + u.intro));
+      pnl.appendChild(el("p", "small muted", "Откроется после всех уроков модуля " + pm.module + ". " + bidi(u.intro)));
       return pnl;
     }
-    if (u.kind === "drill") pnl.appendChild(el("p", "small muted", u.intro));
+    if (u.kind === "drill") pnl.appendChild(el("p", "small muted", bidi(u.intro)));
     const list = el("div", "list");
     st.ls.forEach((l, i) => {
       const done = !!S.lessons[l.id], isNext = st.nextL && st.nextL.id === l.id;
