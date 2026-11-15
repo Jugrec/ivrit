@@ -1428,6 +1428,11 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     }
     return out;
   }
+  // full spelling of pointed words where it differs from "drop the nikud" (לִמּוּדִים → לימודים): content/ktmap.json, built from build/ktiv.py
+  let KT = {};
+  const fullSp = (s) => (s || "").replace(/[\u05D0-\u05EA\u0591-\u05C7]+/g, t => KT[t] || plene(t) || t);
+  // spellings that are equally right: אלו = אלה
+  const canon = (s) => s.replace(/(^| )(ה?)אלו(?= |$)/g, "$1$2אלה");
   const FINAL = { "ך": "כ", "ם": "מ", "ן": "נ", "ף": "פ", "ץ": "צ" };
   const unfinal = (s) => s.replace(/[ךםןףץ]/g, c => FINAL[c]);
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -1700,8 +1705,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     let ok = false, given = "", almost = false, typo = false;
     if (["type", "gap", "transform"].includes(cur.type)) {
       given = $("answer").value;
-      const g = norm(given);
-      const acc = cur.accept.flatMap(a => { const p = plene(a); return p ? [norm(a), norm(p)] : [norm(a)]; }).concat(S.altOk[cur.id] || []);
+      const g = canon(norm(given));
+      const acc = [...new Set(cur.accept.flatMap(a => { const p = plene(a); return [norm(a), norm(p || a), norm(fullSp(a))]; }).concat(S.altOk[cur.id] || []).map(canon))];
       ok = !skipped && !!g && acc.includes(g);
       if (!ok && !skipped && g) { almost = acc.some(x => unfinal(x) === unfinal(g)); if (almost) ok = true; }
       if (!ok && !skipped && g && acc.some(x => isTypo(g, x))) { ok = true; almost = true; typo = true; }
@@ -1766,6 +1771,11 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     }
     if ((!res.ok || res.typo) && !res.skipped && ["type", "gap", "transform"].includes(res.ex.type) && norm(res.given)) showDiff(fb, res);
     if (res.ex.note) fb.appendChild(rich(el("span", "note small"), res.ex.note));
+    if (!res.ok && R.mode !== "placement" && R.mode !== "test") {
+      const cid = res.item.cardId || (res.ex.voc ? "v:" + res.ex.voc : cardOf(res.ex)), c = cid && S.cards[cid];
+      const lw = cid && /^[wvrc]:/.test(cid) ? leechWord(cid) : null;
+      if (lw && (hookFor(lw.w.he) || mnemFor(lw.w.he) || (c && (c.lapses || 0) >= 2) || res.ex.voc)) fb.appendChild(hookBox(lw.w, true));
+    }
     const ai = el("div", "ai"); ai.hidden = true; ai.id = "aiOut";
     if (sampleFn && R.mode !== "placement") {
       const row = el("div", "row");
@@ -3957,10 +3967,30 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     box.appendChild(el("p", "small muted", "Проверьте себя по списку:"));
     ["Род и число: прилагательное и глагол согласованы с существительным?", "Артикль: у существительного и прилагательного вместе, в смихуте только у второго слова?", "Предлоги: לְ, בְּ, אֶת, עִם, עַל на своих местах?", "Время глагола: прошедшее, настоящее или будущее выбрано верно?", "Использованы слова из подсказки?", "Прочитайте текст вслух: звучит ли он естественно?"]
       .forEach(t => box.appendChild(rich(el("p", "small"), "• " + t)));
+    const sus = el("div"); box.appendChild(sus);
+    spellCheck(text).then(bad => { if (!bad.length) return;
+      sus.appendChild(el("h3", "", "Проверьте написание"));
+      sus.appendChild(el("p", "small muted", "Этих слов в таком написании нет в словаре приложения. Возможно, это опечатка:"));
+      const r = el("div", "he", bad.join(" · ")); r.dir = "rtl"; sus.appendChild(r); });
     planButton(box);
-    const cp = el("button", "btn secondary small", "Скопировать текст"); cp.type = "button";
-    cp.onclick = async () => { try { await navigator.clipboard.writeText(text); toast("Текст скопирован"); } catch (_) { toast("Не удалось скопировать"); } };
+    const cp = el("button", "btn secondary small", "Скопировать для проверки в Claude"); cp.type = "button";
+    const ask = "Проверь, пожалуйста, мой текст на иврите. Задание: " + WR.w.task.replace(/\[\[|\]\]/g, "") + "\nИсправь все ошибки, покажи исправленный текст с огласовками и коротко объясни каждую ошибку по-русски.\n\n" + text;
+    cp.onclick = async () => { try { await navigator.clipboard.writeText(ask); toast("Скопировано: вставьте в чат с Claude"); } catch (_) { toast("Не удалось скопировать"); } };
     box.appendChild(cp);
+    box.appendChild(el("p", "small muted", "На сайте тексты никто не проверяет. Вставьте скопированное в чат с Claude, и он разберёт ошибки."));
+  }
+  // offline self-check: words whose spelling the app has never seen (content/spell.json), prefixes ו ה ב ל מ ש כ allowed
+  let SPELL = null;
+  async function spellCheck(text) {
+    try { if (!SPELL) SPELL = new Set((await (await fetch("content/spell.json")).json()).split(" ")); } catch (_) { return []; }
+    S.custom.forEach(c => norm(c.he).split(" ").forEach(t => SPELL.add(t)));
+    const PF = "והבלמשכ", out = [];
+    for (const t0 of norm(text).split(" ")) {
+      const t = t0.replace(/[^\u05D0-\u05EA]/g, ""); if (t.length < 2 || out.includes(t)) continue;
+      const ok = SPELL.has(t) || (t.length > 2 && PF.includes(t[0]) && SPELL.has(t.slice(1))) || (t.length > 4 && PF.includes(t[0]) && PF.includes(t[1]) && SPELL.has(t.slice(2)));
+      if (!ok) out.push(t);
+    }
+    return out.slice(0, 12);
   }
   async function checkWriting() {
     const text = $("wrIn").value.trim();
@@ -4111,10 +4141,11 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const dia = CHN && CHN.diary && Object.keys(S.lessons).length && !(S.diary || {})[dkey()];
     if (ch && (!dia || day % 2 === 0)) st.push({ k: "ch", id: ch.id, t: "Свои фразы", d: "«Строим фразы»: " + ch.title, m: 4 });
     else if (dia) st.push({ k: "dia", t: "Свои фразы", d: "дневник: 3 предложения", m: 5 });
+    if (!lessonDay && leeches().length && (!S.leechAt || Date.now() - S.leechAt > 3 * DAY)) st.push({ k: "lee", t: "Трудные слова", d: leeches().slice(0, 3).map(l => NIKUD_OFF(l.w.he)).join(", "), m: 4 });
     if (weakDue()) st.push({ k: "weak", t: "Слабые темы", d: weakest(3).map(w => skPlain(w.k)).join(", "), m: 5 });
     if (SR && spSources().chains.length + spSources().sits.length + spSources().words.length) st.push({ k: "sp", t: "Речь", d: "скажите вслух 3 фразы", m: 3, opt: true });
     // fit the learner's session length: drop the least essential steps first (they come back as "one more step")
-    const KEEP = ["rev", "ut", "les", "voc", "ur", "read", "ch", "dia", "weak", "sp"], lim = sessMin() * 1.2 + (lessonDay ? 0 : 6);   // a consolidation day has no lesson, so it may hold a bit more
+    const KEEP = ["rev", "ut", "les", "voc", "ur", "read", "ch", "dia", "lee", "weak", "sp"], lim = sessMin() * 1.2 + (lessonDay ? 0 : 6);   // a consolidation day has no lesson, so it may hold a bit more
     while (st.length > 3 && st.reduce((a, x) => a + x.m, 0) > lim) {
       const drop = st.reduce((w, x) => KEEP.indexOf(x.k) > KEEP.indexOf(w.k) ? x : w, st[0]);
       st.splice(st.indexOf(drop), 1);
@@ -4132,6 +4163,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       case "ch": return (S.chains || {})[x.id] != null;
       case "dia": return !!(S.diary || {})[dkey()];
       case "weak": return !!S.weakAt && S.weakAt >= P.t;
+      case "lee": return !!S.leechAt && S.leechAt >= P.t;
       case "sp": return (today().sp || 0) >= 3;
     }
     return true;
@@ -4146,6 +4178,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       case "ch": { const c = CHN.chains.find(c => c.id === x.id); return c ? chainRun(c) : openChains(); }
       case "dia": return openWrite(diaryTask());
       case "weak": return startWeak();
+      case "lee": return startLeeches();
       case "sp": return openSpeak();
     }
   }
@@ -4338,8 +4371,8 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   /* ================= my words ================= */
   function openMyWords() { renderMyWords(); renderLeeches(); show("mywords"); }
 
-  /* ================= leeches: words forgotten 4+ times ================= */
-  const LEECH = 4;
+  /* ================= leeches: words forgotten 3+ times ================= */
+  const LEECH = 3;
   // memory hooks for words that are often hard; key = lexKey of the word
   const MNEM_LIST = [   // only words that exist as course or «Слова дня» cards
     "שֻׁלְחָן (шульха́н): шулер сидит за столом.",
@@ -4363,11 +4396,41 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     "שֵׁן (шен): буква ש «шин» с тремя зубцами похожа на зубы.",
     "חַם (хам): хам горячится.",
     "קַר (кар): «кар!» кричит замёрзшая ворона.",
+    "כִּירַיִם (кира́им): Кира им варит суп на плите.",
+    "מֵדִיחַ כֵּלִים (меди́ах кели́м): כֵּלִים это «посуда», а медик её моет.",
+    "תִּקְרָה (тикра́): тигр смотрит в потолок.",
+    "מְכוֹנַת כְּבִיסָה (мехона́т квиса́): מְכוֹנָה «машина» + כְּבִיסָה «стирка», дословно «машина стирки».",
+    "מַגֶּבֶת (маге́вет) от корня נ־ג־ב «вытирать досуха», как пустыня Негев: полотенце делает сухим.",
+    "שְׂמִיכָה (смиха́): смех под одеялом.",
   ];
   // matched by the pointed form, so homographs (פֹּה «здесь» / פֶּה «рот») never get the wrong hint
   const pkey = (x) => String(x).normalize("NFC").replace(/[^\u05D0-\u05EA\u05B0-\u05BC\u05C1\u05C2\u05C7 ]/g, "").trim();
   let MNEM = null;
   const mnemFor = (he) => { if (!MNEM) { MNEM = {}; MNEM_LIST.forEach(m => { MNEM[pkey(m.split(" (")[0])] = m; }); } return MNEM[pkey(he)]; };
+  // the learner's own memory hook per word (S.mnem, keyed by the pointed form); shown when the word is missed
+  const hookFor = (he) => ((S.mnem || {})[pkey(he)] || "");
+  function hookBox(w, compact) {
+    const b = el("div", "box"), mine = hookFor(w.he), m = mnemFor(w.he);
+    b.appendChild(el("div", "lbl", mine ? "Ваша ассоциация" : m ? "Подсказка для памяти" : "Ассоциация"));
+    const txt = el("div", compact ? "small" : ""); b.appendChild(txt);
+    const show = () => { const cur = hookFor(w.he); if (cur) txt.textContent = cur; else if (m) rich(txt, m.replace(/^([^(]+?) \(/, "[[$1]] (")); else txt.textContent = "Своя связь запоминается лучше всего: созвучное русское слово, картинка или ситуация."; };
+    show();
+    const row = el("div", "row"), inp = el("input"); inp.type = "text"; inp.placeholder = "Моя ассоциация"; inp.value = mine; inp.dir = "auto"; inp.style.cssText = "flex:1 1 100%;min-width:0;padding:10px 12px;margin-top:8px;font:inherit;font-size:1rem;color:inherit;background:var(--bg, #fff);border:1px solid var(--line);border-radius:10px";
+    const sv = el("button", "btn secondary small", "Сохранить"); sv.type = "button";
+    sv.onclick = () => { const v = inp.value.trim().slice(0, 200); S.mnem = S.mnem || {}; if (v) S.mnem[pkey(w.he)] = v; else delete S.mnem[pkey(w.he)]; save(); show(); b.firstChild.textContent = v ? "Ваша ассоциация" : m ? "Подсказка для памяти" : "Ассоциация"; toast(v ? "Ассоциация сохранена" : "Ассоциация удалена"); };
+    row.appendChild(inp); row.appendChild(sv);
+    if (sampleFn) {
+      const ai = el("button", "btn ghost small", "Предложить"); ai.type = "button";
+      ai.onclick = async () => { ai.disabled = true; inp.value = "Думаю…";
+        try { const r = await sampleFn("Придумай одну короткую мнемоническую ассоциацию для русскоязычной ученицы, чтобы запомнить ивритское слово " + w.he + " (" + (w.tr || "") + ") «" + w.ru + "». Опирайся на созвучие с русским словом или на корень слова, если он прозрачен. Одно предложение, до 15 слов, без вступления и кавычек." + STYLE);
+          inp.value = String(r && r.text || r || "").trim().slice(0, 200); }
+        catch (_) { inp.value = ""; toast("Не удалось получить подсказку"); }
+        ai.disabled = false; };
+      row.appendChild(ai);
+    }
+    b.appendChild(row);
+    return b;
+  }
   function leechWord(id) {
     if (id.startsWith("w:")) { const w = getWord(id.slice(2)); return w ? { key: "w:" + w.id, w, kind: "course" } : null; }
     const w = VOC.byId[id.slice(2)]; return w ? { key: "v:" + w.id, w, kind: "voc" } : null;
@@ -4440,9 +4503,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         sim.forEach(x => { const r = el("div"); r.appendChild(el("span", "he", shown(x.he))); r.appendChild(document.createTextNode(" " + (x.tr ? x.tr + ", " : "") + x.ru)); b.appendChild(r); });
         lc.appendChild(b);
       }
-      const m = mnemFor(w.he);
-      if (m) { const b = el("div", "box"); b.appendChild(el("div", "lbl", "Подсказка для памяти")); b.appendChild(rich(el("div"), m.replace(/^([^(]+?) \(/, "[[$1]] ("))); lc.appendChild(b); }
-      else { const b = el("div", "box"); b.appendChild(el("div", "lbl", "Совет")); b.appendChild(el("div", "small", "Придумайте свою связь: созвучное русское слово, картинку или ситуацию. Скажите слово вслух и составьте с ним одно своё предложение.")); lc.appendChild(b); }
+      lc.appendChild(hookBox(w));
       det.appendChild(lc); box.appendChild(det);
     });
   }
@@ -4450,15 +4511,16 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     const w = lw.w;
     if (lw.kind === "course") { const out = [wordRec(w), wordProd(w)]; const cz = wordCloze(w); if (cz) out.push(cz); return out; }
     const others = shuffle(VOC.list.filter(x => x.ru !== w.ru && x.id !== w.id)).slice(0, 3).map(x => x.ru);
-    const out = [{ id: "lrec:" + w.id, type: "choice", prompt: "Что значит это слово?", he: w.he, options: [w.ru].concat(others), answer: 0 },
-                 { id: "lprod:" + w.id, type: "type", prompt: "Как сказать на иврите: «" + w.ru + "»?", accept: [w.he].concat(w.cz && w.cz.n == null && lexKey(w.cz.ans) === lexKey(w.he) ? w.cz.acc : []) }];
+    const out = [{ id: "lrec:" + w.id, voc: w.id, type: "choice", prompt: "Что значит это слово?", he: w.he, options: [w.ru].concat(others), answer: 0 },
+                 { id: "lprod:" + w.id, voc: w.id, type: "type", prompt: "Как сказать на иврите: «" + w.ru + "»?", accept: [w.he].concat(w.cz && w.cz.n == null && lexKey(w.cz.ans) === lexKey(w.he) ? w.cz.acc : []) }];
     if (w.cz) { const toks = w.ex.split(" "), n = w.cz.n || 1;
-      out.push({ id: "lcz:" + w.id, type: "gap", prompt: "Вставьте слово «" + w.ru + "» в нужной форме. Перевод: " + w.exru,
+      out.push({ id: "lcz:" + w.id, voc: w.id, type: "gap", prompt: "Вставьте слово «" + w.ru + "» в нужной форме. Перевод: " + w.exru,
         he: toks.slice(0, w.cz.i).concat([w.cz.pre + "___"]).concat(toks.slice(w.cz.i + n)).join(" "), accept: [w.cz.ans].concat(w.cz.acc) }); }
     return out;
   }
   function startLeeches() {
     const L = leeches().slice(0, 8); if (!L.length) return;
+    S.leechAt = Date.now(); save();
     const rounds = L.map(leechEx), items = [];
     for (let r = 0; r < 3; r++) shuffle(rounds.filter(x => x[r]).map(x => x[r])).forEach(ex => items.push({ ex }));
     run({ mode: "review", items, requeue: true, grade: false,
@@ -4685,6 +4747,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         (pf.writing || []).forEach(w => PRACTICE.writing.push(w));
       }
       buildLex(lexFile);
+      try { KT = await (await fetch("content/ktmap.json")).json(); } catch (_) {}
       if (C.outputs) { try { OUT = await (await fetch("content/" + C.outputs)).json(); } catch (_) {} }
       if (C.ttexts) { try { TT = (await (await fetch("content/" + C.ttexts)).json()).texts; IDX.skillName.story = "Понимание текста"; } catch (_) {} }
       if (C.stories) { try { STORIES = await (await fetch("content/" + C.stories)).json(); IDX.skillName.story = "Понимание текста"; } catch (_) {} }
