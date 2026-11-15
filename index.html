@@ -536,7 +536,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         <button class="btn secondary" id="b-dialogs">Разговор</button>
         <button class="btn secondary" id="b-writing">Письмо</button>
       </div>
-      <div class="nav"><button class="btn secondary" id="b-rootfam">Корни и модели</button><button class="btn secondary" id="b-chains">Строим фразы</button><button class="btn secondary" id="b-sits">Ситуации</button><button class="btn secondary" id="b-speak">Говорим вслух</button></div>
+      <div class="nav"><button class="btn secondary" id="b-rootfam">Корни и модели</button><button class="btn secondary" id="b-chains">Строим фразы</button><button class="btn secondary" id="b-sits">Ситуации</button><button class="btn secondary" id="b-speak">Говорим вслух</button><button class="btn secondary" id="b-listen" hidden>Аудирование</button></div>
       <div class="nav nav3"><button class="btn secondary" id="b-nonik">Без огласовок</button><button class="btn secondary" id="b-cursive">Прописные буквы</button><button class="btn secondary" id="b-games">Игры</button></div>
       <p class="small muted" id="practiceNote"></p>
     </div>
@@ -1397,7 +1397,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
   }
   function renderVoice() {
     const ok = !!heVoice;
-    $("voiceRow").hidden = !ok;
+    $("voiceRow").hidden = !ok; $("b-listen").hidden = !ok;
     $("voiceStatus").textContent = !voicesChecked ? "Проверяю голос иврита…" :
       ok ? "Голос иврита найден: " + heVoice.name + ". Звук в упражнениях включён."
          : "На этом устройстве нет голоса иврита, поэтому звук выключен, а задания на слух заменены заданиями на чтение. На компьютере звук обычно работает в браузере Edge.";
@@ -1655,7 +1655,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         qw.appendChild(document.createTextNode(a)); qw.appendChild(el("span", "gapbox", " ")); qw.appendChild(document.createTextNode(b || ""));
       } else qw.textContent = shown(cur.he);
     }
-    $("qlisten").hidden = cur.type !== "listen" || !!useAlt;
+    $("qlisten").hidden = !(cur.type === "listen" ? !useAlt : !!cur.say);
     $("qfb").hidden = true; $("qfb").textContent = "";
     $("b-check").textContent = "Проверить"; $("b-check").disabled = true; $("b-skip").hidden = false;
     const typed = ["type", "gap", "transform"].includes(cur.type);
@@ -1684,6 +1684,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       });
       if (cur.type === "listen" && !useAlt) setTimeout(() => speak(cur.say), 250);
     }
+    if (cur.say && cur.type !== "listen") setTimeout(() => speak(cur.say), 250);
   }
   function shuffledTokens(t) { if (t.length < 2) return t.slice(); let s; let n = 0; do { s = shuffle(t); n++; } while (s.join("|") === t.join("|") && n < 10); return s; }
   function renderBuilt() {
@@ -4144,10 +4145,11 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     if (ch && (!dia || day % 2 === 0)) st.push({ k: "ch", id: ch.id, t: "Свои фразы", d: "«Строим фразы»: " + ch.title, m: 4 });
     else if (dia) st.push({ k: "dia", t: "Свои фразы", d: "дневник: 3 предложения", m: 5 });
     if (!lessonDay && leeches().length && (!S.leechAt || Date.now() - S.leechAt > 3 * DAY)) st.push({ k: "lee", t: "Трудные слова", d: leeches().slice(0, 3).map(l => NIKUD_OFF(l.w.he)).join(", "), m: 4 });
+    if (lisReady() && (!S.lisAt || Date.now() - S.lisAt > 1.5 * DAY)) st.push({ k: "lis", t: "Аудирование", d: "8 фраз на слух", m: 4 });
     if (weakDue()) st.push({ k: "weak", t: "Слабые темы", d: weakest(3).map(w => skPlain(w.k)).join(", "), m: 5 });
     if (SR && spSources().chains.length + spSources().sits.length + spSources().words.length) st.push({ k: "sp", t: "Речь", d: "скажите вслух 3 фразы", m: 3, opt: true });
     // fit the learner's session length: drop the least essential steps first (they come back as "one more step")
-    const KEEP = ["rev", "ut", "les", "voc", "ur", "read", "ch", "dia", "lee", "weak", "sp"], lim = sessMin() * 1.2 + (lessonDay ? 0 : 6);   // a consolidation day has no lesson, so it may hold a bit more
+    const KEEP = ["rev", "ut", "les", "voc", "ur", "read", "ch", "lis", "dia", "lee", "weak", "sp"], lim = sessMin() * 1.2 + (lessonDay ? 0 : 6);   // a consolidation day has no lesson, so it may hold a bit more
     while (st.length > 3 && st.reduce((a, x) => a + x.m, 0) > lim) {
       const drop = st.reduce((w, x) => KEEP.indexOf(x.k) > KEEP.indexOf(w.k) ? x : w, st[0]);
       st.splice(st.indexOf(drop), 1);
@@ -4166,6 +4168,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       case "dia": return !!(S.diary || {})[dkey()];
       case "weak": return !!S.weakAt && S.weakAt >= P.t;
       case "lee": return !!S.leechAt && S.leechAt >= P.t;
+      case "lis": return !!S.lisAt && S.lisAt >= P.t;
       case "sp": return (today().sp || 0) >= 3;
     }
     return true;
@@ -4181,6 +4184,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
       case "dia": return openWrite(diaryTask());
       case "weak": return startWeak();
       case "lee": return startLeeches();
+      case "lis": return startListen();
       case "sp": return openSpeak();
     }
   }
@@ -4520,6 +4524,39 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
         he: toks.slice(0, w.cz.i).concat([w.cz.pre + "___"]).concat(toks.slice(w.cz.i + n)).join(" "), accept: [w.cz.ans].concat(w.cz.acc) }); }
     return out;
   }
+  /* ===== listening: whole sentences only. Tested by ear: the device voice reads unpointed sentences right and single words unreliably.
+     Material is what the learner has already met in writing: examples of learned words of the day and lines of texts already read. ===== */
+  function lisPool() {
+    const out = [], seen = new Set(), rd = S.read || {};
+    const add = (he, ru, id) => { const n = String(he || "").trim().split(/\s+/).length; if (n < 2 || n > 9 || !ru || seen.has(he)) return; seen.add(he); out.push({ he, ru, n, id }); };
+    if (VOC) VOC.list.forEach(w => { if (S.cards["v:" + w.id] && w.ex && w.exru && (!w.cz || czOpen(w))) add(w.ex, w.exru, "v:" + w.id); });
+    (TT || []).concat(STORIES ? STORIES.episodes : []).forEach(t => { if (rd[t.id]) t.he.forEach((h, i) => add(h, t.ru[i], t.id + ":" + i)); });
+    return out;
+  }
+  const lisReady = () => !!heVoice && lisPool().length >= 6;
+  function startListen() {
+    const pool = lisPool();
+    if (!heVoice) return toast("На этом устройстве нет голоса иврита");
+    if (pool.length < 6) return toast("Пока мало материала: выучите несколько слов дня или прочитайте текст");
+    const H = S.lis = S.lis || {};
+    const pick = shuffle(pool).sort((a, b) => (H[a.id] || 0) - (H[b.id] || 0)).slice(0, 8);   // least recently heard first
+    const clean = (he) => he.replace(/[.!?,:;"]/g, " ").replace(/\s+/g, " ").trim();
+    let nOrd = 0, nDict = 0;
+    const items = pick.map((x, i) => {
+      H[x.id] = Date.now();
+      const note = "[[" + x.he + "]] " + x.ru;
+      if (x.n <= 5 && nOrd < 2 && i % 2 === 0) { nOrd++; return { ex: { id: "lis:o:" + x.id, type: "order", prompt: "Послушайте и соберите предложение", tokens: clean(x.he).split(" "), say: x.he, note } }; }
+      if (x.n <= 4 && nDict < 2) { nDict++; return { ex: { id: "lis:t:" + x.id, type: "type", prompt: "Послушайте и напишите на иврите", accept: [clean(x.he)], correct: x.he, say: x.he, note: x.ru } }; }
+      const others = shuffle(pool.filter(y => y.ru !== x.ru)).slice(0, 3).map(y => y.ru);
+      return { ex: { id: "lis:c:" + x.id, type: "choice", prompt: "Послушайте и выберите перевод", options: [x.ru].concat(others), answer: 0, say: x.he, note } };
+    });
+    S.lisAt = Date.now(); save();
+    run({ mode: "review", items, requeue: false, grade: false, label: () => "Аудирование",
+      onDone: (results) => summary({ eyebrow: "Аудирование", title: "Вы прослушали " + items.length + " " + plural(items.length, "фразу", "фразы", "фраз"), results,
+        text: "Фразы взяты из слов дня, которые вы уже учили, и из прочитанных текстов. Голос читает целые предложения: так он звучит верно.",
+        actions: [{ label: "Ещё раз", fn: startListen }, { label: "На главную", fn: goHome }] }),
+      onQuit: () => goHome() });
+  }
   function startLeeches() {
     const L = leeches().slice(0, 8); if (!L.length) return;
     S.leechAt = Date.now(); save();
@@ -4642,7 +4679,7 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     $("b-cursive").onclick = openCursive;
     $("b-nonik").onclick = nonikRun;
     $("b-rootfam").onclick = openRoots;
-    $("b-chains").onclick = openChains; $("b-sits").onclick = openSits;
+    $("b-listen").onclick = startListen; $("b-chains").onclick = openChains; $("b-sits").onclick = openSits;
     $("b-speak").onclick = openSpeak; $("spGo").onclick = spStart; $("spMic").onclick = spListen;
     $("spListen").onclick = () => { const it = SP && SP.q[SP.pos]; if (it) speak(it.he); };
     $("spNext").onclick = () => spNext(false); $("spSkip").onclick = () => spNext(true); $("spStop").onclick = () => { if (spRec) { try { spRec.abort(); } catch (_) {} spRec = null; } openSpeak(); };
