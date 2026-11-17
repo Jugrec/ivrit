@@ -1710,8 +1710,12 @@ button.li:not(:disabled):hover .t { color: var(--accent); }
     let ok = false, given = "", almost = false, typo = false;
     if (["type", "gap", "transform"].includes(cur.type)) {
       given = $("answer").value;
-      const g = canon(norm(given));
+      let g = canon(norm(given));
+      // the sentence already shows a prefix before the blank (הַ___, בְּ___): the answer may repeat it
+      const pm = cur.type === "gap" && String(cur.he || "").match(/([\u05D0-\u05EA][\u0591-\u05C7]*(?:[\u05D0-\u05EA][\u0591-\u05C7]*)?)___/);
+      const pre = pm ? norm(pm[1]) : "";
       const acc = [...new Set(cur.accept.flatMap(a => { const p = plene(a); return [norm(a), norm(p || a), norm(fullSp(a))]; }).concat(S.altOk[cur.id] || []).map(canon))];
+      if (pre && !acc.includes(g) && g.length > pre.length + 1 && g.startsWith(pre) && acc.includes(g.slice(pre.length))) g = g.slice(pre.length);
       ok = !skipped && !!g && acc.includes(g);
       if (!ok && !skipped && g) { almost = acc.some(x => unfinal(x) === unfinal(g)); if (almost) ok = true; }
       if (!ok && !skipped && g && acc.some(x => isTypo(g, x))) { ok = true; almost = true; typo = true; }

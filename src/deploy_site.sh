@@ -18,7 +18,7 @@ git add -A
 if git diff --cached --quiet; then echo "nothing to deploy"; exit 0; fi
 git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit -qm "$MSG
 
-Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01BbUnvDc2v45GN8xBXvFc6N"
 git push -q origin HEAD:main
 git log --oneline -1
