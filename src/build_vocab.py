@@ -5,6 +5,8 @@
 import json, os, re, sys, glob, unicodedata
 
 ROOT = sys.argv[1]
+try: PUBLISHED = {w["id"] for t in json.load(open(ROOT + "/content/vocab.json", encoding="utf-8"))["topics"] for w in t["words"]}
+except Exception: PUBLISHED = set()
 SRC = ROOT + "/build/vocab_src"
 NIK = re.compile("[֑-ׇ]")
 HEB = re.compile("[א-ת]")
@@ -129,7 +131,8 @@ for path in sorted(glob.glob(SRC + "/[0-9]*.txt")):
         if bool(ex) != bool(exru): errors.append(where + ": example without translation")
         if ex and not NIK.search(ex): errors.append(where + ": example without nikud")
         key = bare(he)
-        if key in known: dropped.append(he + " (уже в курсе)"); continue
+        # a word already published stays even when a later module teaches it: learners have cards for it
+        if key in known and cur["id"] + ":" + key.replace(" ", "_") not in PUBLISHED: dropped.append(he + " (уже в курсе)"); continue
         if key in seen: dropped.append(he + " (повтор, есть в " + seen[key] + ")"); continue
         seen[key] = cur["id"]
         w = {"id": cur["id"] + ":" + key.replace(" ", "_"), "he": he, "tr": tr, "ru": ru}
